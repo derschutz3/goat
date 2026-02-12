@@ -147,35 +147,35 @@ class TicketService:
         self.repository.update(ticket)
         return True
     
-    def get_dashboard_stats(self):
+        def get_dashboard_stats(self):
         from datetime import datetime, timedelta
+        try:
+            status_counts = dict(self.repository.count_by_status())
+            open_count = status_counts.get('novo', 0)
+            pending_count = status_counts.get('em_analise', 0) + status_counts.get('aguardando_peca', 0)
+            overdue_count = self.repository.count_overdue(datetime.utcnow())
+            today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+            resolved_today = self.repository.count_resolved_today(today_start)
+            recent_tickets = self.repository.get_recent(limit=5)
+            productivity = self.repository.get_technician_productivity(today_start)
+            return {
+                'open': open_count,
+                'pending': pending_count,
+                'overdue': overdue_count,
+                'resolved_today': resolved_today,
+                'recent_tickets': recent_tickets,
+                'productivity': productivity,
+                'priority_counts': dict(self.repository.count_by_priority())
+            }
+        except Exception:
+            return {
+                'open': 0,
+                'pending': 0,
+                'overdue': 0,
+                'resolved_today': 0,
+                'recent_tickets': [],
+                'productivity': [],
+                'priority_counts': {}
+            }
         
-        # Get raw status counts
-        status_counts = dict(self.repository.count_by_status())
-        
-        # Calculate specific metrics
-        open_count = status_counts.get('novo', 0)
-        pending_count = status_counts.get('em_analise', 0) + status_counts.get('aguardando_peca', 0)
-        
-        # Get overdue tickets
-        overdue_count = self.repository.count_overdue(datetime.utcnow())
-        
-        # Get resolved today
-        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-        resolved_today = self.repository.count_resolved_today(today_start)
-        
-        # Get recent tickets
-        recent_tickets = self.repository.get_recent(limit=5)
-        
-        # Get technician productivity
-        productivity = self.repository.get_technician_productivity(today_start)
-        
-        return {
-            'open': open_count,
-            'pending': pending_count,
-            'overdue': overdue_count,
-            'resolved_today': resolved_today,
-            'recent_tickets': recent_tickets,
-            'productivity': productivity,
-            'priority_counts': dict(self.repository.count_by_priority())
-        }
+    
