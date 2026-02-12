@@ -178,4 +178,4 @@ class TicketService:
                 'priority_counts': {}
             }
         
-    
+
