@@ -150,14 +150,14 @@ class TicketService:
         def get_dashboard_stats(self):
             from datetime import datetime, timedelta
             try:
-            status_counts = dict(self.repository.count_by_status())
-            open_count = status_counts.get('novo', 0)
-            pending_count = status_counts.get('em_analise', 0) + status_counts.get('aguardando_peca', 0)
-            overdue_count = self.repository.count_overdue(datetime.utcnow())
-            today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-            resolved_today = self.repository.count_resolved_today(today_start)
-            recent_tickets = self.repository.get_recent(limit=5)
-            productivity = self.repository.get_technician_productivity(today_start)
+                status_counts = dict(self.repository.count_by_status())
+                open_count = status_counts.get('novo', 0)
+                pending_count = status_counts.get('em_analise', 0) + status_counts.get('aguardando_peca', 0)
+                overdue_count = self.repository.count_overdue(datetime.utcnow())
+                today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                resolved_today = self.repository.count_resolved_today(today_start)
+                recent_tickets = self.repository.get_recent(limit=5)
+                productivity = self.repository.get_technician_productivity(today_start)
             return {
                 'open': open_count,
                 'pending': pending_count,
