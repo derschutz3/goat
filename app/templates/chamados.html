@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Chamados{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 text-secondary">
+        <i class="fas fa-list me-2"></i>
+        {% if active_page == 'gerenciar_chamados' %}Gerenciar Chamados{% else %}Meus Chamados{% endif %}
+    </h4>
+    <div>
+        <a href="{{ url_for(request.endpoint, exclude_closed=('false' if exclude_closed else 'true')) }}" class="btn btn-outline-secondary me-2">
+            <i class="fas fa-eye{{ '-slash' if not exclude_closed else '' }} me-1"></i>
+            {{ 'Ocultar Fechados' if not exclude_closed else 'Mostrar Fechados' }}
+        </a>
+        <a href="{{ url_for('chamados.novo_chamado') }}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Novo Chamado</a>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="filter-bar">
+    <form class="row g-3">
+        <div class="col-md-2">
+            <select class="form-select form-select-sm" aria-label="Status" id="statusFilter">
+                <option value="all" selected>Todos Status</option>
+                <option value="novo">Novo</option>
+                <option value="em_analise">Em Análise</option>
+                <option value="aguardando_peca">Esperando Peça</option>
+                <option value="resolvido">Concluído</option>
+                <option value="nao_resolvido">Não Concluído</option>
+                <option value="fechado">Fechado</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select form-select-sm" aria-label="Loja" id="storeFilter">
+                <option value="all" selected>Todas Lojas/Setores</option>
+                {% for store in stores %}
+                <option value="{{ store.id }}">{{ store.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control" placeholder="Buscar por título ou número..." id="searchInput">
+                <button class="btn btn-outline-secondary" type="button"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Tickets Grid -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="ticketsGrid">
+    {% for ticket in tickets %}
+    <div class="col ticket-item" data-status="{{ ticket.status|default('novo') }}" data-store="{{ ticket.store_id }}">
+        <div class="card card-ticket h-100">
+            <div class="status-indicator status-{{ ticket.status|default('novo') }}"></div>
+            <div class="card-body ps-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge border text-body">#{{ ticket.id }}</span>
+                    <span class="badge bg-{{ 'danger' if ticket.priority == 'critica' else 'warning' if ticket.priority == 'alta' else 'info' if ticket.priority == 'media' else 'secondary' }} text-dark">{{ ticket.priority|capitalize }}</span>
+                </div>
+                <h6 class="card-title mb-1"><a href="{{ url_for('chamados.ver_chamado', id=ticket.id) }}" class="text-decoration-none stretched-link">{{ ticket.title }}</a></h6>
+                <p class="card-text text-muted small mb-3">
+                    {% if ticket.store %}
+                    {{ ticket.store.name }}
+                    {% else %}
+                    Loja não informada
+                    {% endif %}
+                </p>
+                
+                <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <small class="text-muted"><i class="far fa-clock me-1"></i>{{ ticket.created_at.strftime('%d/%m %H:%M') }}</small>
+                </div>
+                <div class="mt-2 pt-2 border-top">
+                    <small class="text-muted d-block">Técnico:</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                        {% if ticket.technician %}
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-user-check text-primary me-1"></i> <span class="small">{{ ticket.technician.username }}</span>
+                        </div>
+                        {% else %}
+                        <span class="fw-bold small text-secondary">Não atribuído</span>
+                        {% endif %}
+
+                        {% if active_page == 'gerenciar_chamados' %}
+                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 position-relative" style="z-index: 2;" data-bs-toggle="modal" data-bs-target="#modalGerenciar{{ ticket.id }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gerenciar (Only for gerenciar_chamados page) -->
+    {% if active_page == 'gerenciar_chamados' %}
+    <div class="modal fade" id="modalGerenciar{{ ticket.id }}" tabindex="-1" aria-labelledby="modalLabel{{ ticket.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel{{ ticket.id }}">Gerenciar Chamado #{{ ticket.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for('chamados.atualizar_chamado_geral', id=ticket.id) }}" method="POST">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="status{{ ticket.id }}" class="form-label">Status</label>
+                                <select class="form-select" id="status{{ ticket.id }}" name="status">
+                                    <option value="novo" {% if ticket.status == 'novo' %}selected{% endif %}>Novo</option>
+                                    <option value="em_analise" {% if ticket.status == 'em_analise' %}selected{% endif %}>Em Análise</option>
+                                    <option value="aguardando_peca" {% if ticket.status == 'aguardando_peca' %}selected{% endif %}>Esperando Peça</option>
+                                    <option value="resolvido" {% if ticket.status == 'resolvido' %}selected{% endif %}>Concluído</option>
+                                    <option value="nao_resolvido" {% if ticket.status == 'nao_resolvido' %}selected{% endif %}>Não Concluído</option>
+                                    <option value="fechado" {% if ticket.status == 'fechado' %}selected{% endif %}>Fechado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="technician{{ ticket.id }}" class="form-label">Técnico Responsável</label>
+                                <select class="form-select" id="technician{{ ticket.id }}" name="technician_id">
+                                    <option value="">Nenhum</option>
+                                    {% for tech in technicians %}
+                                    <option value="{{ tech.id }}" {% if ticket.technician_id == tech.id %}selected{% endif %}>{{ tech.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="store{{ ticket.id }}" class="form-label">Loja / Setor</label>
+                                <select class="form-select" id="store{{ ticket.id }}" name="store_id">
+                                    <option value="">Selecione...</option>
+                                    {% for store in stores %}
+                                    <option value="{{ store.id }}" {% if ticket.store_id == store.id %}selected{% endif %}>{{ store.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="priority{{ ticket.id }}" class="form-label">Prioridade</label>
+                                <select class="form-select" id="priority{{ ticket.id }}" name="priority">
+                                    <option value="baixa" {% if ticket.priority == 'baixa' %}selected{% endif %}>Baixa</option>
+                                    <option value="media" {% if ticket.priority == 'media' %}selected{% endif %}>Média</option>
+                                    <option value="alta" {% if ticket.priority == 'alta' %}selected{% endif %}>Alta</option>
+                                    <option value="critica" {% if ticket.priority == 'critica' %}selected{% endif %}>Crítica</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="category{{ ticket.id }}" class="form-label">Categoria</label>
+                                <select class="form-select" id="category{{ ticket.id }}" name="category">
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.name }}" {% if ticket.category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="description{{ ticket.id }}" class="form-label">Descrição Original</label>
+                                <textarea class="form-control" id="description{{ ticket.id }}" name="description" rows="3">{{ ticket.description }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="additional_info{{ ticket.id }}" class="form-label">Informações Adicionais</label>
+                                <textarea class="form-control" id="additional_info{{ ticket.id }}" name="additional_info" rows="3">{{ ticket.additional_info }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <p class="text-muted">Nenhum chamado encontrado.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = document.getElementById('statusFilter');
+        const storeFilter = document.getElementById('storeFilter');
+        const searchInput = document.getElementById('searchInput');
+        const ticketItems = document.querySelectorAll('.ticket-item');
+        
+        function filterTickets() {
+            const statusValue = statusFilter.value;
+            const storeValue = storeFilter.value;
+            const searchValue = searchInput.value.toLowerCase();
+            
+            ticketItems.forEach(item => {
+                const status = item.getAttribute('data-status');
+                const store = item.getAttribute('data-store');
+                const cardTitle = item.querySelector('.card-title').textContent.toLowerCase();
+                const ticketId = item.querySelector('.badge.border').textContent.toLowerCase();
+                
+                const matchesStatus = (statusValue === 'all' || statusValue === status);
+                const matchesStore = (storeValue === 'all' || storeValue === store);
+                const matchesSearch = (cardTitle.includes(searchValue) || ticketId.includes(searchValue));
+                
+                if (matchesStatus && matchesStore && matchesSearch) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        statusFilter.addEventListener('change', filterTickets);
+        storeFilter.addEventListener('change', filterTickets);
+        searchInput.addEventListener('input', filterTickets);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes do Chamado #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <a href="{{ url_for('chamados.listar_chamados') }}" class="btn btn-outline-secondary me-3"><i class="fas fa-arrow-left"></i></a>
+        <div>
+            <h4 class="mb-0">{{ ticket.title }}</h4>
+            <span class="text-muted small">Chamado #{{ ticket.id }}</span>
+        </div>
+    </div>
+    <!-- Actions (Admin/Tech only usually) -->
+    <div>
+        {% if current_user.role in ['admin', 'manager', 'technician'] %}
+        <!-- Edição movida para a aba de Gerenciar Chamados conforme solicitado -->
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Ticket Info -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header py-3">
+                <h6 class="mb-0 text-muted">Dados do Chamado</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Status</small>
+                        {% set status_color = 'info' if ticket.status == 'novo' else 
+                                              'primary' if ticket.status == 'em_analise' else 
+                                              'warning' if ticket.status == 'aguardando_peca' else 
+                                              'success' if ticket.status == 'resolvido' else 
+                                              'danger' if ticket.status == 'nao_resolvido' else 
+                                              'secondary' %}
+                        <span class="badge bg-{{ status_color }}">{{ ticket.status|replace('_', ' ')|capitalize }}</span>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Loja / Setor</small>
+                        <span class="fw-medium">{{ ticket.store.name if ticket.store else 'Não informado' }}</span>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Prioridade</small>
+                        <span class="badge bg-{{ 'danger' if ticket.priority == 'critica' else 'warning' if ticket.priority == 'alta' else 'info' if ticket.priority == 'media' else 'secondary' }} text-dark">{{ ticket.priority|capitalize }}</span>
+                    </li>
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Técnico Responsável</small>
+                        {% if ticket.technician %}
+                        <span class="text-primary fw-bold">{{ ticket.technician.username }}</span>
+                        {% elif ticket.technician_id %}
+                        <span class="text-danger small">ID: {{ ticket.technician_id }} (Usuário não encontrado)</span>
+                        {% else %}
+                        <span class="text-muted fst-italic">Não atribuído</span>
+                        <a href="#" class="small ms-2 text-decoration-none">Atribuir a mim</a>
+                        {% endif %}
+                    </li>
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Data de Abertura</small>
+                        <span>{{ ticket.created_at.strftime('%d/%m/%Y às %H:%M') }}</span>
+                    </li>
+                    {% if ticket.closed_at %}
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Data de Fechamento</small>
+                        <span class="text-success">{{ ticket.closed_at.strftime('%d/%m/%Y às %H:%M') }}</span>
+                    </li>
+                    {% endif %}
+                    <li class="list-group-item px-0">
+                        <small class="text-muted d-block">Categoria</small>
+                        <span>{{ ticket.category|capitalize }}</span>
+                    </li>
+                </ul>
+                
+                <div class="mt-4">
+                    <small class="text-muted d-block mb-1">Descrição Original:</small>
+                    <div class="p-3 info-box rounded">
+                        <p class="mb-0 small">{{ ticket.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Additional Info -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-muted"><i class="fas fa-info-circle me-2"></i>Informações Adicionais</h6>
+                {% if current_user.role in ['admin', 'supervisor'] or (current_user.role == 'tecnico' and ticket.technician_id == current_user.id) %}
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalInfo">
+                    <i class="fas fa-edit me-1"></i> Editar
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if ticket.additional_info %}
+                <div class="p-3 info-box rounded">
+                    <p class="mb-0" style="white-space: pre-wrap;">{{ ticket.additional_info }}</p>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-clipboard fa-3x mb-3 text-secondary opacity-50"></i>
+                    <p>Nenhuma informação adicional registrada.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Info -->
+<div class="modal fade" id="modalInfo" tabindex="-1" aria-labelledby="modalInfoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalInfoLabel">Editar Informações Adicionais</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('chamados.atualizar_info', id=ticket.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="additional_info" class="form-label">Informações do Técnico</label>
+                        <textarea class="form-control" id="additional_info" name="additional_info" rows="10">{{ ticket.additional_info or '' }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

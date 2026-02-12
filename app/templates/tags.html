@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Tags{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h4><i class="fas fa-tags me-2"></i>Gerenciar Tags</h4>
+        <p class="text-muted">Crie e gerencie etiquetas para classificar chamados.</p>
+    </div>
+    <div class="col-md-6 text-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newTagModal">
+            <i class="fas fa-plus me-2"></i>Nova Tag
+        </button>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Nome</th>
+                        <th>Cor</th>
+                        <th>Visualização</th>
+                        <th class="text-end pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tag in tags %}
+                    <tr>
+                        <td class="ps-4 fw-bold">{{ tag.name }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div style="width: 20px; height: 20px; background-color: {{ tag.color }}; border-radius: 4px; margin-right: 8px;"></div>
+                                <span class="text-muted small">{{ tag.color }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <form action="{{ url_for('tags.delete_tag', id=tag.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta tag?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            <i class="fas fa-tags fa-3x mb-3 opacity-25"></i>
+                            <p class="mb-0">Nenhuma tag cadastrada.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nova Tag -->
+<div class="modal fade" id="newTagModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Tag</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('tags.index') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome da Tag</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="Ex: Urgente, Hardware...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="color" class="form-label">Cor</label>
+                        <input type="color" class="form-control form-control-color w-100" id="color" name="color" value="#0d6efd" title="Escolha a cor">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

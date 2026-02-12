@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h4 class="text-secondary"><i class="fas fa-chart-pie me-2"></i>Dashboard</h4>
+    <p class="text-muted small">Visão geral do sistema de chamados</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Total Aberto -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card card-dashboard text-primary h-100">
+            <div class="icon"><i class="fas fa-folder-open"></i></div>
+            <div class="number">{{ stats.open }}</div>
+            <div class="label">Abertos</div>
+        </div>
+    </div>
+
+    <!-- Em Atendimento -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card card-dashboard text-info h-100">
+            <div class="icon"><i class="fas fa-tools"></i></div>
+            <div class="number">{{ stats.pending }}</div>
+            <div class="label">Em Atendimento</div>
+        </div>
+    </div>
+
+    <!-- Atrasados -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card card-dashboard text-danger h-100">
+            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="number">{{ stats.overdue }}</div>
+            <div class="label">Atrasados</div>
+        </div>
+    </div>
+
+    <!-- Finalizados Hoje -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card card-dashboard text-success h-100">
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+            <div class="number">{{ stats.resolved_today }}</div>
+            <div class="label">Finalizados Hoje</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header">
+                <h6 class="mb-0 text-muted">Chamados Recentes</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Título</th>
+                                <th scope="col">Loja</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Técnico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in stats.recent_tickets %}
+                            <tr>
+                                <td><a href="{{ url_for('chamados.ver_chamado', id=ticket.id) }}" class="text-decoration-none fw-bold">#{{ ticket.id }}</a></td>
+                                <td>{{ ticket.title }}</td>
+                                <td>{{ ticket.store.name if ticket.store else 'N/A' }}</td>
+                                <td>
+                                    {% if ticket.status == 'novo' %}
+                                    <span class="badge bg-info text-dark">Novo</span>
+                                    {% elif ticket.status == 'em_analise' %}
+                                    <span class="badge bg-primary">Em Análise</span>
+                                    {% elif ticket.status == 'aguardando_peca' %}
+                                    <span class="badge bg-warning text-dark">Esperando Peça</span>
+                                    {% elif ticket.status == 'resolvido' %}
+                                    <span class="badge bg-success">Concluído</span>
+                                    {% elif ticket.status == 'nao_resolvido' %}
+                                    <span class="badge bg-danger">Não Concluído</span>
+                                    {% elif ticket.status == 'fechado' %}
+                                    <span class="badge bg-secondary">Fechado</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ ticket.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ ticket.technician.username if ticket.technician else '-' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">Nenhum chamado recente</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('chamados.listar_chamados') }}" class="text-decoration-none small">Ver todos os chamados</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header">
+                <h6 class="mb-0 text-muted">Produtividade (Hoje)</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% if stats.productivity %}
+                        {% for tech in stats.productivity %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-user-circle me-2 text-secondary"></i> {{ tech.name }}
+                            </div>
+                            <span class="badge bg-light text-dark rounded-pill">{{ tech.count }} chamados</span>
+                        </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="list-group-item text-center text-muted">
+                            <small>Nenhum técnico encontrado ou sem atividades hoje.</small>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Meus Alertas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h4><i class="fas fa-bell me-2"></i>Meus Alertas</h4>
+        <p class="text-muted">Notificações e avisos do sistema.</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+            {% for alert in alerts %}
+            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if not alert.read %}bg-light{% endif %}">
+                <div>
+                    <div class="d-flex align-items-center mb-1">
+                        {% if alert.type == 'info' %}
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        {% elif alert.type == 'warning' %}
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        {% elif alert.type == 'error' %}
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        {% elif alert.type == 'success' %}
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        {% endif %}
+                        <span class="fw-bold">{{ alert.message }}</span>
+                    </div>
+                    <small class="text-muted">{{ alert.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                </div>
+                {% if not alert.read %}
+                <a href="{{ url_for('alertas.mark_read', id=alert.id) }}" class="btn btn-sm btn-outline-secondary" title="Marcar como lido">
+                    <i class="fas fa-check"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-bell-slash fa-3x mb-3 opacity-25"></i>
+                <p class="mb-0">Você não tem novos alertas.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

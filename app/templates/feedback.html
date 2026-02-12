@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Avaliações de Atendimento{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h4><i class="fas fa-star me-2"></i>Avaliações de Atendimento</h4>
+        <p class="text-muted">Feedback recebido dos usuários sobre os chamados resolvidos.</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Chamado</th>
+                        <th>Avaliação</th>
+                        <th>Comentário</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in feedbacks %}
+                    <tr>
+                        <td class="ps-4">
+                            <a href="{{ url_for('chamados.detalhes_chamado', id=item.ticket_id) }}" class="text-decoration-none fw-bold">
+                                #{{ item.ticket_id }}
+                            </a>
+                        </td>
+                        <td>
+                            <div class="text-warning">
+                                {% for i in range(item.rating) %}
+                                <i class="fas fa-star"></i>
+                                {% endfor %}
+                                {% for i in range(5 - item.rating) %}
+                                <i class="far fa-star"></i>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>{{ item.comment or '-' }}</td>
+                        <td>{{ item.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            <i class="fas fa-star-half-alt fa-3x mb-3 opacity-25"></i>
+                            <p class="mb-0">Nenhuma avaliação recebida ainda.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

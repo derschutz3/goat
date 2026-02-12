@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Chamado{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 text-secondary"><i class="fas fa-plus-circle me-2"></i>Abrir Novo Chamado</h4>
+    <a href="{{ url_for('chamados.listar_chamados') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Voltar</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <form action="{{ url_for('chamados.novo_chamado') }}" method="POST">
+            <div class="row g-4">
+                <!-- Left Column: Details -->
+                <div class="col-md-4 border-end">
+                    <h5 class="card-title mb-3 text-muted">Informações Básicas</h5>
+                    
+                    <div class="mb-3">
+                        <label for="loja" class="form-label">Loja ou Setor <span class="text-danger">*</span></label>
+                        <select class="form-select" id="loja" name="store_id" required>
+                            <option value="" selected disabled>Selecione...</option>
+                            {% for store in stores %}
+                            <option value="{{ store.id }}">{{ store.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="categoria" class="form-label">Categoria</label>
+                        <select class="form-select" id="categoria" name="category" required>
+                            <option value="" selected disabled>Selecione...</option>
+                            {% for category in categories %}
+                            <option value="{{ category.name }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="prioridade" class="form-label">Prioridade</label>
+                        <select class="form-select" id="prioridade" name="priority">
+                            <option value="baixa">Baixa</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="alta">Alta</option>
+                            <option value="critica">Crítica (Loja parada)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tecnico" class="form-label">Técnico Responsável</label>
+                        <select class="form-select" id="tecnico" name="technician_id">
+                            <option value="" selected>Automático / Nenhum</option>
+                            {% for tech in technicians %}
+                            <option value="{{ tech.id }}">{{ tech.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status Inicial</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="novo" selected>Novo (Padrão)</option>
+                            <option value="em_analise">Em Análise</option>
+                            <option value="aguardando_peca">Esperando Peça</option>
+                            <option value="resolvido">Concluído</option>
+                            <option value="nao_resolvido">Não Concluído</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="anexo" class="form-label">Anexo (Print/Foto)</label>
+                        <input class="form-control" type="file" id="anexo" name="attachment">
+                        <div class="form-text">Máximo: 5MB. Formatos: JPG, PNG, PDF.</div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Description -->
+                <div class="col-md-8">
+                    <h5 class="card-title mb-3 text-muted">Detalhes da Solicitação</h5>
+
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título do Chamado <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="titulo" name="title" placeholder="Ex: Impressora do caixa não imprime" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição Detalhada <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="descricao" name="description" rows="8" placeholder="Descreva o problema com o máximo de detalhes possível..." required></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end pt-3">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="fas fa-paper-plane me-2"></i> Abrir Chamado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

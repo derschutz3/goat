@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Sugestões{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h4><i class="fas fa-lightbulb me-2"></i>Sugestões</h4>
+        <p class="text-muted">Compartilhe suas ideias para melhorar o sistema.</p>
+    </div>
+    <div class="col-md-6 text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newSuggestionModal">
+            <i class="fas fa-plus me-2"></i>Nova Sugestão
+        </button>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for suggestion in suggestions %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title mb-0">{{ suggestion.title }}</h5>
+                    {% if suggestion.status == 'pending' %}
+                    <span class="badge bg-secondary">Pendente</span>
+                    {% elif suggestion.status == 'approved' %}
+                    <span class="badge bg-success">Aprovada</span>
+                    {% elif suggestion.status == 'rejected' %}
+                    <span class="badge bg-danger">Rejeitada</span>
+                    {% endif %}
+                </div>
+                <p class="card-text text-muted">{{ suggestion.description }}</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center pb-3">
+                <small class="text-muted">Por: {{ suggestion.user.username }}</small>
+                <form action="{{ url_for('sugestoes.vote', id=suggestion.id) }}" method="POST">
+                    <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill">
+                        <i class="fas fa-thumbs-up me-1"></i> {{ suggestion.votes }} Votos
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5 text-muted">
+        <i class="fas fa-lightbulb fa-3x mb-3 opacity-25"></i>
+        <p class="mb-0">Nenhuma sugestão enviada ainda. Seja o primeiro!</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal Nova Sugestão -->
+<div class="modal fade" id="newSuggestionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Sugestão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('sugestoes.index') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Título</label>
+                        <input type="text" class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea class="form-control" name="description" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
