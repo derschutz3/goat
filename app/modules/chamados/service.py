@@ -148,8 +148,8 @@ class TicketService:
         return True
     
         def get_dashboard_stats(self):
-        from datetime import datetime, timedelta
-        try:
+            from datetime import datetime, timedelta
+            try:
             status_counts = dict(self.repository.count_by_status())
             open_count = status_counts.get('novo', 0)
             pending_count = status_counts.get('em_analise', 0) + status_counts.get('aguardando_peca', 0)
