@@ -25,13 +25,16 @@ class Config:
     }
     
     # Configure pooling based on database type
-    # Always default to NullPool for SQLite or if DB type is uncertain to prevent locking
-    if 'sqlite' in SQLALCHEMY_DATABASE_URI or 'postgresql' not in SQLALCHEMY_DATABASE_URI:
-        # SQLite handles concurrency poorly with pooling (file locking).
-        # Using NullPool disables pooling, preventing "QueuePool limit" errors
-        # and letting SQLite manage its own file locks.
+    # Check for SQLite
+    if 'sqlite' in SQLALCHEMY_DATABASE_URI:
         SQLALCHEMY_ENGINE_OPTIONS['poolclass'] = NullPool
+    # Check for Postgres (supports postgresql:// and postgres://)
+    elif 'postgres' in SQLALCHEMY_DATABASE_URI:
+        # Production pooling for Postgres
+        # Use reasonable limits to avoid exhausting DB max connections
+        SQLALCHEMY_ENGINE_OPTIONS['pool_size'] = 10  # Reduced from 20 to be safer
+        SQLALCHEMY_ENGINE_OPTIONS['max_overflow'] = 20 # Reduced from 40
     else:
-        # Production pooling (Postgres/MySQL)
-        SQLALCHEMY_ENGINE_OPTIONS['pool_size'] = 20
-        SQLALCHEMY_ENGINE_OPTIONS['max_overflow'] = 40
+        # Fallback for other DBs (MySQL, etc) or if using NullPool is safer
+        SQLALCHEMY_ENGINE_OPTIONS['pool_size'] = 10
+        SQLALCHEMY_ENGINE_OPTIONS['max_overflow'] = 20
