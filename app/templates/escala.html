@@ -120,7 +120,7 @@
                         <label class="form-label small text-muted fw-bold text-uppercase">Lojas Atribuídas</label>
                         <div class="card bg-body-tertiary border-0 p-2" style="max-height: 250px; overflow-y: auto;">
                             {% for store in all_stores %}
-                            <div class="form-check p-2 rounded hover-bg-light">
+                            <div class="form-check p-2 rounded hover-bg-light position-relative">
                                 <input class="form-check-input" type="checkbox" name="store_ids" value="{{ store.id }}" id="store_{{ store.id }}">
                                 <label class="form-check-label w-100 stretched-link cursor-pointer d-flex justify-content-between align-items-center" for="store_{{ store.id }}">
                                     <span class="text-body">{{ store.name }}</span>

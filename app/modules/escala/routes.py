@@ -58,6 +58,11 @@ def atualizar_celula():
     
     # Add new schedules
     for store_id in store_ids:
+        try:
+            store_id = int(store_id)
+        except ValueError:
+            continue
+            
         # Check if store is already assigned to ANYONE on THIS DAY (Unique constraint)
         # If so, remove it from the other person/slot
         existing_conflict = Schedule.query.filter_by(store_id=store_id, day_of_week=day).first()
@@ -101,6 +106,11 @@ def gerar_escala():
         return redirect(url_for('escala.index'))
 
     stores = Store.query.all()
+    
+    if not stores:
+        flash('Nenhuma loja encontrada para gerar escala. Cadastre lojas primeiro.', 'warning')
+        return redirect(url_for('escala.index'))
+
     days = ['segunda', 'terca', 'quarta', 'quinta', 'sexta']
     
     # Distribute stores evenly among technicians
@@ -164,6 +174,11 @@ def gerar_escala_inteligente():
     }
     
     stores = Store.query.all()
+    
+    if not stores:
+        flash('Nenhuma loja encontrada para gerar escala.', 'warning')
+        return redirect(url_for('escala.index'))
+        
     store_loads = []
     
     for store in stores:
