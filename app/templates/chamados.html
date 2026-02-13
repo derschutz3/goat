@@ -33,7 +33,7 @@
         </div>
         <div class="col-md-3">
             <select class="form-select form-select-sm" aria-label="Loja" id="storeFilter">
-                <option value="all" selected>Todas Lojas/Setores</option>
+                <option value="all" selected>Todas Lojas</option>
                 {% for store in stores %}
                 <option value="{{ store.id }}">{{ store.name }}</option>
                 {% endfor %}

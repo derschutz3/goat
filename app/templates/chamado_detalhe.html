@@ -39,7 +39,7 @@
                         <span class="badge bg-{{ status_color }}">{{ ticket.status|replace('_', ' ')|capitalize }}</span>
                     </li>
                     <li class="list-group-item px-0">
-                        <small class="text-muted d-block">Loja / Setor</small>
+                        <small class="text-muted d-block">Loja</small>
                         <span class="fw-medium">{{ ticket.store.name if ticket.store else 'Não informado' }}</span>
                     </li>
                     <li class="list-group-item px-0">

@@ -122,7 +122,7 @@
             {% if current_user.role != 'tecnico' %}
             <div class="border-top my-2 mx-3 text-muted small px-2 py-1">Gestão</div>
             <a class="nav-link {% if active_page == 'lojas_setores' %}active{% endif %}" href="{{ url_for('lojas.index') }}">
-                <i class="fas fa-store"></i> Lojas / Setores
+                <i class="fas fa-store"></i> Lojas
             </a>
             {% endif %}
 
