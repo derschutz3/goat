@@ -21,6 +21,12 @@ def create_app(config_class=Config):
     @login_manager.user_loader
     def load_user(user_id):
         return db.session.get(User, int(user_id))
+        
+    # Ensure database sessions are removed at the end of each request
+    # This prevents connection leaks that cause "QueuePool limit" errors
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db.session.remove()
 
     # Global Login Requirement
     @app.before_request

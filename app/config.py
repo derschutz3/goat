@@ -25,7 +25,8 @@ class Config:
     }
     
     # Configure pooling based on database type
-    if 'sqlite' in SQLALCHEMY_DATABASE_URI:
+    # Always default to NullPool for SQLite or if DB type is uncertain to prevent locking
+    if 'sqlite' in SQLALCHEMY_DATABASE_URI or 'postgresql' not in SQLALCHEMY_DATABASE_URI:
         # SQLite handles concurrency poorly with pooling (file locking).
         # Using NullPool disables pooling, preventing "QueuePool limit" errors
         # and letting SQLite manage its own file locks.
