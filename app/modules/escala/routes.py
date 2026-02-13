@@ -11,6 +11,10 @@ escala_bp = Blueprint('escala', __name__, template_folder='../../templates')
 @escala_bp.route('/escala')
 @login_required
 def index():
+    if current_user.role not in ['admin', 'manager', 'supervisor', 'tecnico']:
+        flash('Acesso não autorizado.', 'danger')
+        return redirect(url_for('chamados.index'))
+
     # Fetch all technicians
     technicians = User.query.filter_by(role='tecnico').order_by(User.username).all()
     

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 from .service import StoreService
 
 lojas_bp = Blueprint('lojas', __name__, url_prefix='/lojas')
@@ -38,6 +38,9 @@ def save():
 @lojas_bp.route('/delete/<path:name>', methods=['POST'])
 @login_required
 def delete(name):
+    if current_user.role not in ['admin', 'manager', 'supervisor']:
+        return jsonify({'success': False, 'message': 'Acesso não autorizado.'}), 403
+
     try:
         if store_service.delete_store(name):
             return jsonify({'success': True})
