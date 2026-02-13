@@ -5,7 +5,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0 text-secondary"><i class="fas fa-store me-2"></i>Lojas e Setores</h4>
-    <!-- <button class="btn btn-primary"><i class="fas fa-plus me-1"></i> Nova Unidade</button> -->
+    <button class="btn btn-primary" onclick="openModal()"><i class="fas fa-plus me-1"></i> Nova Unidade</button>
 </div>
 
 <div class="row g-4">
@@ -18,13 +18,22 @@
             </div>
             <div class="list-group list-group-flush">
                 {% for store in stats %}
-                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>{{ store.name }}</strong>
-                        <!-- <div class="small text-muted">Endereço não cadastrado</div> -->
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center flex-grow-1" onclick="editStore('{{ store.name }}')" style="cursor: pointer;">
+                        <div class="ms-2">
+                            <div class="fw-bold">{{ store.name }}</div>
+                            <small class="text-muted">{{ store.count }} chamados</small>
+                        </div>
                     </div>
-                    <span class="badge bg-{{ 'primary' if store.count > 0 else 'secondary' }} rounded-pill">{{ store.count }} chamados</span>
-                </a>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editStore('{{ store.name }}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStore('{{ store.name }}')" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
                 {% else %}
                 <div class="list-group-item text-center text-muted py-3">
                     Nenhuma loja encontrada.
@@ -34,5 +43,120 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
+<!-- Modal -->
+<div class="modal fade" id="storeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Nova Loja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="storeForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome da Loja</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cnpj" class="form-label">CNPJ</label>
+                        <input type="text" class="form-control" id="cnpj">
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Endereço</label>
+                        <input type="text" class="form-control" id="address">
+                    </div>
+                    <div class="mb-3">
+                        <label for="manager" class="form-label">Gerente</label>
+                        <input type="text" class="form-control" id="manager">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveStore()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let storeModal;
+
+document.addEventListener('DOMContentLoaded', function() {
+    storeModal = new bootstrap.Modal(document.getElementById('storeModal'));
+});
+
+function openModal() {
+    document.getElementById('modalTitle').innerText = 'Nova Loja';
+    document.getElementById('storeForm').reset();
+    document.getElementById('name').readOnly = false;
+    storeModal.show();
+}
+
+function editStore(name) {
+    document.getElementById('modalTitle').innerText = 'Editar Loja';
+    
+    fetch(`/lojas/details/${encodeURIComponent(name)}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('name').value = data.name;
+            document.getElementById('cnpj').value = data.cnpj || '';
+            document.getElementById('address').value = data.address || '';
+            document.getElementById('manager').value = data.manager || '';
+            document.getElementById('name').readOnly = true; // Prevent renaming for now as it is the key
+            storeModal.show();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function saveStore() {
+    const data = {
+        name: document.getElementById('name').value,
+        cnpj: document.getElementById('cnpj').value,
+        address: document.getElementById('address').value,
+        manager: document.getElementById('manager').value
+    };
+
+    fetch('/lojas/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erro ao salvar: ' + (data.message || 'Erro desconhecido'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erro ao salvar loja');
+    });
+}
+
+function deleteStore(name) {
+    if (confirm(`Tem certeza que deseja excluir a loja "${name}"?`)) {
+        fetch(`/lojas/delete/${encodeURIComponent(name)}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao excluir: ' + (data.message || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro ao excluir loja');
+        });
+    }
+}
+</script>
+{% endblock %}
