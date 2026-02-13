@@ -60,6 +60,18 @@
 }
 
 [data-bs-theme="dark"] {
+    /* Dark Mode Variables */
+    --bg-color: #212529;
+    --surface-color: #2c3034;
+    --text-color: #f8f9fa;
+    --text-muted: #adb5bd;
+    --border-color: #495057;
+    --topbar-bg: #1a1d20;
+    --topbar-text: #ffffff;
+    --hover-bg: #343a40;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    --card-shadow-hover: 0 4px 8px rgba(0,0,0,0.5);
+
     /* Chat Colors */
     --chat-tech-bg: #4a1c1c; /* Dark red tint */
     --chat-user-bg: #343a40;
