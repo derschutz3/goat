@@ -83,8 +83,66 @@
         </div>
     </div>
 
-    <!-- Right Column: Additional Info -->
+    <!-- Right Column: Additional Info & Attachments -->
     <div class="col-md-8">
+        <!-- Attachments Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-muted"><i class="fas fa-paperclip me-2"></i>Anexos</h6>
+                {% if current_user.role in ['admin', 'manager', 'supervisor', 'tecnico'] %}
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalUpload">
+                    <i class="fas fa-upload me-1"></i> Adicionar
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if ticket.attachment %}
+                    <div class="d-flex align-items-center p-3 border rounded bg-light">
+                        {% set ext = ticket.attachment.split('.')[-1].lower() %}
+                        {% if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
+                            <div class="me-3" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalImagePreview">
+                                <img src="{{ url_for('static', filename='uploads/attachments/' + ticket.attachment) }}" alt="Anexo" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 text-break">{{ ticket.attachment }}</h6>
+                                <small class="text-muted d-block mb-2">Imagem</small>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalImagePreview">
+                                    <i class="fas fa-eye me-1"></i> Visualizar
+                                </button>
+                                <a href="{{ url_for('static', filename='uploads/attachments/' + ticket.attachment) }}" download class="btn btn-sm btn-outline-secondary ms-1">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="me-3">
+                                {% if ext == 'pdf' %}
+                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                {% elif ext in ['xls', 'xlsx', 'csv'] %}
+                                    <i class="fas fa-file-excel fa-3x text-success"></i>
+                                {% elif ext in ['doc', 'docx'] %}
+                                    <i class="fas fa-file-word fa-3x text-primary"></i>
+                                {% else %}
+                                    <i class="fas fa-file-alt fa-3x text-secondary"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 text-break">{{ ticket.attachment }}</h6>
+                                <small class="text-muted d-block mb-2">{{ ext|upper }}</small>
+                                <a href="{{ url_for('static', filename='uploads/attachments/' + ticket.attachment) }}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i> Abrir / Baixar
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-paperclip fa-2x mb-2 opacity-50"></i>
+                        <p class="mb-0 small">Nenhum anexo.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 text-muted"><i class="fas fa-info-circle me-2"></i>Informações Adicionais</h6>
@@ -133,4 +191,43 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Upload Attachment -->
+<div class="modal fade" id="modalUpload" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar/Substituir Anexo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('chamados.upload_anexo', id=ticket.id) }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="attachment" class="form-label">Arquivo</label>
+                        <input type="file" class="form-control" id="attachment" name="attachment" required>
+                        <div class="form-text">Formatos: JPG, PNG, PDF, Excel, Word. Máx: 10MB.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Image Preview -->
+{% if ticket.attachment %}
+<div class="modal fade" id="modalImagePreview" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="modal-body p-0 text-center position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1055; filter: invert(1);"></button>
+                <img src="{{ url_for('static', filename='uploads/attachments/' + ticket.attachment) }}" class="img-fluid rounded shadow-lg" alt="Preview" style="max-height: 90vh;">
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

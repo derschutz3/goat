@@ -95,6 +95,17 @@ def create_app(config_class=Config):
                     conn.execute(text("ALTER TABLE users ADD COLUMN profile_image VARCHAR(255)"))
                     conn.commit()
                     print("Auto-Migration: Column added successfully.")
+
+                # Check for 'attachment' in 'tickets'
+                try:
+                    conn.execute(text("SELECT attachment FROM tickets LIMIT 1"))
+                except Exception:
+                    print("Auto-Migration: Adding 'attachment' column to 'tickets' table...")
+                    conn.rollback()
+                    conn.execute(text("ALTER TABLE tickets ADD COLUMN attachment VARCHAR(255)"))
+                    conn.commit()
+                    print("Auto-Migration: Column 'attachment' added successfully.")
+
         except Exception as e:
             print(f"Auto-Migration Warning: Could not check/update database schema: {e}")
 

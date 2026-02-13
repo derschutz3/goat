@@ -27,6 +27,7 @@ class Ticket(db.Model):
     due_date = db.Column(db.DateTime, nullable=True)
     closed_at = db.Column(db.DateTime, nullable=True)
     additional_info = db.Column(db.Text, nullable=True)
+    attachment = db.Column(db.String(255), nullable=True)
     
     # Foreign Keys
     requester_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

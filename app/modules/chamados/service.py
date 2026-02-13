@@ -1,6 +1,9 @@
 from app.modules.chamados.repository import TicketRepository
 from datetime import datetime
 from app.database import db
+import os
+from werkzeug.utils import secure_filename
+from flask import current_app
 
 class TicketService:
 
@@ -77,13 +80,50 @@ class TicketService:
             return True
         return False
 
-    def create_ticket(self, data, user):
+    def upload_attachment(self, id, file):
+        ticket = self.repository.find_by_id(id)
+        if ticket and file and file.filename:
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S_')
+            filename = timestamp + filename
+            
+            upload_folder = os.path.join(current_app.static_folder, 'uploads', 'attachments')
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+                
+            file.save(os.path.join(upload_folder, filename))
+            
+            # If there was an old attachment, maybe delete it? 
+            # For now, let's just overwrite the reference in DB.
+            # Ideally, we should delete the old file to save space, but let's keep it simple for now.
+            ticket.attachment = filename
+            self.repository.update(ticket)
+            return True
+        return False
+
+    def create_ticket(self, data, user, files=None):
         from .models import Ticket
         
         # Determine status
         status = data.get('status', 'novo')
         technician_id = data.get('technician_id')
         
+        attachment_filename = None
+        if files and 'attachment' in files:
+            file = files['attachment']
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                # Ensure unique filename to avoid overwrites (timestamp prefix)
+                timestamp = datetime.now().strftime('%Y%m%d%H%M%S_')
+                filename = timestamp + filename
+                
+                upload_folder = os.path.join(current_app.static_folder, 'uploads', 'attachments')
+                if not os.path.exists(upload_folder):
+                    os.makedirs(upload_folder)
+                    
+                file.save(os.path.join(upload_folder, filename))
+                attachment_filename = filename
+
         # If technician is assigned but status is still 'novo', maybe auto-move to 'aberto'?
         # For now, just trust the user input.
         
@@ -95,7 +135,8 @@ class TicketService:
             status=status,
             store_id=data.get('store_id'),
             requester_id=user.id,
-            technician_id=technician_id if technician_id else None
+            technician_id=technician_id if technician_id else None,
+            attachment=attachment_filename
         )
         return self.repository.create(ticket)
         

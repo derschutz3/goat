@@ -16,7 +16,7 @@ def index():
 @login_required
 def novo_chamado():
     if request.method == 'POST':
-        service.create_ticket(request.form, current_user)
+        service.create_ticket(request.form, current_user, request.files)
         flash('Chamado criado com sucesso!', 'success')
         return redirect(url_for('chamados.index'))
     
@@ -77,7 +77,7 @@ def gerenciar_chamados():
     technicians = service.get_all_technicians()
     stores = service.get_all_stores()
     categories = service.get_all_categories()
-    return render_template('chamados.html', tickets=tickets, technicians=technicians, stores=stores, categories=categories, active_page='gerenciar_chamados', exclude_closed=exclude_closed)
+    return render_template('gerenciar_chamados.html', tickets=tickets, technicians=technicians, stores=stores, categories=categories, active_page='gerenciar_chamados', exclude_closed=exclude_closed)
 
 @chamados_bp.route('/chamado/atualizar/<int:id>', methods=['POST'])
 @login_required
@@ -98,6 +98,25 @@ def atualizar_chamado_geral(id):
 def ver_chamado(id):
     ticket = service.get_ticket(id)
     return render_template('chamado_detalhe.html', ticket=ticket)
+
+@chamados_bp.route('/chamado/<int:id>/upload', methods=['POST'])
+@login_required
+def upload_anexo(id):
+    if 'attachment' not in request.files:
+        flash('Nenhum arquivo selecionado.', 'warning')
+        return redirect(url_for('chamados.ver_chamado', id=id))
+        
+    file = request.files['attachment']
+    if file.filename == '':
+        flash('Nenhum arquivo selecionado.', 'warning')
+        return redirect(url_for('chamados.ver_chamado', id=id))
+        
+    if service.upload_attachment(id, file):
+        flash('Anexo enviado com sucesso!', 'success')
+    else:
+        flash('Erro ao enviar anexo.', 'danger')
+        
+    return redirect(url_for('chamados.ver_chamado', id=id))
 
 @chamados_bp.route('/chamado/<int:id>/info', methods=['POST'])
 @login_required

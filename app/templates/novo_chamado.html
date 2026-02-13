@@ -10,7 +10,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-4">
-        <form action="{{ url_for('chamados.novo_chamado') }}" method="POST">
+        <form action="{{ url_for('chamados.novo_chamado') }}" method="POST" enctype="multipart/form-data">
             <div class="row g-4">
                 <!-- Left Column: Details -->
                 <div class="col-md-4 border-end">
