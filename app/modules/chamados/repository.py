@@ -9,7 +9,11 @@ class TicketRepository:
         return ticket
 
     def find_all(self, filters=None):
-        query = Ticket.query
+        query = Ticket.query.options(
+            db.joinedload(Ticket.store),
+            db.joinedload(Ticket.technician),
+            db.joinedload(Ticket.requester)
+        )
         
         if filters:
             if 'department' in filters and filters['department']:
@@ -58,24 +62,22 @@ class TicketRepository:
         ).count()
 
     def get_recent(self, limit=5):
-        return Ticket.query.order_by(Ticket.created_at.desc()).limit(limit).all()
+        return Ticket.query.options(
+            db.joinedload(Ticket.store),
+            db.joinedload(Ticket.technician)
+        ).order_by(Ticket.created_at.desc()).limit(limit).all()
 
     def get_technician_productivity(self, today_start):
-        # Get all technicians
-        techs = User.query.filter_by(role='tecnico').all()
-        stats = []
+        # Optimized with GROUP BY to avoid N+1 queries
+        results = db.session.query(
+            User.username, 
+            db.func.count(Ticket.id)
+        ).join(Ticket, Ticket.technician_id == User.id)\
+         .filter(Ticket.status == 'resolvido', Ticket.updated_at >= today_start)\
+         .filter(User.role == 'tecnico')\
+         .group_by(User.username).all()
         
-        for tech in techs:
-            count = Ticket.query.filter(
-                Ticket.technician_id == tech.id,
-                Ticket.status == 'resolvido',
-                Ticket.updated_at >= today_start
-            ).count()
-            stats.append({
-                'name': tech.username,
-                'count': count
-            })
-            
+        stats = [{'name': r[0], 'count': r[1]} for r in results]
         return sorted(stats, key=lambda x: x['count'], reverse=True)
 
     def get_all_departments(self):

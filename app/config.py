@@ -20,14 +20,18 @@ class Config:
 
     # Database connection pool configuration
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_recycle': 3600,   # Recycle connections every hour
-        'pool_pre_ping': True   # Check connection health to avoid stale errors
+        'pool_recycle': 1800,   # Recycle connections every 30 minutes (safer for MySQL default timeouts)
+        'pool_pre_ping': True,  # Check connection health to avoid stale errors
+        'pool_size': 20,        # Increased size for multiple stores concurrency
+        'max_overflow': 40      # Allow spikes in traffic
     }
     
     # Configure pooling based on database type
     # Check for SQLite
     if 'sqlite' in SQLALCHEMY_DATABASE_URI:
-        SQLALCHEMY_ENGINE_OPTIONS['poolclass'] = NullPool
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'poolclass': NullPool
+        }
     # Check for Postgres (supports postgresql:// and postgres://)
     elif 'postgres' in SQLALCHEMY_DATABASE_URI:
         # Production pooling for Postgres

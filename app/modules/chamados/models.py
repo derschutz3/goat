@@ -19,10 +19,10 @@ class Ticket(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), default='novo', index=True) # novo, aberto, pendente, resolvido, fechado
-    priority = db.Column(db.String(20), default='media') # baixa, media, alta, critica
+    priority = db.Column(db.String(20), default='media', index=True) # baixa, media, alta, critica
     category = db.Column(db.String(50))
     
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     due_date = db.Column(db.DateTime, nullable=True)
     closed_at = db.Column(db.DateTime, nullable=True)
@@ -30,9 +30,9 @@ class Ticket(db.Model):
     attachment = db.Column(db.String(255), nullable=True)
     
     # Foreign Keys
-    requester_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    technician_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=True)
+    requester_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    technician_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
+    store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=True, index=True)
     
     # Relationships
     requester = db.relationship('User', foreign_keys=[requester_id], backref='tickets_requested')

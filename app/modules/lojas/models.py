@@ -4,7 +4,7 @@ class Store(db.Model):
     __tablename__ = 'stores'
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(100), unique=True, nullable=False, index=True)
     cnpj = db.Column(db.String(20))
     address = db.Column(db.String(200))
     manager = db.Column(db.String(100))
