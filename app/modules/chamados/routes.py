@@ -8,8 +8,9 @@ service = TicketService()
 @chamados_bp.route('/')
 @login_required
 def index():
-    stats = service.get_dashboard_stats()
-    return render_template('dashboard.html', active_page='dashboard', stats=stats)
+    # stats = service.get_dashboard_stats()
+    # return render_template('dashboard.html', active_page='dashboard', stats=stats)
+    return redirect(url_for('chamados.listar_chamados'))
 
 @chamados_bp.route('/novo', methods=['GET', 'POST'])
 @login_required

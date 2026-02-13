@@ -36,7 +36,7 @@
 
     <!-- Sidebar -->
     {% if current_user.is_authenticated %}
-    <div class="sidebar">
+    <div class="sidebar bg-surface">
         <nav class="nav flex-column">
             <a class="nav-link {% if active_page == 'chamados' %}active{% endif %}" href="{{ url_for('chamados.listar_chamados') }}">
                 <i class="fas fa-list"></i> Chamados
