@@ -127,29 +127,38 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="store{{ ticket.id }}" class="form-label">Loja / Setor</label>
-                                <select class="form-select" id="store{{ ticket.id }}" name="store_id">
+                                <select class="form-select" id="store{{ ticket.id }}" name="store_id" {% if current_user.role == 'tecnico' %}disabled{% endif %}>
                                     <option value="">Selecione...</option>
                                     {% for store in stores %}
                                     <option value="{{ store.id }}" {% if ticket.store_id == store.id %}selected{% endif %}>{{ store.name }}</option>
                                     {% endfor %}
                                 </select>
+                                {% if current_user.role == 'tecnico' %}
+                                <input type="hidden" name="store_id" value="{{ ticket.store_id }}">
+                                {% endif %}
                             </div>
                             <div class="col-md-6">
                                 <label for="priority{{ ticket.id }}" class="form-label">Prioridade</label>
-                                <select class="form-select" id="priority{{ ticket.id }}" name="priority">
+                                <select class="form-select" id="priority{{ ticket.id }}" name="priority" {% if current_user.role == 'tecnico' %}disabled{% endif %}>
                                     <option value="baixa" {% if ticket.priority == 'baixa' %}selected{% endif %}>Baixa</option>
                                     <option value="media" {% if ticket.priority == 'media' %}selected{% endif %}>Média</option>
                                     <option value="alta" {% if ticket.priority == 'alta' %}selected{% endif %}>Alta</option>
                                     <option value="critica" {% if ticket.priority == 'critica' %}selected{% endif %}>Crítica</option>
                                 </select>
+                                {% if current_user.role == 'tecnico' %}
+                                <input type="hidden" name="priority" value="{{ ticket.priority }}">
+                                {% endif %}
                             </div>
                             <div class="col-12">
                                 <label for="category{{ ticket.id }}" class="form-label">Categoria</label>
-                                <select class="form-select" id="category{{ ticket.id }}" name="category">
+                                <select class="form-select" id="category{{ ticket.id }}" name="category" {% if current_user.role == 'tecnico' %}disabled{% endif %}>
                                     {% for cat in categories %}
                                     <option value="{{ cat.name }}" {% if ticket.category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
                                     {% endfor %}
                                 </select>
+                                {% if current_user.role == 'tecnico' %}
+                                <input type="hidden" name="category" value="{{ ticket.category }}">
+                                {% endif %}
                             </div>
                             <div class="col-12">
                                 <label for="description{{ ticket.id }}" class="form-label">Descrição Original</label>

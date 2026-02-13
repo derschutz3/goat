@@ -67,7 +67,7 @@ def listar_chamados():
 @chamados_bp.route('/gerenciar')
 @login_required
 def gerenciar_chamados():
-    if current_user.role not in ['admin', 'manager', 'supervisor']:
+    if current_user.role not in ['admin', 'manager', 'supervisor', 'tecnico']:
         flash('Acesso não autorizado.', 'danger')
         return redirect(url_for('chamados.index'))
         
@@ -81,7 +81,7 @@ def gerenciar_chamados():
 @chamados_bp.route('/chamado/atualizar/<int:id>', methods=['POST'])
 @login_required
 def atualizar_chamado_geral(id):
-    if current_user.role not in ['admin', 'manager', 'supervisor']:
+    if current_user.role not in ['admin', 'manager', 'supervisor', 'tecnico']:
         flash('Acesso não autorizado.', 'danger')
         return redirect(url_for('chamados.index'))
         

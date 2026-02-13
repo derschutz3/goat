@@ -50,18 +50,25 @@
             
 
 
+            <!-- Gestão Section -->
+            {% if current_user.role != 'tecnico' %}
             <div class="border-top my-2 mx-3 text-muted small px-2 py-1">Gestão</div>
             <a class="nav-link {% if active_page == 'lojas_setores' %}active{% endif %}" href="{{ url_for('lojas.index') }}">
                 <i class="fas fa-store"></i> Lojas / Setores
             </a>
+            {% endif %}
 
 
-            <!-- Admin Only -->
-            {% if current_user.role in ['admin', 'manager', 'supervisor'] %}
+            <!-- Admin / Gerenciamento -->
+            {% if current_user.role in ['admin', 'manager', 'supervisor', 'tecnico'] %}
             <div class="border-top my-2 mx-3 text-muted small px-2 py-1">Administração</div>
             <a class="nav-link {% if active_page == 'gerenciar_chamados' %}active{% endif %}" href="{{ url_for('chamados.gerenciar_chamados') }}">
                 <i class="fas fa-tasks"></i> Gerenciar Chamados
             </a>
+            {% endif %}
+
+            <!-- Admin Only (Excluding Tecnico) -->
+            {% if current_user.role in ['admin', 'manager', 'supervisor'] %}
             <a class="nav-link {% if active_page == 'categorias' %}active{% endif %}" href="{{ url_for('chamados.gerenciar_categorias') }}">
                 <i class="fas fa-list-ul"></i> Categorias
             </a>
