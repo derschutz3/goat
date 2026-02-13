@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #0d6efd;
+    --primary-color: #dc3545; /* Changed from Blue (#0d6efd) to Red (#dc3545) */
     --sidebar-width: 250px;
     --topbar-height: 60px;
     
@@ -15,26 +15,53 @@
     --card-shadow: 0 2px 4px rgba(0,0,0,0.05);
     --card-shadow-hover: 0 4px 8px rgba(0,0,0,0.1);
     
+    /* Override Bootstrap Primary Color */
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background-color: #bb2d3b !important; /* Darker red for hover */
+    border-color: #b02a37 !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.link-primary {
+    color: var(--primary-color) !important;
+}
+
+.link-primary:hover {
+    color: #bb2d3b !important;
+}
+
+/* Adjust chat colors for red theme */
+:root {
     /* Chat Colors */
-    --chat-tech-bg: #e7f1ff;
+    --chat-tech-bg: #ffe6e6; /* Light red tint */
     --chat-user-bg: #f8f9fa;
 }
 
 [data-bs-theme="dark"] {
-    /* Dark Mode Variables */
-    --bg-color: #212529;
-    --surface-color: #2c3034;
-    --text-color: #e9ecef;
-    --text-muted: #adb5bd;
-    --border-color: #495057;
-    --topbar-bg: #1a1d20; /* Darker Graphite */
-    --topbar-text: #ffffff;
-    --hover-bg: #343a40;
-    --card-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    --card-shadow-hover: 0 4px 8px rgba(0,0,0,0.4);
-    
     /* Chat Colors */
-    --chat-tech-bg: #1c2e4a;
+    --chat-tech-bg: #4a1c1c; /* Dark red tint */
     --chat-user-bg: #343a40;
 }
 
