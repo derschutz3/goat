@@ -5,11 +5,17 @@
 {% block content %}
 <style>
     .login-container {
-        min-height: 100vh;
+        height: 100vh;
+        width: 100vw;
         display: flex;
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        overflow: hidden;
+    }
+
+    body {
+        overflow: hidden; /* Remove scrollbars */
     }
 
     [data-bs-theme="dark"] .login-container {
@@ -26,6 +32,11 @@
         transform: translateY(0);
         transition: all 0.3s ease;
         animation: fadeInUp 0.6s ease-out;
+    }
+    
+    [data-bs-theme="dark"] .login-card {
+        background-color: #212529;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
 
     .login-card:hover {
@@ -49,9 +60,19 @@
 
     .form-floating .form-control {
         border-radius: 8px;
-        border: 1px solid var(--border-color);
-        background-color: var(--surface-color);
-        color: var(--text-color);
+        border: 1px solid var(--border-color, #ced4da);
+        background-color: var(--surface-color, #fff);
+        color: var(--text-color, #212529);
+    }
+    
+    [data-bs-theme="dark"] .form-control {
+        background-color: #2b3035;
+        border-color: #495057;
+        color: #fff;
+    }
+    
+    [data-bs-theme="dark"] .form-floating label {
+        color: #adb5bd;
     }
 
     .form-floating .form-control:focus {
@@ -112,7 +133,7 @@
 
     [data-bs-theme="dark"] .theme-toggle-login {
         background: rgba(0, 0, 0, 0.3);
-        border-color: rgba(255, 255, 255, 0.1);
+        border-color: transparent;
         color: #fff;
     }
 
