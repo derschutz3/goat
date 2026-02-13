@@ -12,7 +12,7 @@ escala_bp = Blueprint('escala', __name__, template_folder='../../templates')
 @login_required
 def index():
     # Fetch all technicians
-    technicians = User.query.filter_by(role='tecnico').all()
+    technicians = User.query.filter_by(role='tecnico').order_by(User.username).all()
     
     # Organize schedule by day -> technician -> stores
     days = ['segunda', 'terca', 'quarta', 'quinta', 'sexta']
