@@ -10,18 +10,31 @@
     </button>
 </div>
 
-<ul class="nav nav-tabs mb-3">
-    <li class="nav-item">
-        <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{{ url_for('auth.listar_usuarios') }}">
-            <i class="fas fa-users me-1"></i> Todos
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {% if active_tab == 'tecnicos' %}active{% endif %}" href="{{ url_for('auth.listar_tecnicos') }}">
-            <i class="fas fa-tools me-1"></i> Técnicos
-        </a>
-    </li>
-</ul>
+<div class="row mb-3">
+    <div class="col-md-6">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{{ url_for('auth.listar_usuarios') }}">
+                    <i class="fas fa-users me-1"></i> Todos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'tecnicos' %}active{% endif %}" href="{{ url_for('auth.listar_tecnicos') }}">
+                    <i class="fas fa-tools me-1"></i> Técnicos
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <form action="{{ url_for(request.endpoint) }}" method="GET" class="d-flex">
+            <input class="form-control me-2" type="search" name="search" placeholder="Pesquisar por nome ou email..." value="{{ search }}" aria-label="Pesquisar">
+            <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+            {% if search %}
+            <a href="{{ url_for(request.endpoint) }}" class="btn btn-outline-danger ms-2" title="Limpar Filtro"><i class="fas fa-times"></i></a>
+            {% endif %}
+        </form>
+    </div>
+</div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
@@ -71,6 +84,15 @@
                             {% endif %}
                         </td>
                         <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-outline-warning me-1" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#alterarSenhaModal"
+                                    data-id="{{ user.id }}"
+                                    data-username="{{ user.username }}"
+                                    onclick="preencherModalSenha(this)"
+                                    title="Alterar Senha">
+                                <i class="fas fa-key"></i>
+                            </button>
                             <button class="btn btn-sm btn-outline-primary me-1" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#editarUsuarioModal"
@@ -78,12 +100,13 @@
                                     data-username="{{ user.username }}"
                                     data-role="{{ user.role }}"
                                     data-department="{{ user.department or '' }}"
-                                    onclick="preencherModalEdicao(this)">
+                                    onclick="preencherModalEdicao(this)"
+                                    title="Editar Usuário">
                                 <i class="fas fa-edit"></i>
                             </button>
                             {% if user.id != current_user.id %}
                             <form action="{{ url_for('auth.excluir_usuario', id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
-                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir Usuário"><i class="fas fa-trash-alt"></i></button>
                             </form>
                             {% endif %}
                         </td>
@@ -169,15 +192,38 @@
                         <label class="form-label">Departamento</label>
                         <input type="text" class="form-control" name="department" id="editDepartment">
                     </div>
-                    <hr>
-                    <div class="mb-3">
-                        <label class="form-label">Nova Senha (Opcional)</label>
-                        <input type="password" class="form-control" name="password" placeholder="Deixe em branco para manter a atual">
-                    </div>
+                    <!-- Senha removida daqui para ter modal exclusivo -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Alterar Senha -->
+<div class="modal fade" id="alterarSenhaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Alterar Senha: <span id="senhaUsernameDisplay"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formAlterarSenha" method="POST">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i> Digite a nova senha para o usuário.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nova Senha</label>
+                        <input type="password" class="form-control" name="password" required placeholder="Nova senha">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Alterar Senha</button>
                 </div>
             </form>
         </div>
@@ -198,6 +244,15 @@
         const form = document.getElementById('formEditarUsuario');
         form.action = "{{ url_for('auth.editar_usuario', id=0) }}".replace('0', id);
     }
-</script>
 
+    function preencherModalSenha(button) {
+        const id = button.getAttribute('data-id');
+        const username = button.getAttribute('data-username');
+        
+        document.getElementById('senhaUsernameDisplay').textContent = username;
+        
+        const form = document.getElementById('formAlterarSenha');
+        form.action = "{{ url_for('auth.editar_usuario', id=0) }}".replace('0', id);
+    }
+</script>
 {% endblock %}
