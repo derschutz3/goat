@@ -4,49 +4,95 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <h4 class="mb-0 text-secondary"><i class="fas fa-users-cog me-2"></i>Gerenciar Usuários</h4>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoUsuarioModal">
-        <i class="fas fa-plus me-1"></i> Novo Usuário
+    <div>
+        <h4 class="mb-0 text-secondary"><i class="fas fa-users-cog me-2"></i>Gerenciar Usuários</h4>
+        <p class="text-muted small mb-0">Administre o acesso e permissões da equipe.</p>
+    </div>
+    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#novoUsuarioModal">
+        <i class="fas fa-user-plus me-2"></i>Novo Usuário
     </button>
 </div>
 
-<div class="row mb-3">
-    <div class="col-md-6">
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{{ url_for('auth.listar_usuarios') }}">
-                    <i class="fas fa-users me-1"></i> Todos
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'tecnicos' %}active{% endif %}" href="{{ url_for('auth.listar_tecnicos') }}">
-                    <i class="fas fa-tools me-1"></i> Técnicos
-                </a>
-            </li>
-        </ul>
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3 text-primary">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Total de Usuários</h6>
+                    <h3 class="mb-0">{{ users|length }}</h3>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="col-md-6">
-        <form action="{{ url_for(request.endpoint) }}" method="GET" class="d-flex">
-            <input class="form-control me-2" type="search" name="search" placeholder="Pesquisar por nome ou email..." value="{{ search }}" aria-label="Pesquisar">
-            <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
-            {% if search %}
-            <a href="{{ url_for(request.endpoint) }}" class="btn btn-outline-danger ms-2" title="Limpar Filtro"><i class="fas fa-times"></i></a>
-            {% endif %}
-        </form>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success">
+                    <i class="fas fa-user-check fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Usuários Ativos</h6>
+                    <h3 class="mb-0">{{ users|selectattr("is_active")|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3 text-info">
+                    <i class="fas fa-tools fa-2x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-0">Técnicos</h6>
+                    <h3 class="mb-0">{{ users|selectattr("role", "equalto", "tecnico")|list|length }}</h3>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <ul class="nav nav-pills card-header-pills">
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{{ url_for('auth.listar_usuarios') }}">Todos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_tab == 'tecnicos' %}active{% endif %}" href="{{ url_for('auth.listar_tecnicos') }}">Técnicos</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <form action="{{ url_for(request.endpoint) }}" method="GET" class="d-flex">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input class="form-control border-start-0 ps-0 bg-light" type="search" name="search" placeholder="Buscar usuário..." value="{{ search }}">
+                        <button class="btn btn-primary" type="submit">Buscar</button>
+                    </div>
+                    {% if search %}
+                    <a href="{{ url_for(request.endpoint) }}" class="btn btn-outline-danger ms-2" title="Limpar"><i class="fas fa-times"></i></a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle">
-                <thead>
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small text-uppercase">
                     <tr>
-                        <th scope="col" class="ps-4">Nome</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Departamento</th>
-                        <th scope="col">Função</th>
-                        <th scope="col" class="text-end pe-4">Ações</th>
+                        <th class="ps-4">Usuário</th>
+                        <th>Função</th>
+                        <th>Departamento</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,124 +100,142 @@
                     <tr>
                         <td class="ps-4">
                             <div class="d-flex align-items-center">
-                                {% if user.profile_image %}
-                                <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_image) }}" alt="Avatar" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
-                                {% else %}
-                                <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 40px; height: 40px;">
-                                    {{ user.username[:2].upper() }}
+                                <div class="position-relative">
+                                    {% if user.profile_image %}
+                                    <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_image) }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 45px; height: 45px;">
+                                        {{ user.username[:2].upper() }}
+                                    </div>
+                                    {% endif %}
+                                    <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
                                 </div>
-                                {% endif %}
-                                <div>
-                                    <h6 class="mb-0">{{ user.username }}</h6>
+                                <div class="ms-3">
+                                    <h6 class="mb-0 fw-bold text-dark">{{ user.username }}</h6>
+                                    <small class="text-muted">{{ user.email }}</small>
                                 </div>
                             </div>
                         </td>
-                        <td>{{ user.email }}</td>
-                        <td>
-                            {% if user.department %}
-                            <span class="badge bg-light text-dark border">{{ user.department }}</span>
-                            {% else %}
-                            <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
                         <td>
                             {% if user.role == 'admin' %}
-                            <span class="badge bg-danger">Admin</span>
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3">Admin</span>
                             {% elif user.role == 'manager' %}
-                            <span class="badge bg-primary">Gestor</span>
-                            {% elif user.role == 'supervisor' %}
-                            <span class="badge bg-warning text-dark">Supervisor</span>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">Gestor</span>
                             {% elif user.role == 'tecnico' %}
-                            <span class="badge bg-secondary">Técnico</span>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">Técnico</span>
                             {% else %}
-                            <span class="badge bg-info text-dark">Usuário</span>
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3">Usuário</span>
                             {% endif %}
                         </td>
+                        <td>{{ user.department or '-' }}</td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success rounded-pill">Ativo</span>
+                        </td>
                         <td class="text-end pe-4">
-                            {% if current_user.id == user.id or current_user.role == 'admin' or get_role_level(current_user.role) > get_role_level(user.role) %}
-                            <button class="btn btn-sm btn-outline-warning me-1" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#alterarSenhaModal"
-                                    data-id="{{ user.id }}"
-                                    data-username="{{ user.username }}"
-                                    onclick="preencherModalSenha(this)"
-                                    title="Alterar Senha">
-                                <i class="fas fa-key"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-primary me-1" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#editarUsuarioModal"
-                                    data-id="{{ user.id }}"
-                                    data-username="{{ user.username }}"
-                                    data-role="{{ user.role }}"
-                                    data-department="{{ user.department or '' }}"
-                                    onclick="preencherModalEdicao(this)"
-                                    title="Editar Usuário">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            {% endif %}
-                            {% if user.id != current_user.id and (current_user.role == 'admin' or get_role_level(current_user.role) > get_role_level(user.role)) %}
-                            <form action="{{ url_for('auth.excluir_usuario', id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir Usuário"><i class="fas fa-trash-alt"></i></button>
-                            </form>
-                            {% endif %}
+                            <div class="btn-group">
+                                {% if current_user.id == user.id or current_user.role == 'admin' or get_role_level(current_user.role) > get_role_level(user.role) %}
+                                <button class="btn btn-sm btn-light text-primary" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editarUsuarioModal"
+                                        data-id="{{ user.id }}"
+                                        data-username="{{ user.username }}"
+                                        data-role="{{ user.role }}"
+                                        data-department="{{ user.department or '' }}"
+                                        onclick="preencherModalEdicao(this)"
+                                        title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-light text-warning" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#alterarSenhaModal"
+                                        data-id="{{ user.id }}"
+                                        data-username="{{ user.username }}"
+                                        onclick="preencherModalSenha(this)"
+                                        title="Gerenciar Senha">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                {% endif %}
+                                {% if user.id != current_user.id and (current_user.role == 'admin' or get_role_level(current_user.role) > get_role_level(user.role)) %}
+                                <form action="{{ url_for('auth.excluir_usuario', id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza?');">
+                                    <button type="submit" class="btn btn-sm btn-light text-danger" title="Excluir"><i class="fas fa-trash"></i></button>
+                                </form>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">Nenhum usuário encontrado.</td>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-users-slash fa-3x mb-3 opacity-25"></i>
+                                <p>Nenhum usuário encontrado.</p>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+    <div class="card-footer bg-white text-muted small py-3">
+        Exibindo {{ users|length }} usuários.
+    </div>
 </div>
 
 <!-- Modal Novo Usuário -->
 <div class="modal fade" id="novoUsuarioModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Novo Usuário</h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title"><i class="fas fa-user-plus me-2 text-primary"></i>Novo Usuário</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ url_for('auth.criar_usuario') }}" method="POST" enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nome de Usuário</label>
-                        <input type="text" class="form-control" name="username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Senha</label>
-                        <input type="password" class="form-control" name="password" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Foto de Perfil</label>
-                        <input type="file" class="form-control" name="profile_image" accept="image/*">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Função</label>
-                        <select class="form-select" name="role">
-                            <option value="user">Usuário Padrão</option>
-                            <option value="tecnico">Técnico</option>
-                            <option value="manager">Gestor</option>
-                            <option value="supervisor">Supervisor</option>
-                            <option value="admin">Administrador</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Departamento</label>
-                        <input type="text" class="form-control" name="department">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 text-center mb-3">
+                            <div class="position-relative d-inline-block">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto border border-2 border-dashed" style="width: 100px; height: 100px;">
+                                    <i class="fas fa-camera text-secondary fa-2x"></i>
+                                </div>
+                                <input type="file" class="form-control position-absolute top-0 start-0 w-100 h-100 opacity-0" name="profile_image" accept="image/*" style="cursor: pointer;">
+                            </div>
+                            <small class="d-block text-muted mt-2">Clique para adicionar foto</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Usuário</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Email</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Função</label>
+                            <select class="form-select" name="role">
+                                <option value="user">Usuário</option>
+                                <option value="tecnico">Técnico</option>
+                                <option value="manager">Gestor</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Departamento</label>
+                            <input type="text" class="form-control" name="department">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Senha Inicial</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="password" id="newPassInput" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('newPassInput')"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4">Criar Usuário</button>
                 </div>
             </form>
         </div>
@@ -180,60 +244,72 @@
 
 <!-- Modal Editar Usuário -->
 <div class="modal fade" id="editarUsuarioModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar Usuário: <span id="editUsernameDisplay"></span></h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title"><i class="fas fa-user-edit me-2 text-primary"></i>Editar: <span id="editUsernameDisplay" class="fw-bold"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="formEditarUsuario" method="POST">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Função</label>
-                        <select class="form-select" name="role" id="editRole">
-                            <option value="user">Usuário Padrão</option>
-                            <option value="tecnico">Técnico</option>
-                            <option value="manager">Gestor</option>
-                            <option value="supervisor">Supervisor</option>
-                            <option value="admin">Administrador</option>
-                        </select>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Função</label>
+                            <select class="form-select" name="role" id="editRole">
+                                <option value="user">Usuário</option>
+                                <option value="tecnico">Técnico</option>
+                                <option value="manager">Gestor</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Departamento</label>
+                            <input type="text" class="form-control" name="department" id="editDepartment">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Departamento</label>
-                        <input type="text" class="form-control" name="department" id="editDepartment">
-                    </div>
-                    <!-- Senha removida daqui para ter modal exclusivo -->
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Alterar Senha -->
+<!-- Modal Alterar Senha (Moderno com Visualização) -->
 <div class="modal fade" id="alterarSenhaModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Alterar Senha: <span id="senhaUsernameDisplay"></span></h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning bg-opacity-10 border-bottom-0">
+                <h5 class="modal-title text-dark"><i class="fas fa-key me-2 text-warning"></i>Gerenciar Senha: <span id="senhaUsernameDisplay" class="fw-bold"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="formAlterarSenha" method="POST">
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-1"></i> Digite a nova senha para o usuário.
+                <div class="modal-body p-4">
+                    <div class="alert alert-light border mb-4 small">
+                        <i class="fas fa-shield-alt text-primary me-2"></i>
+                        Por segurança, as senhas são criptografadas e não podem ser visualizadas. Você pode definir uma nova senha abaixo e visualizá-la antes de salvar.
                     </div>
+                    
                     <div class="mb-3">
-                        <label class="form-label">Nova Senha</label>
-                        <input type="password" class="form-control" name="password" required placeholder="Nova senha">
+                        <label class="form-label small fw-bold text-muted">Nova Senha</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg" name="password" id="resetPassInput" required placeholder="Digite a nova senha...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('resetPassInput')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" type="button" onclick="generatePassword('resetPassInput')" title="Gerar senha aleatória">
+                                <i class="fas fa-dice"></i>
+                            </button>
+                        </div>
+                        <div class="form-text mt-2" id="passwordStrength"></div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning">Alterar Senha</button>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning px-4 text-dark fw-bold">Definir Nova Senha</button>
                 </div>
             </form>
         </div>
@@ -263,6 +339,37 @@
         
         const form = document.getElementById('formAlterarSenha');
         form.action = "{{ url_for('auth.editar_usuario', id=0) }}".replace('0', id);
+        
+        // Reset input
+        document.getElementById('resetPassInput').value = '';
+        document.getElementById('resetPassInput').type = 'password';
+    }
+
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = input.nextElementSibling.querySelector('i');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    function generatePassword(inputId) {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let password = "";
+        for (let i = 0; i < 12; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const input = document.getElementById(inputId);
+        input.type = "text"; // Show generated password
+        input.value = password;
+        
+        // Update icon to slash since it's visible
+        const icon = input.nextElementSibling.querySelector('i');
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
     }
 </script>
 {% endblock %}
