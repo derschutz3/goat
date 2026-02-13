@@ -94,11 +94,40 @@
 [data-bs-theme="dark"] .table {
     color: var(--text-color);
     border-color: var(--border-color);
+    --bs-table-bg: var(--bg-color); /* Fix for Bootstrap table backgrounds */
+    --bs-table-color: var(--text-color);
 }
 
 [data-bs-theme="dark"] .table-hover tbody tr:hover {
     color: var(--text-color);
     background-color: var(--hover-bg);
+}
+
+/* Force dark mode on text-muted if needed, but usually opacity handles it */
+[data-bs-theme="dark"] .text-muted {
+    color: #adb5bd !important;
+}
+
+/* Fix for light badges/text in dark mode */
+[data-bs-theme="dark"] .text-dark {
+    color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .bg-light {
+    background-color: #343a40 !important;
+    color: #f8f9fa !important;
+}
+
+/* Fix for specific border utilities */
+[data-bs-theme="dark"] .border {
+    border-color: var(--border-color) !important;
+}
+
+[data-bs-theme="dark"] .border-top, 
+[data-bs-theme="dark"] .border-bottom,
+[data-bs-theme="dark"] .border-end,
+[data-bs-theme="dark"] .border-start {
+    border-color: var(--border-color) !important;
 }
 
 [data-bs-theme="dark"] .form-control,
