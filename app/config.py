@@ -16,3 +16,12 @@ class Config:
     # Upload configuration
     UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads', 'profiles')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16MB max limit
+
+    # Database connection pool configuration
+    # Fixes QueuePool limit overflow errors by increasing pool size
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 20,        # Increase baseline connections (default 5)
+        'max_overflow': 40,     # Increase burst connections (default 10)
+        'pool_recycle': 3600,   # Recycle connections every hour
+        'pool_pre_ping': True   # Check connection health to avoid stale errors
+    }
