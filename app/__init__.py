@@ -81,4 +81,21 @@ def create_app(config_class=Config):
     from app.modules.escala import escala_bp
     app.register_blueprint(escala_bp)
 
+    # Auto-Migration logic: Check and add missing columns on startup
+    with app.app_context():
+        try:
+            from sqlalchemy import text
+            with db.engine.connect() as conn:
+                try:
+                    conn.execute(text("SELECT profile_image FROM users LIMIT 1"))
+                except Exception:
+                    # Column likely missing, attempt to add it
+                    print("Auto-Migration: Adding 'profile_image' column to 'users' table...")
+                    conn.rollback() # Reset transaction if needed (Postgres)
+                    conn.execute(text("ALTER TABLE users ADD COLUMN profile_image VARCHAR(255)"))
+                    conn.commit()
+                    print("Auto-Migration: Column added successfully.")
+        except Exception as e:
+            print(f"Auto-Migration Warning: Could not check/update database schema: {e}")
+
     return app
