@@ -1,0 +1,56 @@
+/* Mobile Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1015; /* Below sidebar (1020) but above content */
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.sidebar-overlay.show {
+    display: block;
+    opacity: 1;
+}
+
+/* Adjust topbar for mobile */
+@media (max-width: 768px) {
+    .topbar {
+        padding: 0 15px;
+    }
+    
+    .topbar .brand {
+        font-size: 1.1rem;
+    }
+
+    /* Make buttons and inputs easier to tap */
+    .btn, .form-control, .form-select, .nav-link {
+        min-height: 44px; /* Touch target size */
+    }
+
+    /* Adjust page headers to wrap if needed */
+    .d-flex.justify-content-between {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    /* Ensure tables scroll instead of squashing */
+    .table-responsive .table th, 
+    .table-responsive .table td {
+        white-space: nowrap;
+    }
+
+    /* Card adjustments */
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Filters spacing */
+    .filter-bar {
+        padding: 10px;
+    }
+}

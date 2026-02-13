@@ -10,6 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}?v=1">
     <script>
         // Check local storage for theme preference
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -102,6 +103,9 @@
     </div>
     {% endif %}
 
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Sidebar -->
     {% if current_user.is_authenticated %}
     <div class="sidebar bg-surface">
@@ -180,6 +184,23 @@
             const toggleBtn = document.getElementById('theme-toggle');
             const icon = toggleBtn.querySelector('i');
             const html = document.documentElement;
+            
+            // Sidebar Mobile Toggle
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('show');
+                    sidebarOverlay.classList.toggle('show');
+                });
+
+                sidebarOverlay.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                });
+            }
             
             // Set initial icon
             if (html.getAttribute('data-bs-theme') === 'dark') {
