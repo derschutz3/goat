@@ -54,9 +54,13 @@
                     <tr>
                         <td class="ps-4">
                             <div class="d-flex align-items-center">
+                                {% if user.profile_image %}
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_image) }}" alt="Avatar" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
                                 <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 40px; height: 40px;">
                                     {{ user.username[:2].upper() }}
                                 </div>
+                                {% endif %}
                                 <div>
                                     <h6 class="mb-0">{{ user.username }}</h6>
                                 </div>
@@ -84,6 +88,7 @@
                             {% endif %}
                         </td>
                         <td class="text-end pe-4">
+                            {% if current_user.id == user.id or current_user.role == 'admin' or get_role_level(current_user.role) > get_role_level(user.role) %}
                             <button class="btn btn-sm btn-outline-warning me-1" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#alterarSenhaModal"
@@ -104,7 +109,8 @@
                                     title="Editar Usuário">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            {% if user.id != current_user.id %}
+                            {% endif %}
+                            {% if user.id != current_user.id and (current_user.role == 'admin' or get_role_level(current_user.role) > get_role_level(user.role)) %}
                             <form action="{{ url_for('auth.excluir_usuario', id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir Usuário"><i class="fas fa-trash-alt"></i></button>
                             </form>
@@ -130,7 +136,7 @@
                 <h5 class="modal-title">Novo Usuário</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('auth.criar_usuario') }}" method="POST">
+            <form action="{{ url_for('auth.criar_usuario') }}" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Nome de Usuário</label>
@@ -143,6 +149,10 @@
                     <div class="mb-3">
                         <label class="form-label">Senha</label>
                         <input type="password" class="form-control" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Foto de Perfil</label>
+                        <input type="file" class="form-control" name="profile_image" accept="image/*">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Função</label>

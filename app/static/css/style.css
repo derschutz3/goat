@@ -85,6 +85,15 @@
 }
 
 /* Global Dark Mode Overrides */
+[data-bs-theme="dark"] body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+[data-bs-theme="dark"] .bg-surface {
+    background-color: var(--surface-color) !important;
+}
+
 [data-bs-theme="dark"] .card {
     background-color: var(--surface-color);
     border-color: var(--border-color);
@@ -94,7 +103,7 @@
 [data-bs-theme="dark"] .table {
     color: var(--text-color);
     border-color: var(--border-color);
-    --bs-table-bg: var(--bg-color); /* Fix for Bootstrap table backgrounds */
+    --bs-table-bg: var(--bg-color);
     --bs-table-color: var(--text-color);
 }
 
@@ -103,12 +112,10 @@
     background-color: var(--hover-bg);
 }
 
-/* Force dark mode on text-muted if needed, but usually opacity handles it */
 [data-bs-theme="dark"] .text-muted {
     color: #adb5bd !important;
 }
 
-/* Fix for light badges/text in dark mode */
 [data-bs-theme="dark"] .text-dark {
     color: #f8f9fa !important;
 }
@@ -118,11 +125,12 @@
     color: #f8f9fa !important;
 }
 
-/* Fix for specific border utilities */
-[data-bs-theme="dark"] .border {
-    border-color: var(--border-color) !important;
+[data-bs-theme="dark"] .bg-white {
+    background-color: var(--surface-color) !important;
+    color: var(--text-color) !important;
 }
 
+[data-bs-theme="dark"] .border,
 [data-bs-theme="dark"] .border-top, 
 [data-bs-theme="dark"] .border-bottom,
 [data-bs-theme="dark"] .border-end,
@@ -141,6 +149,12 @@
 [data-bs-theme="dark"] .form-select:focus {
     background-color: var(--bg-color);
     border-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+[data-bs-theme="dark"] .input-group-text {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
     color: var(--text-color);
 }
 
@@ -166,6 +180,17 @@
 
 [data-bs-theme="dark"] .btn-close {
     filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+[data-bs-theme="dark"] .list-group-item {
+    background-color: var(--surface-color);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+/* Custom bg-surface class */
+.bg-surface {
+    background-color: var(--surface-color) !important;
 }
 
 body {
@@ -429,14 +454,7 @@ body {
 .text-sm { font-size: 0.875rem; }
 
 /* Dark Mode Overrides for specific bootstrap elements if needed */
-[data-bs-theme="dark"] .text-muted {
-    color: #adb5bd !important;
-}
-
-[data-bs-theme="dark"] .card {
-    background-color: var(--surface-color);
-    color: var(--text-color);
-}
+/* Removed duplicates - consolidated above */
 
 /* --- Modern Animations & Interactions --- */
 

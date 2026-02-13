@@ -9,7 +9,7 @@
     <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4">
     <script>
         // Check local storage for theme preference
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -28,10 +28,78 @@
             <button class="btn btn-link text-light p-0 me-3" id="theme-toggle" title="Alternar Tema">
                 <i class="fas fa-moon"></i>
             </button>
-            <span class="text-light small"><i class="fas fa-user-circle me-1"></i> {{ current_user.username }}</span>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-light"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            
+            <!-- User Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-link text-light text-decoration-none dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if current_user.profile_image %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_image) }}" alt="Avatar" class="rounded-circle border border-light" style="width: 32px; height: 32px; object-fit: cover;">
+                    {% else %}
+                    <i class="fas fa-user-circle fa-lg"></i>
+                    {% endif %}
+                    <span class="ms-2 small d-none d-md-inline">{{ current_user.username }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                    <li>
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#perfilModal">
+                            <i class="fas fa-user-cog me-2 text-primary"></i>Meu Perfil
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
+    {% endif %}
+
+    <!-- Modal Perfil -->
+    {% if current_user.is_authenticated %}
+    <div class="modal fade" id="perfilModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Meu Perfil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('auth.atualizar_perfil') }}" method="POST" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="text-center mb-4">
+                            {% if current_user.profile_image %}
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_image) }}" alt="Avatar" class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+                            {% else %}
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 100px; height: 100px;">
+                                <i class="fas fa-user fa-3x text-secondary"></i>
+                            </div>
+                            {% endif %}
+                            <h5 class="mb-0">{{ current_user.username }}</h5>
+                            <small class="text-muted">{{ current_user.role|capitalize }}</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Alterar Foto de Perfil</label>
+                            <input type="file" class="form-control" name="profile_image" accept="image/*">
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nova Senha (deixe em branco para manter)</label>
+                            <input type="password" class="form-control" name="new_password" placeholder="Nova senha">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     {% endif %}
 
     <!-- Sidebar -->

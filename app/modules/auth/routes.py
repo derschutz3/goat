@@ -1,9 +1,15 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, current_user, login_required
 from app.models import User
 from app.database import db
 from . import auth_bp
 from sqlalchemy import or_
+import os
+from werkzeug.utils import secure_filename
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -68,6 +74,23 @@ def criar_usuario():
     else:
         user = User(username=username, email=email, role=role, department=department)
         user.set_password(password)
+        
+        # Handle profile image upload
+        if 'profile_image' in request.files:
+            file = request.files['profile_image']
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                # Generate unique filename to avoid collisions
+                unique_filename = f"{username}_{filename}"
+                
+                # Ensure upload directory exists
+                upload_folder = current_app.config['UPLOAD_FOLDER']
+                if not os.path.exists(upload_folder):
+                    os.makedirs(upload_folder)
+                    
+                file.save(os.path.join(upload_folder, unique_filename))
+                user.profile_image = unique_filename
+        
         db.session.add(user)
         db.session.commit()
         flash('Usuário criado com sucesso!', 'success')
@@ -148,6 +171,38 @@ def editar_usuario(id):
     if role == 'tecnico':
         return redirect(url_for('auth.listar_tecnicos'))
     return redirect(url_for('auth.listar_usuarios'))
+
+@auth_bp.route('/perfil/atualizar', methods=['POST'])
+@login_required
+def atualizar_perfil():
+    user = current_user
+    
+    # Update Password
+    new_password = request.form.get('new_password')
+    if new_password and new_password.strip():
+        user.set_password(new_password)
+        flash('Senha atualizada com sucesso.', 'success')
+        
+    # Update Photo
+    if 'profile_image' in request.files:
+        file = request.files['profile_image']
+        if file and file.filename != '' and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            unique_filename = f"{user.username}_{filename}"
+            
+            upload_folder = current_app.config['UPLOAD_FOLDER']
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+                
+            # Remove old image if exists and not default? (Optional, keeping simple for now)
+            
+            file.save(os.path.join(upload_folder, unique_filename))
+            user.profile_image = unique_filename
+            flash('Foto de perfil atualizada com sucesso.', 'success')
+            
+    db.session.commit()
+    # Redirect back to where they came from or home
+    return redirect(request.referrer or url_for('chamados.listar_chamados'))
 
 @auth_bp.route('/usuarios/excluir/<int:id>', methods=['POST'])
 @login_required
