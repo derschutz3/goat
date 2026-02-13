@@ -54,9 +54,7 @@
             <a class="nav-link {% if active_page == 'lojas_setores' %}active{% endif %}" href="{{ url_for('lojas.index') }}">
                 <i class="fas fa-store"></i> Lojas / Setores
             </a>
-            <a class="nav-link {% if active_page == 'tags' %}active{% endif %}" href="{{ url_for('tags.index') }}">
-                <i class="fas fa-tags"></i> Tags
-            </a>
+
 
             <!-- Admin Only -->
             {% if current_user.role in ['admin', 'manager', 'supervisor'] %}
