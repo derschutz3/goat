@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from sqlalchemy.pool import NullPool
 
 # Carrega variáveis do arquivo .env se existir
 load_dotenv()
@@ -18,10 +19,18 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16MB max limit
 
     # Database connection pool configuration
-    # Fixes QueuePool limit overflow errors by increasing pool size
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_size': 20,        # Increase baseline connections (default 5)
-        'max_overflow': 40,     # Increase burst connections (default 10)
         'pool_recycle': 3600,   # Recycle connections every hour
         'pool_pre_ping': True   # Check connection health to avoid stale errors
     }
+    
+    # Configure pooling based on database type
+    if 'sqlite' in SQLALCHEMY_DATABASE_URI:
+        # SQLite handles concurrency poorly with pooling (file locking).
+        # Using NullPool disables pooling, preventing "QueuePool limit" errors
+        # and letting SQLite manage its own file locks.
+        SQLALCHEMY_ENGINE_OPTIONS['poolclass'] = NullPool
+    else:
+        # Production pooling (Postgres/MySQL)
+        SQLALCHEMY_ENGINE_OPTIONS['pool_size'] = 20
+        SQLALCHEMY_ENGINE_OPTIONS['max_overflow'] = 40
