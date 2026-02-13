@@ -76,6 +76,22 @@ def criar_usuario():
         return redirect(url_for('auth.listar_tecnicos'))
     return redirect(url_for('auth.listar_usuarios'))
 
+def get_role_level(role):
+    levels = {
+        'admin': 100,
+        'manager': 80,
+        'supervisor': 60,
+        'tecnico': 40,
+        'user': 20
+    }
+    return levels.get(role, 0)
+
+@auth_bp.context_processor
+def utility_processor():
+    def get_role_level_ctx(role):
+        return get_role_level(role)
+    return dict(get_role_level=get_role_level_ctx)
+
 @auth_bp.route('/usuarios/editar/<int:id>', methods=['POST'])
 @login_required
 def editar_usuario(id):
@@ -85,12 +101,36 @@ def editar_usuario(id):
         flash('Usuário não encontrado.', 'danger')
         return redirect(url_for('auth.listar_usuarios'))
         
+    # Check permissions (Hierarchy: Admin > Manager > Supervisor > Technician > User)
+    allowed = False
+    if current_user.id == user.id:
+        allowed = True
+    elif current_user.role == 'admin':
+        allowed = True
+    else:
+        current_level = get_role_level(current_user.role)
+        target_level = get_role_level(user.role)
+        if current_level > target_level:
+            allowed = True
+            
+    if not allowed:
+        flash('Você não tem permissão para editar este usuário.', 'danger')
+        return redirect(url_for('auth.listar_usuarios'))
+        
     role = request.form.get('role')
     department = request.form.get('department')
     new_password = request.form.get('password')
     
     # Only update role if provided (might be hidden in some forms)
     if role:
+        # Prevent non-admins from assigning roles higher than their own
+        if current_user.role != 'admin':
+            new_role_level = get_role_level(role)
+            current_role_level = get_role_level(current_user.role)
+            if new_role_level >= current_role_level and role != current_user.role:
+                 flash('Você não pode promover um usuário a um cargo igual ou superior ao seu.', 'danger')
+                 return redirect(url_for('auth.listar_usuarios'))
+
         if user.id == current_user.id and role != user.role:
             flash('Cuidado: Você alterou sua própria função.', 'warning')
         user.role = role
@@ -112,15 +152,27 @@ def editar_usuario(id):
 @auth_bp.route('/usuarios/excluir/<int:id>', methods=['POST'])
 @login_required
 def excluir_usuario(id):
-    # Allow all users to manage users since it's an internal IT app
     user = db.session.get(User, id)
     if user:
         if user.id == current_user.id:
             flash('Você não pode excluir a si mesmo.', 'danger')
         else:
-            db.session.delete(user)
-            db.session.commit()
-            flash('Usuário excluído com sucesso.', 'success')
+            # Check permissions
+            allowed = False
+            if current_user.role == 'admin':
+                allowed = True
+            else:
+                current_level = get_role_level(current_user.role)
+                target_level = get_role_level(user.role)
+                if current_level > target_level:
+                    allowed = True
+            
+            if allowed:
+                db.session.delete(user)
+                db.session.commit()
+                flash('Usuário excluído com sucesso.', 'success')
+            else:
+                flash('Você não tem permissão para excluir este usuário.', 'danger')
     else:
         flash('Usuário não encontrado.', 'danger')
         
