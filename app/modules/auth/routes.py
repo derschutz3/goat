@@ -76,10 +76,14 @@ def editar_usuario(id):
         return redirect(url_for('auth.listar_usuarios'))
     role = request.form.get('role')
     department = request.form.get('department')
+    new_password = request.form.get('password')
     if user.id == current_user.id and role != user.role:
         flash('Cuidado: Você alterou sua própria função.', 'warning')
     user.role = role
     user.department = department
+    if new_password and new_password.strip():
+        user.set_password(new_password)
+        flash('Senha atualizada com sucesso.', 'success')
     db.session.commit()
     flash('Usuário atualizado com sucesso.', 'success')
     if role == 'tecnico':

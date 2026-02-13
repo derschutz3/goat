@@ -48,13 +48,7 @@
                 <i class="fas fa-chart-pie"></i> Dashboard
             </a>
             
-            <div class="border-top my-2 mx-3 text-muted small px-2 py-1">Comunicação</div>
-            <a class="nav-link {% if active_page == 'alertas' %}active{% endif %}" href="{{ url_for('alertas.index') }}">
-                <i class="fas fa-bell"></i> Alertas
-            </a>
-            <a class="nav-link {% if active_page == 'sugestoes' %}active{% endif %}" href="{{ url_for('sugestoes.index') }}">
-                <i class="fas fa-lightbulb"></i> Sugestões
-            </a>
+
 
             <div class="border-top my-2 mx-3 text-muted small px-2 py-1">Gestão</div>
             <a class="nav-link {% if active_page == 'lojas_setores' %}active{% endif %}" href="{{ url_for('lojas.index') }}">
