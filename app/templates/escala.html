@@ -73,11 +73,11 @@
                             {% if current_user.role in ['admin', 'manager', 'supervisor'] %}
                             <button class="btn btn-sm btn-light border position-absolute bottom-0 end-0 m-2 shadow-sm opacity-50 hover-opacity-100 rounded-circle d-flex align-items-center justify-content-center" 
                                     style="width: 28px; height: 28px;"
-                                    onclick="openEditModal('{{ tech.id }}', '{{ tech.username }}', '{{ day }}', [
-                                        {% for store in schedule_map[day][tech.id] %}
-                                            '{{ store.id }}'{% if not loop.last %},{% endif %}
-                                        {% endfor %}
-                                    ])"
+                                    data-user-id="{{ tech.id }}"
+                                    data-user-name="{{ tech.username }}"
+                                    data-day="{{ day }}"
+                                    data-store-ids='{{ schedule_map[day][tech.id]|map(attribute="id")|list|tojson }}'
+                                    onclick="openEditModal(this)"
                                     title="Editar lojas">
                                 <i class="fas fa-pencil-alt text-secondary" style="font-size: 0.8rem;"></i>
                             </button>
@@ -144,7 +144,12 @@
 </div>
 
 <script>
-    function openEditModal(userId, userName, day, currentStoreIds) {
+    function openEditModal(btn) {
+        const userId = btn.getAttribute('data-user-id');
+        const userName = btn.getAttribute('data-user-name');
+        const day = btn.getAttribute('data-day');
+        const currentStoreIds = JSON.parse(btn.getAttribute('data-store-ids'));
+
         document.getElementById('modalUserId').value = userId;
         document.getElementById('modalDayInput').value = day;
         document.getElementById('modalTechName').textContent = userName;
@@ -154,7 +159,6 @@
         const checkboxes = document.querySelectorAll('input[name="store_ids"]');
         checkboxes.forEach(cb => {
             cb.checked = false;
-            // Optional: highlight current selection logic could be added here
         });
         
         // Check current stores
