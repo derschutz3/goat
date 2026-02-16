@@ -99,18 +99,11 @@ def gerar_escala():
     Schedule.query.delete()
     
     # Get Techs
-    pedro = User.query.filter_by(username='Pedro').first()
-    joao = User.query.filter_by(username='Joao').first()
-    
-    # Fallback if specific users don't exist, use any technicians
-    technicians = [pedro, joao]
-    technicians = [t for t in technicians if t is not None]
+    from sqlalchemy import or_
+    technicians = User.query.filter(or_(User.role == 'tecnico', User.is_technician == True)).all()
     
     if not technicians:
-        technicians = User.query.filter_by(role='tecnico').all()
-        
-    if not technicians:
-        flash('Nenhum técnico encontrado para gerar escala. Crie usuários com cargo Técnico.', 'warning')
+        flash('Nenhum técnico encontrado para gerar escala. Crie usuários com cargo Técnico ou marque a opção "Atua como Técnico".', 'warning')
         return redirect(url_for('escala.index'))
 
     stores = Store.query.all()
@@ -159,12 +152,8 @@ def gerar_escala_inteligente():
     Schedule.query.delete()
     
     # 2. Get Techs
-    pedro = User.query.filter_by(username='Pedro').first()
-    joao = User.query.filter_by(username='Joao').first()
-    technicians = [t for t in [pedro, joao] if t is not None]
-    if not technicians:
-        from sqlalchemy import or_
-        technicians = User.query.filter(or_(User.role == 'tecnico', User.is_technician == True)).all()
+    from sqlalchemy import or_
+    technicians = User.query.filter(or_(User.role == 'tecnico', User.is_technician == True)).all()
     
     if not technicians:
         flash('Nenhum técnico encontrado.', 'warning')

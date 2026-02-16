@@ -71,6 +71,10 @@ def criar_usuario():
     department = request.form.get('department')
     is_technician = request.form.get('is_technician') == 'on'
     
+    # Enforce consistency: If role is 'tecnico', is_technician must be True
+    if role == 'tecnico':
+        is_technician = True
+    
     if User.query.filter_by(username=username).first():
         flash('Usuário já existe.', 'danger')
     else:
@@ -165,6 +169,10 @@ def editar_usuario(id):
         user.department = department
         
     # Always update is_technician if we are in the edit flow
+    # Enforce consistency: If role is 'tecnico', is_technician must be True
+    if role == 'tecnico':
+        is_technician = True
+        
     user.is_technician = is_technician
         
     if new_password and new_password.strip():

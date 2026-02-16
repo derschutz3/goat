@@ -49,7 +49,7 @@
                 </div>
                 <div>
                     <h6 class="text-muted mb-0">Técnicos</h6>
-                    <h3 class="mb-0">{{ users|selectattr("role", "equalto", "tecnico")|list|length }}</h3>
+                    <h3 class="mb-0">{{ users|selectattr("is_technician")|list|length }}</h3>
                 </div>
             </div>
         </div>
@@ -125,6 +125,12 @@
                             <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">Técnico</span>
                             {% else %}
                             <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3">Usuário</span>
+                            {% endif %}
+                            
+                            {% if user.is_technician and user.role != 'tecnico' %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 ms-1" title="Atua como Técnico">
+                                <i class="fas fa-tools small"></i>
+                            </span>
                             {% endif %}
                         </td>
                         <td>{{ user.department or '-' }}</td>
