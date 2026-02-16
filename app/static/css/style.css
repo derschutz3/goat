@@ -94,18 +94,51 @@
 [data-bs-theme="dark"] .card,
 [data-bs-theme="dark"] .modal-content,
 [data-bs-theme="dark"] .dropdown-menu,
-[data-bs-theme="dark"] .list-group-item,
-[data-bs-theme="dark"] .bg-white {
+[data-bs-theme="dark"] .list-group-item {
     background-color: var(--surface-color) !important;
     color: var(--text-color) !important;
+}
+
+[data-bs-theme="dark"] .bg-body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+[data-bs-theme="dark"] .bg-body-secondary {
+    background-color: #343a40 !important; /* Slightly lighter than bg */
+}
+
+[data-bs-theme="dark"] .text-body-emphasis {
+    color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .link-body-emphasis {
+    color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .nav-link {
+    color: var(--text-color);
+}
+
+[data-bs-theme="dark"] .nav-link:hover {
+    color: var(--primary-color);
+}
+
+/* Ensure background color is applied correctly in dark mode */
+.bg-white {
+    background-color: var(--surface-color) !important;
+}
+
+[data-bs-theme="light"] .bg-white {
+    background-color: #ffffff !important;
 }
 
 [data-bs-theme="dark"] .table {
     color: var(--text-color);
     border-color: var(--border-color);
-    --bs-table-bg: var(--bg-color);
+    --bs-table-bg: var(--surface-color);
     --bs-table-color: var(--text-color);
-    background-color: var(--bg-color) !important;
+    background-color: var(--surface-color) !important;
 }
 
 [data-bs-theme="dark"] .table-hover tbody tr:hover {
@@ -116,6 +149,7 @@
 [data-bs-theme="dark"] .table > :not(caption) > * > * {
     background-color: transparent !important; /* Fix table cell backgrounds */
     color: var(--text-color);
+    border-color: var(--border-color);
 }
 
 [data-bs-theme="dark"] .text-muted {
@@ -129,6 +163,10 @@
 [data-bs-theme="dark"] .bg-light {
     background-color: #343a40 !important;
     color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .bg-body-tertiary {
+    background-color: #2c3034 !important;
 }
 
 [data-bs-theme="dark"] .border,
