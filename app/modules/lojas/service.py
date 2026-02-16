@@ -20,7 +20,8 @@ class StoreService:
                 'count': stats_dict.get(store.name, 0)
             })
             
-        return sorted(final_list, key=lambda x: x['name'])
+        from app.utils import natural_sort_key
+        return sorted(final_list, key=lambda x: natural_sort_key(x['name']))
 
     def get_store_details(self, name):
         store = self.repository.find_by_name(name)

@@ -12,7 +12,9 @@ class TicketService:
 
     def get_all_stores(self):
         from app.modules.lojas.models import Store
-        return Store.query.order_by(Store.name).all()
+        from app.utils import natural_sort_key
+        stores = Store.query.all()
+        return sorted(stores, key=lambda x: natural_sort_key(x.name))
 
     def get_all_categories(self):
         from .models import Category
@@ -56,12 +58,14 @@ class TicketService:
         stats_dict = {r[0]: r[1] for r in results}
         
         # Get all stores to ensure 0 counts are included
-        all_stores = Store.query.order_by(Store.name).all()
+        all_stores = Store.query.all()
         
         stats = []
         for store in all_stores:
              stats.append({'name': store.name, 'count': stats_dict.get(store.name, 0)})
-        return stats
+        
+        from app.utils import natural_sort_key
+        return sorted(stats, key=lambda x: natural_sort_key(x['name']))
     
     def list_tickets(self, exclude_closed=False):
         filters = {}

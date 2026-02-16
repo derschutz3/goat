@@ -29,7 +29,9 @@ def index():
         if s.day_of_week in schedule_map and s.user_id in schedule_map[s.day_of_week]:
             schedule_map[s.day_of_week][s.user_id].append(s.store)
 
-    all_stores = Store.query.order_by(Store.name).all()
+    from app.utils import natural_sort_key
+    all_stores = Store.query.all()
+    all_stores = sorted(all_stores, key=lambda x: natural_sort_key(x.name))
 
     return render_template('escala.html', 
                            technicians=technicians, 
