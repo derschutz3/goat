@@ -29,7 +29,12 @@ def index():
         if s.day_of_week in schedule_map and s.user_id in schedule_map[s.day_of_week]:
             schedule_map[s.day_of_week][s.user_id].append(s.store)
 
+    # Sort stores within each cell
     from app.utils import natural_sort_key
+    for day in days:
+        for tech in technicians:
+            schedule_map[day][tech.id].sort(key=lambda s: natural_sort_key(s.name))
+
     all_stores = Store.query.all()
     all_stores = sorted(all_stores, key=lambda x: natural_sort_key(x.name))
 
