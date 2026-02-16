@@ -15,8 +15,9 @@ def index():
         flash('Acesso não autorizado.', 'danger')
         return redirect(url_for('chamados.index'))
 
-    # Fetch all technicians
-    technicians = User.query.filter_by(role='tecnico').order_by(User.username).all()
+    # Fetch all technicians (Role='tecnico' OR is_technician=True)
+    from sqlalchemy import or_
+    technicians = User.query.filter(or_(User.role == 'tecnico', User.is_technician == True)).order_by(User.username).all()
     
     # Organize schedule by day -> technician -> stores
     days = ['segunda', 'terca', 'quarta', 'quinta', 'sexta']
@@ -162,7 +163,8 @@ def gerar_escala_inteligente():
     joao = User.query.filter_by(username='Joao').first()
     technicians = [t for t in [pedro, joao] if t is not None]
     if not technicians:
-        technicians = User.query.filter_by(role='tecnico').all()
+        from sqlalchemy import or_
+        technicians = User.query.filter(or_(User.role == 'tecnico', User.is_technician == True)).all()
     
     if not technicians:
         flash('Nenhum técnico encontrado.', 'warning')

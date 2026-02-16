@@ -68,13 +68,14 @@ class TicketRepository:
         ).order_by(Ticket.created_at.desc()).limit(limit).all()
 
     def get_technician_productivity(self, today_start):
+        from sqlalchemy import or_
         # Optimized with GROUP BY to avoid N+1 queries
         results = db.session.query(
             User.username, 
             db.func.count(Ticket.id)
         ).join(Ticket, Ticket.technician_id == User.id)\
          .filter(Ticket.status == 'resolvido', Ticket.updated_at >= today_start)\
-         .filter(User.role == 'tecnico')\
+         .filter(or_(User.role == 'tecnico', User.is_technician == True))\
          .group_by(User.username).all()
         
         stats = [{'name': r[0], 'count': r[1]} for r in results]

@@ -40,7 +40,8 @@ class TicketService:
 
     def get_all_technicians(self):
         from app.models import User
-        return User.query.filter_by(role='tecnico').all()
+        from sqlalchemy import or_
+        return User.query.filter(or_(User.role == 'tecnico', User.is_technician == True)).all()
 
     def get_department_stats(self):
         # This might need to be updated to use Store model if needed, 

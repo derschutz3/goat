@@ -141,6 +141,7 @@
                                         data-username="{{ user.username }}"
                                         data-role="{{ user.role }}"
                                         data-department="{{ user.department or '' }}"
+                                        data-is-technician="{{ 'true' if user.is_technician else 'false' }}"
                                         onclick="preencherModalEdicao(this)"
                                         title="Editar">
                                     <i class="fas fa-edit"></i>
@@ -219,6 +220,12 @@
                                 <option value="supervisor">Supervisor</option>
                                 <option value="admin">Admin</option>
                             </select>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_technician" id="newIsTechnician">
+                                <label class="form-check-label small" for="newIsTechnician">
+                                    Atua como Técnico?
+                                </label>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted">Departamento</label>
@@ -262,6 +269,12 @@
                                 <option value="supervisor">Supervisor</option>
                                 <option value="admin">Admin</option>
                             </select>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_technician" id="editIsTechnician">
+                                <label class="form-check-label small" for="editIsTechnician">
+                                    Atua como Técnico?
+                                </label>
+                            </div>
                         </div>
                         <div class="col-12">
                             <label class="form-label small fw-bold text-muted">Departamento</label>
@@ -322,10 +335,12 @@
         const username = button.getAttribute('data-username');
         const role = button.getAttribute('data-role');
         const department = button.getAttribute('data-department');
+        const isTechnician = button.getAttribute('data-is-technician') === 'true';
         
         document.getElementById('editUsernameDisplay').textContent = username;
         document.getElementById('editRole').value = role;
         document.getElementById('editDepartment').value = department;
+        document.getElementById('editIsTechnician').checked = isTechnician;
         
         const form = document.getElementById('formEditarUsuario');
         form.action = "{{ url_for('auth.editar_usuario', id=0) }}".replace('0', id);

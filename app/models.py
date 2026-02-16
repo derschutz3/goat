@@ -11,6 +11,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
     role = db.Column(db.String(20), default='user', index=True) # user, technician, admin, manager, supervisor
+    is_technician = db.Column(db.Boolean, default=False, index=True) # Secondary flag to allow admins/managers to act as technicians
     department = db.Column(db.String(100), index=True)
     profile_image = db.Column(db.String(255))
     is_active = db.Column(db.Boolean, default=True, index=True)

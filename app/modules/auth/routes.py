@@ -50,7 +50,8 @@ def listar_usuarios():
 def listar_tecnicos():
     # Allow all users to access user management since it's an internal IT app
     search = request.args.get('search', '')
-    query = User.query.filter_by(role='tecnico')
+    # Query for users who have role='tecnico' OR is_technician=True
+    query = User.query.filter(or_(User.role == 'tecnico', User.is_technician == True))
     
     if search:
         search_term = f"%{search}%"
@@ -68,11 +69,12 @@ def criar_usuario():
     password = request.form.get('password')
     role = request.form.get('role')
     department = request.form.get('department')
+    is_technician = request.form.get('is_technician') == 'on'
     
     if User.query.filter_by(username=username).first():
         flash('Usuário já existe.', 'danger')
     else:
-        user = User(username=username, email=email, role=role, department=department)
+        user = User(username=username, email=email, role=role, department=department, is_technician=is_technician)
         user.set_password(password)
         
         # Handle profile image upload
@@ -142,6 +144,7 @@ def editar_usuario(id):
         
     role = request.form.get('role')
     department = request.form.get('department')
+    is_technician = request.form.get('is_technician') == 'on'
     new_password = request.form.get('password')
     
     # Only update role if provided (might be hidden in some forms)
@@ -160,6 +163,9 @@ def editar_usuario(id):
         
     if department:
         user.department = department
+        
+    # Always update is_technician if we are in the edit flow
+    user.is_technician = is_technician
         
     if new_password and new_password.strip():
         user.set_password(new_password)
