@@ -41,38 +41,10 @@
                         <td>{{ policy.response_time }} horas</td>
                         <td>{{ policy.resolution_time }} horas</td>
                         <td class="text-end pe-4">
-                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSlaModal{{ policy.id }}">
+                            <button class="btn btn-sm btn-outline-primary" 
+                                    onclick="openEditSlaModal('{{ policy.id }}', '{{ policy.priority }}', '{{ policy.response_time }}', '{{ policy.resolution_time }}')">
                                 <i class="fas fa-edit"></i> Editar
                             </button>
-                            
-                            <!-- Modal Editar SLA -->
-                            <div class="modal fade text-start" id="editSlaModal{{ policy.id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Editar SLA - {{ policy.priority|title }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <form action="{{ url_for('sla.index') }}" method="POST">
-                                            <input type="hidden" name="id" value="{{ policy.id }}">
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Tempo de Resposta (horas)</label>
-                                                    <input type="number" class="form-control" name="response_time" value="{{ policy.response_time }}" required min="1">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Tempo de Resolução (horas)</label>
-                                                    <input type="number" class="form-control" name="resolution_time" value="{{ policy.resolution_time }}" required min="1">
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                <button type="submit" class="btn btn-primary">Salvar</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -81,4 +53,53 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Editar SLA (Único) -->
+<div class="modal fade" id="editSlaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title"><i class="fas fa-edit me-2 text-primary"></i>Editar SLA - <span id="slaPriorityDisplay" class="fw-bold text-capitalize"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('sla.index') }}" method="POST">
+                <input type="hidden" name="id" id="slaIdInput">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Tempo de Resposta (h)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-clock"></i></span>
+                                <input type="number" class="form-control" name="response_time" id="slaResponseInput" required min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Tempo de Resolução (h)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-check-circle"></i></span>
+                                <input type="number" class="form-control" name="resolution_time" id="slaResolutionInput" required min="1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditSlaModal(id, priority, responseTime, resolutionTime) {
+        document.getElementById('slaIdInput').value = id;
+        document.getElementById('slaPriorityDisplay').textContent = priority;
+        document.getElementById('slaResponseInput').value = responseTime;
+        document.getElementById('slaResolutionInput').value = resolutionTime;
+        
+        const modal = new bootstrap.Modal(document.getElementById('editSlaModal'));
+        modal.show();
+    }
+</script>
 {% endblock %}

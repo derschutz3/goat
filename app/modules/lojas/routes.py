@@ -14,6 +14,8 @@ def index():
 @lojas_bp.route('/details/<path:name>')
 @login_required
 def details(name):
+    from urllib.parse import unquote
+    name = unquote(name)
     data = store_service.get_store_details(name)
     return jsonify(data)
 
@@ -38,6 +40,9 @@ def save():
 @lojas_bp.route('/delete/<path:name>', methods=['POST'])
 @login_required
 def delete(name):
+    from urllib.parse import unquote
+    name = unquote(name)
+    
     if current_user.role not in ['admin', 'manager', 'supervisor']:
         return jsonify({'success': False, 'message': 'Acesso não autorizado.'}), 403
 
