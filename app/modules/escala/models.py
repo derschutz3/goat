@@ -8,7 +8,7 @@ class Schedule(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     day_of_week = db.Column(db.String(20), nullable=False) # segunda, terca, quarta, quinta, sexta
     
-    store = db.relationship('Store', backref=db.backref('schedules', lazy=True))
+    store = db.relationship('Store', backref=db.backref('schedules', lazy=True, cascade="all, delete-orphan"))
     user = db.relationship('User', backref=db.backref('schedules', lazy=True))
     
     __table_args__ = (
