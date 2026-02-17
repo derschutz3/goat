@@ -25,7 +25,7 @@ def index():
     # Structure: { 'segunda': { tech_id: [store1, store2], ... }, ... }
     schedule_map = {day: {tech.id: [] for tech in technicians} for day in days}
     
-    schedules = Schedule.query.all()
+    schedules = Schedule.query.options(db.joinedload(Schedule.store)).all()
     for s in schedules:
         if s.day_of_week in schedule_map and s.user_id in schedule_map[s.day_of_week]:
             if s.store: # Check if store exists to avoid NoneType errors
@@ -67,27 +67,30 @@ def atualizar_celula():
         return redirect(url_for('escala.index'))
         
     # Remove existing schedules for this User + Day
-    Schedule.query.filter_by(user_id=user_id, day_of_week=day).delete()
+    Schedule.query.filter_by(user_id=user_id, day_of_week=day).delete(synchronize_session=False)
     
-    # Add new schedules
+    parsed_store_ids = []
     for store_id in store_ids:
         try:
-            store_id = int(store_id)
+            parsed_store_ids.append(int(store_id))
         except ValueError:
             continue
-            
-        # Check if store is already assigned to ANYONE on THIS DAY (Unique constraint)
-        # If so, remove it from the other person/slot
-        existing_conflict = Schedule.query.filter_by(store_id=store_id, day_of_week=day).first()
-        if existing_conflict:
-            db.session.delete(existing_conflict)
-            
-        new_schedule = Schedule(
-            store_id=store_id,
-            user_id=user_id,
-            day_of_week=day
-        )
-        db.session.add(new_schedule)
+    
+    if parsed_store_ids:
+        existing_conflicts = Schedule.query.filter(
+            Schedule.day_of_week == day,
+            Schedule.store_id.in_(parsed_store_ids)
+        ).all()
+        for conflict in existing_conflicts:
+            db.session.delete(conflict)
+        
+        for store_id in parsed_store_ids:
+            new_schedule = Schedule(
+                store_id=store_id,
+                user_id=user_id,
+                day_of_week=day
+            )
+            db.session.add(new_schedule)
         
     db.session.commit()
     flash('Escala atualizada com sucesso!', 'success')
@@ -101,7 +104,7 @@ def gerar_escala():
         return redirect(url_for('escala.index'))
     
     # Clear existing schedule
-    Schedule.query.delete()
+    Schedule.query.delete(synchronize_session=False)
     
     # Get Techs
     from sqlalchemy import or_
@@ -154,7 +157,7 @@ def gerar_escala_inteligente():
         return redirect(url_for('escala.index'))
     
     # 1. Clear existing schedule
-    Schedule.query.delete()
+    Schedule.query.delete(synchronize_session=False)
     
     # 2. Get Techs
     from sqlalchemy import or_
@@ -166,15 +169,7 @@ def gerar_escala_inteligente():
         
     # 3. Calculate Store Loads (Tickets + Priorities)
     from app.modules.chamados.models import Ticket
-    from sqlalchemy import func
-    
-    # Weights
-    PRIORITY_WEIGHTS = {
-        'critica': 5,
-        'alta': 3,
-        'media': 2,
-        'baixa': 1
-    }
+    from sqlalchemy import case, func
     
     stores = Store.query.all()
     
@@ -182,22 +177,28 @@ def gerar_escala_inteligente():
         flash('Nenhuma loja encontrada para gerar escala.', 'warning')
         return redirect(url_for('escala.index'))
         
-    store_loads = []
+    weight_case = case(
+        (Ticket.priority == 'critica', 5),
+        (Ticket.priority == 'alta', 3),
+        (Ticket.priority == 'media', 2),
+        (Ticket.priority == 'baixa', 1),
+        else_=1
+    )
     
+    load_rows = db.session.query(
+        Ticket.store_id,
+        func.sum(weight_case)
+    ).filter(
+        Ticket.status.notin_(['fechado', 'resolvido']),
+        Ticket.store_id.isnot(None)
+    ).group_by(Ticket.store_id).all()
+    
+    load_map = {store_id: load for store_id, load in load_rows}
+    
+    store_loads = []
     for store in stores:
-        # Get open/recent tickets
-        tickets = Ticket.query.filter(
-            Ticket.store_id == store.id,
-            Ticket.status.notin_(['fechado', 'resolvido'])
-        ).all()
-        
-        load_score = 0
-        for t in tickets:
-            load_score += PRIORITY_WEIGHTS.get(t.priority, 1)
-            
-        # Base load (each store has minimum 1 point of effort)
+        load_score = load_map.get(store.id) or 0
         load_score = max(load_score, 1)
-        
         store_loads.append({
             'store': store,
             'load': load_score
@@ -223,9 +224,6 @@ def gerar_escala_inteligente():
         
     # 5. Save Schedule (Distribute across week days)
     days = ['segunda', 'terca', 'quarta', 'quinta', 'sexta']
-    
-    # Clear existing schedule before saving new one
-    Schedule.query.delete()
     
     for tech in technicians:
         my_stores = tech_assignments[tech.id]

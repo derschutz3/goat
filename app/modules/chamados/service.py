@@ -44,26 +44,21 @@ class TicketService:
         return User.query.filter(or_(User.role == 'tecnico', User.is_technician == True)).all()
 
     def get_department_stats(self):
-        # This might need to be updated to use Store model if needed, 
-        # or kept as is if it relies on User.department (which is string).
-        # Assuming we want stats by Store now:
         from app.modules.lojas.models import Store
         from .models import Ticket
+        from sqlalchemy import and_
         
-        # Count tickets per store
         results = db.session.query(Store.name, db.func.count(Ticket.id))\
-                         .join(Store, Ticket.store_id == Store.id)\
-                         .filter(Ticket.status.notin_(['resolvido', 'fechado']))\
+                         .outerjoin(
+                             Ticket,
+                             and_(
+                                 Ticket.store_id == Store.id,
+                                 Ticket.status.notin_(['resolvido', 'fechado'])
+                             )
+                         )\
                          .group_by(Store.name).all()
         
-        stats_dict = {r[0]: r[1] for r in results}
-        
-        # Get all stores to ensure 0 counts are included
-        all_stores = Store.query.all()
-        
-        stats = []
-        for store in all_stores:
-             stats.append({'name': store.name, 'count': stats_dict.get(store.name, 0)})
+        stats = [{'name': r[0], 'count': r[1]} for r in results]
         
         from app.utils import natural_sort_key
         return sorted(stats, key=lambda x: natural_sort_key(x['name']))
@@ -93,8 +88,7 @@ class TicketService:
             filename = timestamp + filename
             
             upload_folder = os.path.join(current_app.static_folder, 'uploads', 'attachments')
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
+            os.makedirs(upload_folder, exist_ok=True)
                 
             file.save(os.path.join(upload_folder, filename))
             
@@ -123,8 +117,7 @@ class TicketService:
                 filename = timestamp + filename
                 
                 upload_folder = os.path.join(current_app.static_folder, 'uploads', 'attachments')
-                if not os.path.exists(upload_folder):
-                    os.makedirs(upload_folder)
+                os.makedirs(upload_folder, exist_ok=True)
                     
                 file.save(os.path.join(upload_folder, filename))
                 attachment_filename = filename

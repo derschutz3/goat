@@ -28,6 +28,11 @@ class SlaService:
     def update_policy(self, id, response_time, resolution_time):
         policy = db.session.get(SlaPolicy, id)
         if policy:
+            try:
+                response_time = int(response_time)
+                resolution_time = int(resolution_time)
+            except (TypeError, ValueError):
+                return False
             policy.response_time = response_time
             policy.resolution_time = resolution_time
             db.session.commit()

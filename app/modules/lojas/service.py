@@ -8,20 +8,7 @@ class StoreService:
         self.ticket_service = TicketService()
     
     def get_all_stores_with_stats(self):
-        stores = self.repository.find_all()
-        
-        stats_list = self.ticket_service.get_department_stats()
-        stats_dict = {item['name']: item['count'] for item in stats_list}
-        
-        final_list = []
-        for store in stores:
-            final_list.append({
-                'name': store.name,
-                'count': stats_dict.get(store.name, 0)
-            })
-            
-        from app.utils import natural_sort_key
-        return sorted(final_list, key=lambda x: natural_sort_key(x['name']))
+        return self.ticket_service.get_department_stats()
 
     def get_store_details(self, name):
         store = self.repository.find_by_name(name)

@@ -91,8 +91,7 @@ def criar_usuario():
                 
                 # Ensure upload directory exists
                 upload_folder = current_app.config['UPLOAD_FOLDER']
-                if not os.path.exists(upload_folder):
-                    os.makedirs(upload_folder)
+                os.makedirs(upload_folder, exist_ok=True)
                     
                 file.save(os.path.join(upload_folder, unique_filename))
                 user.profile_image = unique_filename
@@ -205,8 +204,7 @@ def atualizar_perfil():
             unique_filename = f"{user.username}_{filename}"
             
             upload_folder = current_app.config['UPLOAD_FOLDER']
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
+            os.makedirs(upload_folder, exist_ok=True)
                 
             # Remove old image if exists and not default? (Optional, keeping simple for now)
             
