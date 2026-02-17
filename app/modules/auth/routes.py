@@ -86,15 +86,19 @@ def criar_usuario():
             file = request.files['profile_image']
             if file and file.filename != '' and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                # Generate unique filename to avoid collisions
-                unique_filename = f"{username}_{filename}"
+                safe_username = secure_filename(username or 'user')
+                unique_filename = f"{safe_username}_{filename}"
                 
-                # Ensure upload directory exists
-                upload_folder = current_app.config['UPLOAD_FOLDER']
+                upload_folder = current_app.config.get('UPLOAD_FOLDER') or os.path.join(
+                    current_app.static_folder, 'uploads', 'profiles'
+                )
                 os.makedirs(upload_folder, exist_ok=True)
-                    
-                file.save(os.path.join(upload_folder, unique_filename))
-                user.profile_image = unique_filename
+                
+                try:
+                    file.save(os.path.join(upload_folder, unique_filename))
+                    user.profile_image = unique_filename
+                except Exception:
+                    flash('Erro ao salvar a imagem de perfil.', 'danger')
         
         db.session.add(user)
         db.session.commit()
@@ -201,16 +205,20 @@ def atualizar_perfil():
         file = request.files['profile_image']
         if file and file.filename != '' and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            unique_filename = f"{user.username}_{filename}"
+            safe_username = secure_filename(user.username or 'user')
+            unique_filename = f"{safe_username}_{filename}"
             
-            upload_folder = current_app.config['UPLOAD_FOLDER']
+            upload_folder = current_app.config.get('UPLOAD_FOLDER') or os.path.join(
+                current_app.static_folder, 'uploads', 'profiles'
+            )
             os.makedirs(upload_folder, exist_ok=True)
-                
-            # Remove old image if exists and not default? (Optional, keeping simple for now)
             
-            file.save(os.path.join(upload_folder, unique_filename))
-            user.profile_image = unique_filename
-            flash('Foto de perfil atualizada com sucesso.', 'success')
+            try:
+                file.save(os.path.join(upload_folder, unique_filename))
+                user.profile_image = unique_filename
+                flash('Foto de perfil atualizada com sucesso.', 'success')
+            except Exception:
+                flash('Erro ao salvar a imagem de perfil.', 'danger')
             
     db.session.commit()
     # Redirect back to where they came from or home
