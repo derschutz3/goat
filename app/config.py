@@ -17,7 +17,7 @@ class Config:
     # Upload configuration
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(basedir, 'static', 'uploads', 'profiles')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16MB max limit
-    MASTER_USERNAME = os.environ.get('MASTER_USERNAME') or 'admin'
+    MASTER_USERNAME = os.environ.get('MASTER_USERNAME') or 'admin1'
     MASTER_PASSWORD = os.environ.get('MASTER_PASSWORD')
     MASTER_EMAIL = os.environ.get('MASTER_EMAIL') or f"{MASTER_USERNAME}@local"
 
