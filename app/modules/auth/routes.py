@@ -5,11 +5,45 @@ from app.database import db
 from . import auth_bp
 from sqlalchemy import or_
 import os
+import uuid
+import firebase_admin
+from firebase_admin import storage
 from werkzeug.utils import secure_filename
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+def save_profile_image(file, username):
+    filename = secure_filename(file.filename)
+    safe_username = secure_filename(username or 'user')
+    ext = os.path.splitext(filename)[1].lower()
+    if current_app.config.get('STORAGE_BACKEND') == 'gcs':
+        try:
+            try:
+                firebase_admin.get_app()
+            except ValueError:
+                firebase_admin.initialize_app()
+            bucket_name = current_app.config.get('GCS_BUCKET')
+            bucket = storage.bucket(bucket_name) if bucket_name else storage.bucket()
+            blob_name = f"profiles/{safe_username}_{uuid.uuid4().hex}{ext}"
+            blob = bucket.blob(blob_name)
+            file.stream.seek(0)
+            blob.upload_from_file(file.stream, content_type=file.mimetype or 'application/octet-stream')
+            blob.make_public()
+            return blob.public_url
+        except Exception:
+            return None
+    upload_folder = current_app.config.get('UPLOAD_FOLDER') or os.path.join(
+        current_app.static_folder, 'uploads', 'profiles'
+    )
+    os.makedirs(upload_folder, exist_ok=True)
+    unique_filename = f"{safe_username}_{uuid.uuid4().hex}{ext}"
+    try:
+        file.save(os.path.join(upload_folder, unique_filename))
+        return unique_filename
+    except Exception:
+        return None
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -85,19 +119,10 @@ def criar_usuario():
         if 'profile_image' in request.files:
             file = request.files['profile_image']
             if file and file.filename != '' and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                safe_username = secure_filename(username or 'user')
-                unique_filename = f"{safe_username}_{filename}"
-                
-                upload_folder = current_app.config.get('UPLOAD_FOLDER') or os.path.join(
-                    current_app.static_folder, 'uploads', 'profiles'
-                )
-                os.makedirs(upload_folder, exist_ok=True)
-                
-                try:
-                    file.save(os.path.join(upload_folder, unique_filename))
-                    user.profile_image = unique_filename
-                except Exception:
+                saved_path = save_profile_image(file, username)
+                if saved_path:
+                    user.profile_image = saved_path
+                else:
                     flash('Erro ao salvar a imagem de perfil.', 'danger')
         
         db.session.add(user)
@@ -204,20 +229,11 @@ def atualizar_perfil():
     if 'profile_image' in request.files:
         file = request.files['profile_image']
         if file and file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            safe_username = secure_filename(user.username or 'user')
-            unique_filename = f"{safe_username}_{filename}"
-            
-            upload_folder = current_app.config.get('UPLOAD_FOLDER') or os.path.join(
-                current_app.static_folder, 'uploads', 'profiles'
-            )
-            os.makedirs(upload_folder, exist_ok=True)
-            
-            try:
-                file.save(os.path.join(upload_folder, unique_filename))
-                user.profile_image = unique_filename
+            saved_path = save_profile_image(file, user.username)
+            if saved_path:
+                user.profile_image = saved_path
                 flash('Foto de perfil atualizada com sucesso.', 'success')
-            except Exception:
+            else:
                 flash('Erro ao salvar a imagem de perfil.', 'danger')
             
     db.session.commit()
