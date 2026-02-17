@@ -14,8 +14,9 @@
     --hover-bg: #e9ecef;
     --card-shadow: 0 2px 4px rgba(0,0,0,0.05);
     --card-shadow-hover: 0 4px 8px rgba(0,0,0,0.1);
-    
-    /* Override Bootstrap Primary Color */
+}
+
+/* Override Bootstrap Primary Color */
 .btn-primary {
     background-color: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
@@ -86,8 +87,13 @@
 
 /* Global Dark Mode Overrides */
 [data-bs-theme="dark"] body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+[data-bs-theme="dark"] .main-content {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
 }
 
 [data-bs-theme="dark"] .bg-surface,
