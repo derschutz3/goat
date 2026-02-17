@@ -159,7 +159,10 @@ def get_role_level(role):
 def utility_processor():
     def get_role_level_ctx(role):
         return get_role_level(role)
-    return dict(get_role_level=get_role_level_ctx)
+    master_username = current_app.config.get('MASTER_USERNAME')
+    master_password = current_app.config.get('MASTER_PASSWORD')
+    is_master = bool(master_username and master_password and current_user.is_authenticated and current_user.username == master_username)
+    return dict(get_role_level=get_role_level_ctx, is_master=is_master)
 
 @auth_bp.route('/usuarios/editar/<int:id>', methods=['POST'])
 @login_required
@@ -186,10 +189,16 @@ def editar_usuario(id):
         flash('Você não tem permissão para editar este usuário.', 'danger')
         return redirect(url_for('auth.listar_usuarios'))
         
+    master_username = current_app.config.get('MASTER_USERNAME')
+    master_password = current_app.config.get('MASTER_PASSWORD')
+    is_master = bool(master_username and master_password and current_user.username == master_username)
+
     role = request.form.get('role')
     department = request.form.get('department')
     is_technician = request.form.get('is_technician') == 'on'
     new_password = request.form.get('password')
+    new_username = request.form.get('username')
+    new_email = request.form.get('email')
     
     # Only update role if provided (might be hidden in some forms)
     if role:
@@ -205,8 +214,22 @@ def editar_usuario(id):
             flash('Cuidado: Você alterou sua própria função.', 'warning')
         user.role = role
         
-    if department:
+    if department is not None:
         user.department = department
+
+    if is_master and new_username:
+        existing_user = User.query.filter(User.username == new_username, User.id != user.id).first()
+        if existing_user:
+            flash('Nome de usuário já cadastrado.', 'danger')
+            return redirect(url_for('auth.listar_usuarios'))
+        user.username = new_username
+
+    if is_master and new_email:
+        existing_email = User.query.filter(User.email == new_email, User.id != user.id).first()
+        if existing_email:
+            flash('Email já cadastrado.', 'danger')
+            return redirect(url_for('auth.listar_usuarios'))
+        user.email = new_email
         
     # Always update is_technician if we are in the edit flow
     # Enforce consistency: If role is 'tecnico', is_technician must be True
@@ -218,9 +241,25 @@ def editar_usuario(id):
     if new_password and new_password.strip():
         user.set_password(new_password)
         flash('Senha atualizada com sucesso.', 'success')
+
+    if is_master and 'profile_image' in request.files:
+        file = request.files['profile_image']
+        if file and file.filename != '' and allowed_file(file.filename):
+            saved_path = save_profile_image(file, user.username)
+            if saved_path:
+                user.profile_image = saved_path
+            else:
+                flash('Erro ao salvar a imagem de perfil.', 'danger')
         
-    db.session.commit()
-    flash('Usuário atualizado com sucesso.', 'success')
+    try:
+        db.session.commit()
+        flash('Usuário atualizado com sucesso.', 'success')
+    except IntegrityError:
+        db.session.rollback()
+        flash('Usuário ou email já cadastrado.', 'danger')
+    except Exception:
+        db.session.rollback()
+        flash('Erro ao atualizar usuário.', 'danger')
     
     if role == 'tecnico':
         return redirect(url_for('auth.listar_tecnicos'))

@@ -149,6 +149,7 @@
                                         data-bs-target="#editarUsuarioModal"
                                         data-id="{{ user.id }}"
                                         data-username="{{ user.username }}"
+                                        data-email="{{ user.email }}"
                                         data-role="{{ user.role }}"
                                         data-department="{{ user.department or '' }}"
                                         data-is-technician="{{ 'true' if user.is_technician else 'false' }}"
@@ -267,9 +268,19 @@
                 <h5 class="modal-title"><i class="fas fa-user-edit me-2 text-primary"></i>Editar: <span id="editUsernameDisplay" class="fw-bold"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formEditarUsuario" method="POST">
+            <form id="formEditarUsuario" method="POST" enctype="multipart/form-data">
                 <div class="modal-body p-4">
                     <div class="row g-3">
+                        {% if is_master %}
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Usuário</label>
+                            <input type="text" class="form-control" name="username" id="editUsername">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Email</label>
+                            <input type="email" class="form-control" name="email" id="editEmail">
+                        </div>
+                        {% endif %}
                         <div class="col-12">
                             <label class="form-label small fw-bold text-muted">Função</label>
                             <select class="form-select" name="role" id="editRole">
@@ -290,6 +301,12 @@
                             <label class="form-label small fw-bold text-muted">Departamento</label>
                             <input type="text" class="form-control" name="department" id="editDepartment">
                         </div>
+                        {% if is_master %}
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Foto de Perfil</label>
+                            <input type="file" class="form-control" name="profile_image" accept="image/*">
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
@@ -343,11 +360,20 @@
     function preencherModalEdicao(button) {
         const id = button.getAttribute('data-id');
         const username = button.getAttribute('data-username');
+        const email = button.getAttribute('data-email');
         const role = button.getAttribute('data-role');
         const department = button.getAttribute('data-department');
         const isTechnician = button.getAttribute('data-is-technician') === 'true';
         
         document.getElementById('editUsernameDisplay').textContent = username;
+        const editUsername = document.getElementById('editUsername');
+        if (editUsername) {
+            editUsername.value = username || '';
+        }
+        const editEmail = document.getElementById('editEmail');
+        if (editEmail) {
+            editEmail.value = email || '';
+        }
         document.getElementById('editRole').value = role;
         document.getElementById('editDepartment').value = department;
         document.getElementById('editIsTechnician').checked = isTechnician;
