@@ -156,9 +156,11 @@
     color: #adb5bd !important;
 }
 
-[data-bs-theme="dark"] .text-dark {
-    color: #f8f9fa !important;
+[data-bs-theme="dark"] .text-secondary {
+    color: #adb5bd !important;
 }
+
+/* Remove incorrect text-dark override that breaks badges */
 
 [data-bs-theme="dark"] .bg-light {
     background-color: #343a40 !important;
