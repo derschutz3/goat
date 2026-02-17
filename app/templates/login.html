@@ -5,106 +5,128 @@
 {% block content %}
 <style>
     .login-container {
-        min-height: calc(100vh - 100px);
+        min-height: 100vh;
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        border-radius: 10px;
+        background: linear-gradient(180deg, #f7f7f5 0%, #ececea 100%);
     }
 
     [data-bs-theme="dark"] .login-container {
-        background: linear-gradient(135deg, #1a1d20 0%, #2c3034 100%);
+        background: linear-gradient(180deg, #0f1113 0%, #17191b 100%);
     }
 
     .login-card {
         width: 100%;
-        max-width: 400px;
-        border: none;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        transform: translateY(0);
-        transition: all 0.3s ease;
-        animation: fadeInUp 0.6s ease-out;
+        max-width: 420px;
+        border-radius: 18px;
+        border: 1px solid #e1e2dd;
+        background: #ffffff;
+        box-shadow: 0 18px 40px rgba(17, 17, 17, 0.08);
     }
     
     [data-bs-theme="dark"] .login-card {
-        background-color: #212529;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    }
-
-    .login-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        background-color: #151719;
+        border-color: #2a2d31;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.35);
     }
 
     .login-header {
-        background: linear-gradient(45deg, var(--primary-color), #4a90e2);
-        color: white;
-        padding: 30px 20px;
-        text-align: center;
-        border-bottom: none;
+        padding: 28px 28px 18px 28px;
+        border-bottom: 1px solid #ecece7;
+        text-align: left;
     }
 
-    .login-icon {
-        font-size: 3rem;
-        margin-bottom: 10px;
-        animation: pulse 2s infinite;
+    [data-bs-theme="dark"] .login-header {
+        border-bottom-color: #2a2d31;
+    }
+
+    .login-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #f2f2ee;
+        color: #1f1f1f;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 16px;
+        border: 1px solid #e3e3dd;
+    }
+
+    [data-bs-theme="dark"] .login-mark {
+        background: #1f2124;
+        color: #f4f4ef;
+        border-color: #2a2d31;
+    }
+
+    .login-subtitle {
+        color: #6c6f66;
+    }
+
+    [data-bs-theme="dark"] .login-subtitle {
+        color: #a7a9a2;
     }
 
     .form-floating .form-control {
-        border-radius: 8px;
-        border: 1px solid var(--border-color, #ced4da);
-        background-color: var(--surface-color, #fff);
-        color: var(--text-color, #212529);
+        border-radius: 12px;
+        border: 1px solid #dadbd6;
+        background-color: #f9f9f6;
+        color: #1f1f1f;
+        height: 54px;
     }
     
     [data-bs-theme="dark"] .form-control {
-        background-color: #2b3035;
-        border-color: #495057;
-        color: #fff;
+        background-color: #1c1f22;
+        border-color: #2f3338;
+        color: #f1f1ec;
     }
     
     [data-bs-theme="dark"] .form-floating label {
-        color: #adb5bd;
+        color: #a7a9a2;
     }
 
     .form-floating .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        border-color: #1f1f1f;
+        box-shadow: 0 0 0 0.2rem rgba(31, 31, 31, 0.08);
+    }
+
+    [data-bs-theme="dark"] .form-floating .form-control:focus {
+        border-color: #f1f1ec;
+        box-shadow: 0 0 0 0.2rem rgba(241, 241, 236, 0.08);
     }
 
     .btn-login {
-        padding: 12px;
+        padding: 12px 14px;
         font-weight: 600;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        background: linear-gradient(to right, var(--primary-color), #4a90e2);
-        border: none;
+        border-radius: 12px;
+        background: #1f1f1f;
+        border: 1px solid #1f1f1f;
+        color: #ffffff;
+        transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     }
 
     .btn-login:hover {
-        background: linear-gradient(to right, #0b5ed7, #3a80d2);
-        transform: scale(1.02);
+        background: #2a2a2a;
+        border-color: #2a2a2a;
+        transform: translateY(-1px);
     }
 
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    [data-bs-theme="dark"] .btn-login {
+        background: #f1f1ec;
+        border-color: #f1f1ec;
+        color: #151515;
     }
 
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+    [data-bs-theme="dark"] .btn-login:hover {
+        background: #e6e6df;
+        border-color: #e6e6df;
+    }
+
+    .login-body {
+        padding: 24px 28px 28px 28px;
     }
 
     .theme-toggle-login {
@@ -112,39 +134,42 @@
         top: 20px;
         right: 20px;
         z-index: 1000;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: var(--text-color);
+        background: #f7f7f3;
+        border: 1px solid #dfdfd8;
+        color: #1f1f1f;
         width: 40px;
         height: 40px;
-        border-radius: 50%;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        box-shadow: 0 6px 14px rgba(17, 17, 17, 0.08);
     }
 
     [data-bs-theme="dark"] .theme-toggle-login {
-        background: rgba(0, 0, 0, 0.3);
-        border-color: transparent;
-        color: #fff;
+        background: #1c1f22;
+        border-color: #2f3338;
+        color: #f1f1ec;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.35);
     }
 
     .theme-toggle-login:hover {
-        transform: rotate(30deg);
-        background: var(--primary-color);
-        color: white;
+        transform: translateY(-1px);
+        background: #edede7;
+        border-color: #d8d8d1;
     }
 
-    /* Hide standard navbar/sidebar for login page */
+    [data-bs-theme="dark"] .theme-toggle-login:hover {
+        background: #24282d;
+        border-color: #353a40;
+    }
+
     .topbar, .sidebar {
         display: none !important;
     }
     
-    /* Reset main content margin for login page */
     .main-content {
         margin-left: 0 !important;
         margin-top: 0 !important;
@@ -162,13 +187,13 @@
 
     <div class="card login-card">
         <div class="login-header">
-            <div class="login-icon">
-            🐒
+            <div class="login-mark">
+                <i class="fas fa-headset"></i>
+            </div>
+            <h4 class="mb-1 fw-semibold">Bem-vindo</h4>
+            <p class="mb-0 small login-subtitle">Sistema dos Primatas</p>
         </div>
-            <h4 class="mb-0 fw-bold">Bem-vindo</h4>
-            <p class="mb-0 opacity-75 small">Sistema dos Primatas</p>
-        </div>
-        <div class="card-body p-4 p-md-5 bg-surface">
+        <div class="login-body bg-surface">
             <form method="POST">
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Usuário" required autofocus>
@@ -180,7 +205,7 @@
                 </div>
                 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-login text-white">
+                    <button type="submit" class="btn btn-login">
                         <i class="fas fa-sign-in-alt me-2"></i> Entrar
                     </button>
                 </div>
