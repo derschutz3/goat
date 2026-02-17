@@ -28,7 +28,12 @@ def index():
     schedules = Schedule.query.all()
     for s in schedules:
         if s.day_of_week in schedule_map and s.user_id in schedule_map[s.day_of_week]:
-            schedule_map[s.day_of_week][s.user_id].append(s.store)
+            if s.store: # Check if store exists to avoid NoneType errors
+                schedule_map[s.day_of_week][s.user_id].append(s.store)
+            else:
+                # Optionally delete orphan schedule
+                # db.session.delete(s)
+                pass
 
     # Sort stores within each cell
     from app.utils import natural_sort_key

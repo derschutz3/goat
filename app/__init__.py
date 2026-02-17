@@ -105,8 +105,37 @@ def create_app(config_class=Config):
                     conn.execute(text("ALTER TABLE tickets ADD COLUMN attachment VARCHAR(255)"))
                     conn.commit()
                     print("Auto-Migration: Column 'attachment' added successfully.")
+                
+                # Check for 'is_technician' in 'users'
+                try:
+                    conn.execute(text("SELECT is_technician FROM users LIMIT 1"))
+                except Exception:
+                    print("Auto-Migration: Adding 'is_technician' column to 'users' table...")
+                    conn.rollback()
+                    # Determine DB type for syntax if needed, but BOOLEAN DEFAULT FALSE is standard-ish
+                    # For Postgres: BOOLEAN DEFAULT FALSE
+                    # For SQLite: BOOLEAN DEFAULT 0
+                    conn.execute(text("ALTER TABLE users ADD COLUMN is_technician BOOLEAN DEFAULT FALSE"))
+                    conn.commit()
+                    print("Auto-Migration: Column 'is_technician' added successfully.")
 
         except Exception as e:
             print(f"Auto-Migration Warning: Could not check/update database schema: {e}")
+
+    # Configure Logging
+    import logging
+    from logging.handlers import RotatingFileHandler
+    import os
+
+    if not app.debug:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/error.log', maxBytes=10240, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('Chamados startup')
 
     return app
