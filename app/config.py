@@ -15,10 +15,8 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Upload configuration
-    UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads', 'profiles')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(basedir, 'static', 'uploads', 'profiles')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16MB max limit
-    STORAGE_BACKEND = os.environ.get('STORAGE_BACKEND') or ('gcs' if os.environ.get('GOOGLE_CLOUD_PROJECT') else 'local')
-    GCS_BUCKET = os.environ.get('GCS_BUCKET') or (os.environ.get('GOOGLE_CLOUD_PROJECT') + '.appspot.com' if os.environ.get('GOOGLE_CLOUD_PROJECT') else None)
 
     # Database connection pool configuration
     SQLALCHEMY_ENGINE_OPTIONS = {

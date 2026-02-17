@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, current_app
+from flask import render_template, redirect, url_for, flash, request, current_app, send_from_directory
 from flask_login import login_user, logout_user, current_user, login_required
 from app.models import User
 from app.database import db
@@ -6,8 +6,6 @@ from . import auth_bp
 from sqlalchemy import or_
 import os
 import uuid
-import firebase_admin
-from firebase_admin import storage
 from werkzeug.utils import secure_filename
 
 def allowed_file(filename):
@@ -18,22 +16,6 @@ def save_profile_image(file, username):
     filename = secure_filename(file.filename)
     safe_username = secure_filename(username or 'user')
     ext = os.path.splitext(filename)[1].lower()
-    if current_app.config.get('STORAGE_BACKEND') == 'gcs':
-        try:
-            try:
-                firebase_admin.get_app()
-            except ValueError:
-                firebase_admin.initialize_app()
-            bucket_name = current_app.config.get('GCS_BUCKET')
-            bucket = storage.bucket(bucket_name) if bucket_name else storage.bucket()
-            blob_name = f"profiles/{safe_username}_{uuid.uuid4().hex}{ext}"
-            blob = bucket.blob(blob_name)
-            file.stream.seek(0)
-            blob.upload_from_file(file.stream, content_type=file.mimetype or 'application/octet-stream')
-            blob.make_public()
-            return blob.public_url
-        except Exception:
-            return None
     upload_folder = current_app.config.get('UPLOAD_FOLDER') or os.path.join(
         current_app.static_folder, 'uploads', 'profiles'
     )
@@ -44,6 +26,14 @@ def save_profile_image(file, username):
         return unique_filename
     except Exception:
         return None
+
+@auth_bp.route('/media/profiles/<path:filename>')
+@login_required
+def profile_image(filename):
+    upload_folder = current_app.config.get('UPLOAD_FOLDER') or os.path.join(
+        current_app.static_folder, 'uploads', 'profiles'
+    )
+    return send_from_directory(upload_folder, filename)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
