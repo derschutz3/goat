@@ -4,6 +4,7 @@ from app.models import User
 from app.database import db
 from . import auth_bp
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -94,6 +95,10 @@ def criar_usuario():
     role = request.form.get('role')
     department = request.form.get('department')
     is_technician = request.form.get('is_technician') == 'on'
+
+    if not username or not email or not password:
+        flash('Preencha usuário, email e senha.', 'danger')
+        return redirect(url_for('auth.listar_usuarios'))
     
     # Enforce consistency: If role is 'tecnico', is_technician must be True
     if role == 'tecnico':
@@ -101,6 +106,8 @@ def criar_usuario():
     
     if User.query.filter_by(username=username).first():
         flash('Usuário já existe.', 'danger')
+    elif User.query.filter_by(email=email).first():
+        flash('Email já cadastrado.', 'danger')
     else:
         user = User(username=username, email=email, role=role, department=department, is_technician=is_technician)
         user.set_password(password)
@@ -114,10 +121,17 @@ def criar_usuario():
                     user.profile_image = saved_path
                 else:
                     flash('Erro ao salvar a imagem de perfil.', 'danger')
-        
-        db.session.add(user)
-        db.session.commit()
-        flash('Usuário criado com sucesso!', 'success')
+
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash('Usuário criado com sucesso!', 'success')
+        except IntegrityError:
+            db.session.rollback()
+            flash('Usuário ou email já cadastrado.', 'danger')
+        except Exception:
+            db.session.rollback()
+            flash('Erro ao criar usuário.', 'danger')
         
     if role == 'tecnico':
         return redirect(url_for('auth.listar_tecnicos'))
