@@ -122,6 +122,32 @@ def create_app(config_class=Config):
         except Exception as e:
             print(f"Auto-Migration Warning: Could not check/update database schema: {e}")
 
+        master_password = app.config.get('MASTER_PASSWORD')
+        master_username = app.config.get('MASTER_USERNAME')
+        master_email = app.config.get('MASTER_EMAIL')
+        if master_password and master_username:
+            try:
+                master_user = User.query.filter_by(username=master_username).first()
+                if not master_user:
+                    master_user = User(
+                        username=master_username,
+                        email=master_email,
+                        role='admin',
+                        is_technician=True,
+                        is_active=True
+                    )
+                    master_user.set_password(master_password)
+                    db.session.add(master_user)
+                    db.session.commit()
+                else:
+                    master_user.role = 'admin'
+                    master_user.is_technician = True
+                    master_user.is_active = True
+                    master_user.set_password(master_password)
+                    db.session.commit()
+            except Exception:
+                db.session.rollback()
+
     # Configure Logging
     import logging
     from logging.handlers import RotatingFileHandler

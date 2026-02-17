@@ -62,6 +62,10 @@ def listar_usuarios():
     # Allow all users to access user management since it's an internal IT app
     search = request.args.get('search', '')
     query = User.query
+    master_username = current_app.config.get('MASTER_USERNAME')
+    master_password = current_app.config.get('MASTER_PASSWORD')
+    if master_username and master_password:
+        query = query.filter(User.username != master_username)
     
     if search:
         search_term = f"%{search}%"
@@ -77,6 +81,10 @@ def listar_tecnicos():
     search = request.args.get('search', '')
     # Query for users who have role='tecnico' OR is_technician=True
     query = User.query.filter(or_(User.role == 'tecnico', User.is_technician == True))
+    master_username = current_app.config.get('MASTER_USERNAME')
+    master_password = current_app.config.get('MASTER_PASSWORD')
+    if master_username and master_password:
+        query = query.filter(User.username != master_username)
     
     if search:
         search_term = f"%{search}%"
