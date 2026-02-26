@@ -65,7 +65,7 @@
                     <tr class="ticket-row" data-status="{{ ticket.status|default('novo') }}" data-store="{{ ticket.store_id }}">
                         <td class="ps-4 fw-bold text-secondary">#{{ ticket.id }}</td>
                         <td>
-                            <a href="{{ url_for('chamados.ver_chamado', id=ticket.id) }}" class="text-decoration-none fw-bold text-dark text-truncate d-inline-block" style="max-width: 200px;" title="{{ ticket.title }}">
+                            <a href="{{ url_for('chamados.ver_chamado', id=ticket.id) }}" class="text-decoration-none fw-bold text-primary text-truncate d-inline-block" style="max-width: 200px;" title="{{ ticket.title }}">
                                 {{ ticket.title }}
                             </a>
                             <small class="d-block text-muted">{{ ticket.category }}</small>
