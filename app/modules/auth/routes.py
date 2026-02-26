@@ -192,6 +192,7 @@ def editar_usuario(id):
     master_username = current_app.config.get('MASTER_USERNAME')
     master_password = current_app.config.get('MASTER_PASSWORD')
     is_master = bool(master_username and master_password and current_user.username == master_username)
+    is_admin = current_user.role == 'admin'
 
     role = request.form.get('role')
     department = request.form.get('department')
@@ -217,7 +218,7 @@ def editar_usuario(id):
     if department is not None:
         user.department = department
 
-    if is_master and new_username:
+    if (is_master or is_admin) and new_username:
         existing_user = User.query.filter(User.username == new_username, User.id != user.id).first()
         if existing_user:
             flash('Nome de usuário já cadastrado.', 'danger')
@@ -242,7 +243,7 @@ def editar_usuario(id):
         user.set_password(new_password)
         flash('Senha atualizada com sucesso.', 'success')
 
-    if is_master and 'profile_image' in request.files:
+    if (is_master or is_admin) and 'profile_image' in request.files:
         file = request.files['profile_image']
         if file and file.filename != '' and allowed_file(file.filename):
             saved_path = save_profile_image(file, user.username)

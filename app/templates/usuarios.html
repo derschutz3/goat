@@ -271,11 +271,13 @@
             <form id="formEditarUsuario" method="POST" enctype="multipart/form-data">
                 <div class="modal-body p-4">
                     <div class="row g-3">
-                        {% if is_master %}
+                        {% if is_master or current_user.role == 'admin' %}
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted">Usuário</label>
                             <input type="text" class="form-control" name="username" id="editUsername">
                         </div>
+                        {% endif %}
+                        {% if is_master %}
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted">Email</label>
                             <input type="email" class="form-control" name="email" id="editEmail">
@@ -301,7 +303,7 @@
                             <label class="form-label small fw-bold text-muted">Departamento</label>
                             <input type="text" class="form-control" name="department" id="editDepartment">
                         </div>
-                        {% if is_master %}
+                        {% if is_master or current_user.role == 'admin' %}
                         <div class="col-12">
                             <label class="form-label small fw-bold text-muted">Foto de Perfil</label>
                             <input type="file" class="form-control" name="profile_image" accept="image/*">

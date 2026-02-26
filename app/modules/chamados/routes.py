@@ -93,6 +93,20 @@ def atualizar_chamado_geral(id):
         
     return redirect(url_for('chamados.gerenciar_chamados'))
 
+@chamados_bp.route('/chamado/excluir/<int:id>', methods=['POST'])
+@login_required
+def excluir_chamado(id):
+    if current_user.role not in ['admin', 'manager', 'supervisor']:
+        flash('Acesso não autorizado.', 'danger')
+        return redirect(url_for('chamados.gerenciar_chamados'))
+
+    if service.delete_ticket(id):
+        flash('Chamado excluído com sucesso!', 'success')
+    else:
+        flash('Chamado não encontrado.', 'danger')
+
+    return redirect(request.referrer or url_for('chamados.gerenciar_chamados'))
+
 @chamados_bp.route('/chamado/<int:id>')
 @login_required
 def ver_chamado(id):

@@ -103,6 +103,13 @@
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalGerenciar{{ ticket.id }}" title="Editar Chamado">
                                 <i class="fas fa-edit"></i>
                             </button>
+                            {% if current_user.role in ['admin', 'manager', 'supervisor'] %}
+                            <form action="{{ url_for('chamados.excluir_chamado', id=ticket.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este chamado?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir Chamado">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% else %}
