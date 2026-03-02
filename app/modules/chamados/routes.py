@@ -1,9 +1,47 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
+from datetime import datetime
+from app.database import db
+from app.modules.timeline.models import TicketEvent
 from .service import TicketService
 
 chamados_bp = Blueprint('chamados', __name__)
 service = TicketService()
+
+def serialize_ticket(ticket):
+    if not ticket:
+        return None
+    return {
+        'id': ticket.id,
+        'title': ticket.title,
+        'description': ticket.description,
+        'status': ticket.status,
+        'priority': ticket.priority,
+        'category': ticket.category,
+        'created_at': ticket.created_at.isoformat() if ticket.created_at else None,
+        'updated_at': ticket.updated_at.isoformat() if ticket.updated_at else None,
+        'due_date': ticket.due_date.isoformat() if ticket.due_date else None,
+        'closed_at': ticket.closed_at.isoformat() if ticket.closed_at else None,
+        'additional_info': ticket.additional_info,
+        'attachment': ticket.attachment,
+        'requester_id': ticket.requester_id,
+        'technician_id': ticket.technician_id,
+        'store_id': ticket.store_id,
+        'store': ticket.store.name if ticket.store else None,
+        'technician': ticket.technician.username if ticket.technician else None,
+        'requester': ticket.requester.username if ticket.requester else None
+    }
+
+def serialize_event(event):
+    return {
+        'id': event.id,
+        'ticket_id': event.ticket_id,
+        'event_type': event.event_type,
+        'description': event.description,
+        'created_at': event.created_at.isoformat() if event.created_at else None,
+        'user_id': event.user_id,
+        'user': event.user.username if event.user else None
+    }
 
 @chamados_bp.route('/')
 @login_required
@@ -64,6 +102,99 @@ def listar_chamados():
     tickets = service.list_tickets(exclude_closed=exclude_closed)
     stores = service.get_all_stores()
     return render_template('chamados.html', tickets=tickets, stores=stores, active_page='chamados', exclude_closed=exclude_closed)
+
+@chamados_bp.route('/api/dashboard')
+@login_required
+def api_dashboard():
+    stats = service.get_dashboard_stats()
+    recent = [serialize_ticket(t) for t in stats.get('recent_tickets', [])]
+    payload = {
+        'open': stats.get('open', 0),
+        'pending': stats.get('pending', 0),
+        'overdue': stats.get('overdue', 0),
+        'resolved_today': stats.get('resolved_today', 0),
+        'recent_tickets': recent,
+        'productivity': stats.get('productivity', []),
+        'priority_counts': stats.get('priority_counts', {})
+    }
+    return jsonify(payload)
+
+@chamados_bp.route('/api/chamados', methods=['GET', 'POST'])
+@login_required
+def api_chamados():
+    if request.method == 'GET':
+        exclude_closed = request.args.get('exclude_closed') == 'true'
+        tickets = service.list_tickets(exclude_closed=exclude_closed)
+        return jsonify([serialize_ticket(t) for t in tickets])
+
+    data = request.get_json(silent=True)
+    if not data:
+        data = request.form
+    title = data.get('title')
+    description = data.get('description')
+    if not title or not description:
+        return jsonify({'error': 'Título e descrição são obrigatórios.'}), 400
+    ticket = service.create_ticket(data, current_user, request.files)
+    return jsonify(serialize_ticket(ticket)), 201
+
+@chamados_bp.route('/api/chamados/<int:id>', methods=['GET', 'PUT'])
+@login_required
+def api_chamado(id):
+    if request.method == 'GET':
+        ticket = service.get_ticket(id)
+        if not ticket:
+            return jsonify({'error': 'Chamado não encontrado.'}), 404
+        return jsonify(serialize_ticket(ticket))
+
+    data = request.get_json(silent=True)
+    if not data:
+        data = request.form
+    if not service.update_ticket_management(id, data):
+        return jsonify({'error': 'Erro ao atualizar chamado.'}), 400
+    ticket = service.get_ticket(id)
+    if not ticket:
+        return jsonify({'error': 'Chamado não encontrado.'}), 404
+    return jsonify(serialize_ticket(ticket))
+
+@chamados_bp.route('/api/chamados/<int:id>/events', methods=['GET', 'POST'])
+@login_required
+def api_chamado_events(id):
+    ticket = service.get_ticket(id)
+    if not ticket:
+        return jsonify({'error': 'Chamado não encontrado.'}), 404
+
+    if request.method == 'GET':
+        events = TicketEvent.query.filter_by(ticket_id=id).order_by(TicketEvent.created_at.desc()).all()
+        return jsonify([serialize_event(event) for event in events])
+
+    data = request.get_json(silent=True)
+    if not data:
+        data = request.form
+    text = data.get('text') or data.get('description')
+    if not text:
+        return jsonify({'error': 'Texto é obrigatório.'}), 400
+    event = TicketEvent(ticket_id=id, event_type='comment', description=text, created_at=datetime.utcnow(), user_id=current_user.id)
+    db.session.add(event)
+    db.session.commit()
+    return jsonify(serialize_event(event)), 201
+
+@chamados_bp.route('/api/stores')
+@login_required
+def api_stores():
+    stores = service.get_all_stores()
+    return jsonify([{'id': store.id, 'name': store.name} for store in stores])
+
+@chamados_bp.route('/api/categories')
+@login_required
+def api_categories():
+    categories = service.get_all_categories()
+    return jsonify([{'id': category.id, 'name': category.name} for category in categories])
+
+@chamados_bp.route('/api/technicians')
+@login_required
+def api_technicians():
+    technicians = service.get_all_technicians()
+    return jsonify([{'id': tech.id, 'username': tech.username} for tech in technicians])
 
 @chamados_bp.route('/gerenciar')
 @login_required

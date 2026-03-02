@@ -119,6 +119,16 @@ def create_app(config_class=Config):
                     conn.commit()
                     print("Auto-Migration: Column 'is_technician' added successfully.")
 
+                # Check for 'user_id' in 'ticket_events'
+                try:
+                    conn.execute(text("SELECT user_id FROM ticket_events LIMIT 1"))
+                except Exception:
+                    print("Auto-Migration: Adding 'user_id' column to 'ticket_events' table...")
+                    conn.rollback()
+                    conn.execute(text("ALTER TABLE ticket_events ADD COLUMN user_id INTEGER"))
+                    conn.commit()
+                    print("Auto-Migration: Column 'user_id' added successfully.")
+
         except Exception as e:
             print(f"Auto-Migration Warning: Could not check/update database schema: {e}")
 

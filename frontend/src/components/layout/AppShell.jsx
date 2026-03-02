@@ -1,0 +1,102 @@
+import { useState } from 'react'
+import { NavLink } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../context/ThemeContext'
+import './layout.css'
+
+// Simple SVG Icons
+const Icons = {
+  Dashboard: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>,
+  Ticket: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>,
+  Plus: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>,
+  Calendar: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+  Moon: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>,
+  Sun: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
+  Logout: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>,
+  Users: () => <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
+  Menu: () => <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+}
+
+export default function AppShell({ children }) {
+  const { logout, user } = useAuth()
+  const { theme, toggle } = useTheme()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  return (
+    <div className={`app-shell ${menuOpen ? 'menu-open' : ''}`}>
+      <aside className="sidebar">
+        <div className="brand">
+          <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: 8 }}></div>
+          Service Desk
+        </div>
+        
+        <nav className="menu">
+          <NavLink to="/dashboard" className="menu-item">
+            <span style={{ marginRight: 12 }}><Icons.Dashboard /></span>
+            Dashboard
+          </NavLink>
+          <NavLink to="/chamados" className="menu-item" end>
+            <span style={{ marginRight: 12 }}><Icons.Ticket /></span>
+            Chamados
+          </NavLink>
+          <NavLink to="/chamados/novo" className="menu-item">
+            <span style={{ marginRight: 12 }}><Icons.Plus /></span>
+            Novo Chamado
+          </NavLink>
+          <NavLink to="/escala" className="menu-item">
+            <span style={{ marginRight: 12 }}><Icons.Calendar /></span>
+            Escala
+          </NavLink>
+          {(user?.role === 'admin' || user?.role === 'manager') && (
+            <NavLink to="/usuarios" className="menu-item">
+              <span style={{ marginRight: 12 }}><Icons.Users /></span>
+              Usuários
+            </NavLink>
+          )}
+        </nav>
+
+        <div className="sidebar-footer">
+          <button className="menu-item" onClick={toggle} style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+            <span style={{ marginRight: 12 }}>{theme === 'dark' ? <Icons.Moon /> : <Icons.Sun />}</span>
+            Tema: {theme === 'dark' ? 'Escuro' : 'Claro'}
+          </button>
+          <button className="menu-item" onClick={logout} style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}>
+            <span style={{ marginRight: 12 }}><Icons.Logout /></span>
+            Sair
+          </button>
+        </div>
+      </aside>
+
+      <main className="main">
+        <header className="topbar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <button className="btn-secondary" onClick={() => setMenuOpen(!menuOpen)} style={{ padding: 8, display: 'none' }}>
+              <Icons.Menu />
+            </button>
+            <div className="topbar-title">Visão Geral</div>
+          </div>
+
+          <div className="user-profile">
+            <div style={{ textAlign: 'right', marginRight: 12 }}>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{user?.username || 'Usuário'}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{user?.role || 'Admin'}</div>
+            </div>
+            <div className="avatar">
+              {user?.username?.[0]?.toUpperCase() || 'U'}
+            </div>
+          </div>
+        </header>
+
+        <div className="content">
+          {children}
+        </div>
+      </main>
+
+      <style>{`
+        @media (max-width: 1024px) {
+          .topbar button { display: block !important; }
+        }
+      `}</style>
+    </div>
+  )
+}
