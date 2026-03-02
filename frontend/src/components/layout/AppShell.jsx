@@ -47,12 +47,10 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Calendar /></span>
             <span className="menu-text">Escala</span>
           </NavLink>
-          {(user?.role === 'admin' || user?.role === 'manager') && (
-            <NavLink to="/usuarios" className="menu-item">
-              <span className="menu-icon"><Icons.Users /></span>
-              <span className="menu-text">Usuários</span>
-            </NavLink>
-          )}
+          <NavLink to="/usuarios" className="menu-item">
+            <span className="menu-icon"><Icons.Users /></span>
+            <span className="menu-text">Usuários</span>
+          </NavLink>
         </nav>
 
         <div className="sidebar-footer">
@@ -64,7 +62,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v1.1</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v1.2</div>
         </div>
       </aside>
 

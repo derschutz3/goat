@@ -126,9 +126,11 @@ export default function UsersPage() {
     }
   }
 
+  /*
   if (user?.role !== 'admin' && user?.role !== 'manager') {
     return <div className="card">Acesso restrito a administradores.</div>
   }
+  */
 
   return (
     <div className="grid">
