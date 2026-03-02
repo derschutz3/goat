@@ -26,43 +26,43 @@ export default function AppShell({ children }) {
     <div className={`app-shell ${menuOpen ? 'menu-open' : ''}`}>
       <aside className="sidebar">
         <div className="brand">
-          <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: 8 }}></div>
-          Service Desk
+          <div className="brand-logo" style={{ width: 32, height: 32, background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: 8, flexShrink: 0 }}></div>
+          <span className="brand-text">Service Desk</span>
         </div>
         
         <nav className="menu">
           <NavLink to="/dashboard" className="menu-item">
-            <span style={{ marginRight: 12 }}><Icons.Dashboard /></span>
-            Dashboard
+            <span className="menu-icon"><Icons.Dashboard /></span>
+            <span className="menu-text">Dashboard</span>
           </NavLink>
           <NavLink to="/chamados" className="menu-item" end>
-            <span style={{ marginRight: 12 }}><Icons.Ticket /></span>
-            Chamados
+            <span className="menu-icon"><Icons.Ticket /></span>
+            <span className="menu-text">Chamados</span>
           </NavLink>
           <NavLink to="/chamados/novo" className="menu-item">
-            <span style={{ marginRight: 12 }}><Icons.Plus /></span>
-            Novo Chamado
+            <span className="menu-icon"><Icons.Plus /></span>
+            <span className="menu-text">Novo Chamado</span>
           </NavLink>
           <NavLink to="/escala" className="menu-item">
-            <span style={{ marginRight: 12 }}><Icons.Calendar /></span>
-            Escala
+            <span className="menu-icon"><Icons.Calendar /></span>
+            <span className="menu-text">Escala</span>
           </NavLink>
           {(user?.role === 'admin' || user?.role === 'manager') && (
             <NavLink to="/usuarios" className="menu-item">
-              <span style={{ marginRight: 12 }}><Icons.Users /></span>
-              Usuários
+              <span className="menu-icon"><Icons.Users /></span>
+              <span className="menu-text">Usuários</span>
             </NavLink>
           )}
         </nav>
 
         <div className="sidebar-footer">
           <button className="menu-item" onClick={toggle} style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-            <span style={{ marginRight: 12 }}>{theme === 'dark' ? <Icons.Moon /> : <Icons.Sun />}</span>
-            Tema: {theme === 'dark' ? 'Escuro' : 'Claro'}
+            <span className="menu-icon">{theme === 'dark' ? <Icons.Moon /> : <Icons.Sun />}</span>
+            <span className="menu-text">Tema: {theme === 'dark' ? 'Escuro' : 'Claro'}</span>
           </button>
           <button className="menu-item" onClick={logout} style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger)' }}>
-            <span style={{ marginRight: 12 }}><Icons.Logout /></span>
-            Sair
+            <span className="menu-icon"><Icons.Logout /></span>
+            <span className="menu-text">Sair</span>
           </button>
         </div>
       </aside>

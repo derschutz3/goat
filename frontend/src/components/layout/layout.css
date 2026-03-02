@@ -8,18 +8,26 @@
 }
 
 .sidebar {
-  width: 280px;
-  background: rgba(10, 10, 18, 0.6);
+  width: 80px;
+  background: rgba(10, 10, 18, 0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid var(--border-light);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
-  padding: 32px 24px;
+  padding: 32px 16px;
   position: fixed;
   height: 100vh;
   z-index: 50;
-  transition: transform 0.3s var(--ease-spring);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+  overflow: hidden;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar:hover {
+  width: 280px;
+  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.4);
+  background: rgba(10, 10, 18, 0.9);
 }
 
 .brand {
@@ -32,54 +40,108 @@
   margin-bottom: 48px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  padding-left: 8px; /* Alinhar com ícones */
+  white-space: nowrap;
+}
+
+.brand-logo {
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.sidebar:hover .brand-logo {
+  transform: scale(1.1);
+}
+
+.brand-text {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition-delay: 0.05s;
+}
+
+.sidebar:hover .brand-text {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.1s;
 }
 
 .menu {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 14px 18px;
-  border-radius: var(--radius-md);
+  padding: 14px 14px;
+  border-radius: 12px;
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
+  height: 52px; /* Altura fixa para consistência */
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-right: 16px;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.menu-text {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar:hover .menu-text {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.1s;
 }
 
 .menu-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--text-main);
-  transform: translateX(4px);
+}
+
+.menu-item:hover .menu-icon {
+  transform: scale(1.1);
+  color: var(--primary);
 }
 
 .menu-item.active {
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), transparent);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05));
   color: var(--primary);
-  border-left: 3px solid var(--primary);
 }
 
-.menu-item.active::after {
+.menu-item.active::before {
   content: '';
   position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 40px;
-  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1));
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 4px;
+  background: var(--primary);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px var(--primary);
 }
 
 .sidebar-footer {
   margin-top: auto;
   padding-top: 24px;
-  border-top: 1px solid var(--border-light);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -87,12 +149,18 @@
 
 .main {
   flex: 1;
-  margin-left: 280px;
+  margin-left: 80px; /* Largura da sidebar retraída */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   position: relative;
+  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Em telas menores, a sidebar pode empurrar o conteúdo ou se comportar diferente.
+   Para manter simples e funcional, vamos manter a lógica de gaveta em desktop.
+   Em mobile (max-width: 1024px), a sidebar original já tinha uma lógica de toggle.
+   Vamos ajustar. */
 
 .topbar {
   height: 80px;
@@ -100,12 +168,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: rgba(5, 5, 10, 0.8);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-light);
+  /* background: rgba(10, 10, 18, 0.3); Removido para ser mais clean */
 }
 
 .topbar-title {
@@ -114,41 +177,61 @@
   color: var(--text-main);
 }
 
-.content {
-  padding: 40px;
-  animation: fadeIn 0.8s ease-out;
-}
-
-/* User Profile in Topbar (Optional) */
 .user-profile {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.content {
+  padding: 0 40px 40px 40px;
+  flex: 1;
 }
 
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-100%);
+    width: 280px; /* Mobile sempre full width quando aberto */
+  }
+  
+  .app-shell.menu-open .sidebar {
+    transform: translateX(0);
   }
   
   .main {
     margin-left: 0;
   }
   
-  .app-shell.menu-open .sidebar {
-    transform: translateX(0);
+  .brand-text, .menu-text {
+    opacity: 1;
+    transform: none;
+  }
+  
+  .content {
+    padding: 20px;
   }
 }
