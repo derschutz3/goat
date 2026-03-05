@@ -56,15 +56,16 @@
 
 .brand-text {
   opacity: 0;
+  visibility: hidden;
   transform: translateX(-10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  transition-delay: 0.05s;
+  transition: visibility 0s 0.3s, opacity 0.3s ease, transform 0.3s ease;
 }
 
 .sidebar:hover .brand-text {
+  visibility: visible;
   opacity: 1;
   transform: translateX(0);
-  transition-delay: 0.1s;
+  transition: visibility 0s 0s, opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
 }
 
 .menu {
@@ -101,14 +102,16 @@
 
 .menu-text {
   opacity: 0;
+  visibility: hidden;
   transform: translateX(-10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: visibility 0s 0.3s, opacity 0.3s ease, transform 0.3s ease;
 }
 
 .sidebar:hover .menu-text {
+  visibility: visible;
   opacity: 1;
   transform: translateX(0);
-  transition-delay: 0.1s;
+  transition: visibility 0s 0s, opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
 }
 
 .menu-item:hover {
@@ -229,6 +232,7 @@
   .brand-text, .menu-text {
     opacity: 1;
     transform: none;
+    visibility: visible;
   }
   
   .content {
