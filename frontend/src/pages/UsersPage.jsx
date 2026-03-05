@@ -60,7 +60,8 @@ export default function UsersPage() {
           data: {
             username: newUser.username,
             role: newUser.role
-          }
+          },
+          emailRedirectTo: undefined // Prevent email confirmation flow if possible
         }
       })
 
