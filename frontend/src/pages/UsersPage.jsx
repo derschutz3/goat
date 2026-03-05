@@ -52,6 +52,7 @@ export default function UsersPage() {
         }
       )
 
+      // 1. Sign up the user in Supabase Auth
       const { data: authData, error: authError } = await tempSupabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
