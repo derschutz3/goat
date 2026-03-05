@@ -111,7 +111,7 @@ export default function TicketCreatePage() {
           <label className="subtitle">Anexos (simulado)</label>
           <input className="input" type="file" onChange={e => setForm({ ...form, attachment: e.target.files?.[0] })} />
         </div>
-        <button className="btn" disabled={loading}>{loading ? 'Enviando...' : 'Criar chamado'}</button>
+        <button className="btn-primary" disabled={loading}>{loading ? 'Enviando...' : 'Criar chamado'}</button>
       </form>
     </div>
   )
