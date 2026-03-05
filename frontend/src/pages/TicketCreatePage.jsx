@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { createTicket, getCategories, getStores, getTechnicians } from '../services/ticketService'
+import { useToast } from '../context/ToastContext'
 
 export default function TicketCreatePage() {
+  const { addToast } = useToast()
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -13,7 +15,6 @@ export default function TicketCreatePage() {
   })
   const [loading, setLoading] = useState(false)
   const [loadingOptions, setLoadingOptions] = useState(true)
-  const [result, setResult] = useState('')
   const [stores, setStores] = useState([])
   const [categories, setCategories] = useState([])
   const [technicians, setTechnicians] = useState([])
@@ -36,7 +37,6 @@ export default function TicketCreatePage() {
   const handleSubmit = async e => {
     e.preventDefault()
     setLoading(true)
-    setResult('')
     const payload = {
       title: form.title,
       description: form.description,
@@ -46,10 +46,16 @@ export default function TicketCreatePage() {
       technician_id: form.technician_id || null,
       attachment: form.attachment?.name || null
     }
-    await createTicket(payload)
-    setLoading(false)
-    setResult('Chamado criado com sucesso')
-    setForm(prev => ({ ...prev, title: '', description: '' }))
+    
+    try {
+      await createTicket(payload)
+      addToast('Chamado criado com sucesso!')
+      setForm(prev => ({ ...prev, title: '', description: '' }))
+    } catch (error) {
+      addToast('Erro ao criar chamado', 'error')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

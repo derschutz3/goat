@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import { mockStores } from '../services/mockData'
 
 // For development without backend, we'll use local state if Supabase fails
@@ -8,12 +9,11 @@ const useMock = import.meta.env.VITE_USE_MOCK === 'true'
 
 export default function StoresPage() {
   const { user } = useAuth()
+  const { addToast } = useToast()
   const [stores, setStores] = useState([])
   const [loading, setLoading] = useState(true)
   const [newStore, setNewStore] = useState('')
   const [editingStore, setEditingStore] = useState(null)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     fetchStores()
@@ -38,6 +38,7 @@ export default function StoresPage() {
       console.error('Error fetching stores:', err)
       // Fallback to mock data if table doesn't exist yet
       setStores(mockStores)
+      addToast('Erro ao carregar lojas, usando dados locais', 'error')
     } finally {
       setLoading(false)
     }
@@ -45,8 +46,6 @@ export default function StoresPage() {
 
   const handleCreateStore = async (e) => {
     e.preventDefault()
-    setError('')
-    setSuccess('')
     
     if (!newStore.trim()) return
 
@@ -54,7 +53,7 @@ export default function StoresPage() {
       if (useMock) {
         const mockNew = { id: Date.now(), name: newStore.toUpperCase() }
         setStores([...stores, mockNew])
-        setSuccess('Loja adicionada (Simulação)')
+        addToast('Loja adicionada (Simulação)')
         setNewStore('')
         return
       }
@@ -67,10 +66,10 @@ export default function StoresPage() {
       if (error) throw error
 
       setStores([...stores, ...(data || [])])
-      setSuccess('Loja adicionada com sucesso!')
+      addToast('Loja adicionada com sucesso!')
       setNewStore('')
     } catch (err) {
-      setError('Erro ao criar loja: ' + err.message)
+      addToast('Erro ao criar loja: ' + err.message, 'error')
     }
   }
 
@@ -81,7 +80,7 @@ export default function StoresPage() {
     try {
       if (useMock) {
         setStores(stores.map(s => s.id === editingStore.id ? editingStore : s))
-        setSuccess('Loja atualizada (Simulação)')
+        addToast('Loja atualizada (Simulação)')
         setEditingStore(null)
         return
       }
@@ -94,10 +93,10 @@ export default function StoresPage() {
       if (error) throw error
 
       setStores(stores.map(s => s.id === editingStore.id ? { ...s, name: editingStore.name.toUpperCase() } : s))
-      setSuccess('Loja atualizada com sucesso!')
+      addToast('Loja atualizada com sucesso!')
       setEditingStore(null)
     } catch (err) {
-      setError('Erro ao atualizar loja: ' + err.message)
+      addToast('Erro ao atualizar loja: ' + err.message, 'error')
     }
   }
 
@@ -107,7 +106,7 @@ export default function StoresPage() {
     try {
       if (useMock) {
         setStores(stores.filter(s => s.id !== id))
-        setSuccess('Loja removida (Simulação)')
+        addToast('Loja removida (Simulação)')
         return
       }
 
@@ -119,9 +118,9 @@ export default function StoresPage() {
       if (error) throw error
 
       setStores(stores.filter(s => s.id !== id))
-      setSuccess('Loja removida com sucesso!')
+      addToast('Loja removida com sucesso!')
     } catch (err) {
-      setError('Erro ao remover loja: ' + err.message)
+      addToast('Erro ao remover loja: ' + err.message, 'error')
     }
   }
 
@@ -143,9 +142,6 @@ export default function StoresPage() {
             </div>
           </div>
           
-          {error && <div style={{ padding: 12, background: '#fee2e2', color: '#dc2626', borderRadius: 8, marginBottom: 16 }}>{error}</div>}
-          {success && <div style={{ padding: 12, background: '#dcfce7', color: '#16a34a', borderRadius: 8, marginBottom: 16 }}>{success}</div>}
-
           <form onSubmit={editingStore ? handleUpdateStore : handleCreateStore} style={{ display: 'grid', gap: 16 }}>
             <div>
               <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Nome da Loja</label>
@@ -169,8 +165,6 @@ export default function StoresPage() {
                   className="btn-secondary" 
                   onClick={() => {
                     setEditingStore(null)
-                    setError('')
-                    setSuccess('')
                   }}
                 >
                   Cancelar
