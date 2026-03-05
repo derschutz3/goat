@@ -275,10 +275,10 @@ export default function UsersPage() {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           color: 'white', fontWeight: 'bold', fontSize: 12
                         }}>
-                          {u.username.charAt(0).toUpperCase()}
+                          {(u.username || '?').charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 500 }}>{u.username}</div>
+                          <div style={{ fontWeight: 500 }}>{u.username || 'Sem nome'}</div>
                           {/* We don't have email in profiles table usually, but if we did we'd show it */}
                         </div>
                       </div>
