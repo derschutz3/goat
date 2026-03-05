@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { createClient } from '@supabase/supabase-js'
 
 export default function UsersPage() {
   const { user } = useAuth()
@@ -19,8 +18,9 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     try {
+      // Fetch from our simple custom table
       const { data, error } = await supabase
-        .from('profiles')
+        .from('app_users')
         .select('*')
         .order('created_at', { ascending: false })
       
@@ -39,58 +39,35 @@ export default function UsersPage() {
     setCreating(true)
 
     try {
-      // Create a temporary client to sign up the user without logging out the admin
-      const tempSupabase = createClient(
-        import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY,
-        {
-          auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-            detectSessionInUrl: false
-          }
-        }
-      )
+      // Check if username exists
+      const { data: existing } = await supabase
+        .from('app_users')
+        .select('id')
+        .eq('username', newUser.username)
+        .single()
 
-      // 1. Sign up the user in Supabase Auth
-      const { data: authData, error: authError } = await tempSupabase.auth.signUp({
-        email: newUser.email,
-        password: newUser.password,
-        options: {
-          data: {
-            username: newUser.username,
-            role: newUser.role
-          },
-          emailRedirectTo: undefined // Prevent email confirmation flow if possible
-        }
-      })
-
-      if (authError) throw authError
-
-      if (authData.user) {
-        // Manually insert profile if trigger didn't catch it (redundancy)
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', authData.user.id)
-          .single()
-
-        if (!existingProfile) {
-          await supabase.from('profiles').insert([
-            {
-              id: authData.user.id,
-              username: newUser.username,
-              role: newUser.role,
-              created_at: new Date().toISOString()
-            }
-          ])
-        }
-
-        addToast(`Usuário ${newUser.username} criado com sucesso!`)
-        setNewUser({ email: '', password: '', username: '', role: 'user' })
-        setShowForm(false)
-        fetchUsers()
+      if (existing) {
+        throw new Error('Nome de usuário já existe')
       }
+
+      // Insert directly into our custom table
+      const { data, error } = await supabase
+        .from('app_users')
+        .insert([{
+          username: newUser.username,
+          password: newUser.password, // Storing plain text for MVP as requested (simple auth)
+          email: newUser.email,
+          role: newUser.role
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      addToast(`Usuário ${newUser.username} criado com sucesso!`)
+      setNewUser({ email: '', password: '', username: '', role: 'user' })
+      setShowForm(false)
+      setUsers([data, ...users])
     } catch (err) {
       console.error('Error creating user:', err)
       addToast(err.message || 'Erro ao criar usuário', 'error')
@@ -104,7 +81,7 @@ export default function UsersPage() {
 
     try {
         const { error } = await supabase
-            .from('profiles')
+            .from('app_users')
             .delete()
             .eq('id', userId)
         
@@ -119,8 +96,6 @@ export default function UsersPage() {
 
   // Stats
   const totalUsers = users.length
-  // Assuming all users in profiles are "active" for now as we don't have a status field yet
-  // We can add a simple logic: if created in last 30 days = "New", else "Active"
   const activeUsers = totalUsers 
   const adminCount = users.filter(u => u.role === 'admin' || u.role === 'manager').length
   const techCount = users.filter(u => u.role === 'tecnico').length
@@ -205,12 +180,12 @@ export default function UsersPage() {
               <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Senha</label>
               <input 
                 className="input" 
-                type="password" 
+                type="text" 
                 value={newUser.password}
                 onChange={e => setNewUser({...newUser, password: e.target.value})}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Senha de acesso"
                 required
-                minLength={6}
+                minLength={4}
               />
             </div>
             <div>
@@ -280,7 +255,7 @@ export default function UsersPage() {
                         </div>
                         <div>
                           <div style={{ fontWeight: 500 }}>{u.username || 'Sem nome'}</div>
-                          {/* We don't have email in profiles table usually, but if we did we'd show it */}
+                          {u.email && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{u.email}</div>}
                         </div>
                       </div>
                     </td>

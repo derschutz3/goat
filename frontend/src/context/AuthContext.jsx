@@ -5,91 +5,60 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      } else {
-        setLoading(false)
-      }
-    })
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      } else {
-        setUser(null)
-        setLoading(false)
-      }
-    })
-
-    return () => subscription.unsubscribe()
+    // Check local storage for existing session
+    const savedUser = localStorage.getItem('app_session')
+    if (savedUser) {
+      setUser(JSON.parse(savedUser))
+    }
+    setLoading(false)
   }, [])
 
-  const fetchProfile = async (userId) => {
+  const login = async ({ username, password }) => {
     try {
+      // 1. Busca usuário na nossa tabela personalizada
       const { data, error } = await supabase
-        .from('profiles')
+        .from('app_users')
         .select('*')
-        .eq('id', userId)
+        .eq('username', username)
+        .eq('password', password) // Comparação direta para simplicidade
         .single()
-      
-      if (error && error.code !== 'PGRST116') {
-        throw error
+
+      if (error || !data) {
+        console.error('Login error:', error)
+        return false
       }
 
-      if (data) {
-        setUser({ ...data, email: session?.user?.email })
-      } else {
-        // Fallback if profile doesn't exist yet
-        setUser({ id: userId, email: session?.user?.email, role: 'user' })
+      // 2. Salva "sessão" localmente
+      const userData = {
+        id: data.id,
+        username: data.username,
+        role: data.role,
+        email: data.email
       }
-    } catch (error) {
-      console.error('Error fetching profile:', error.message)
-    } finally {
-      setLoading(false)
+      
+      setUser(userData)
+      localStorage.setItem('app_session', JSON.stringify(userData))
+      return true
+    } catch (err) {
+      console.error('Login exception:', err)
+      return false
     }
   }
 
-  const login = async ({ username, password }) => {
-    // Supabase uses email/password by default. 
-    // If username is provided, we assume it's an email for this migration, 
-    // or we'd need a cloud function to map username->email.
-    // For simplicity in this step, let's assume the user inputs email.
-    
-    // However, the previous system used usernames. 
-    // If we want to keep usernames, we need to sign up with metadata.
-    
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: username, // Temporarily treating username as email
-      password,
-    })
-
-    if (error) return false
-    return true
-  }
-
   const logout = async () => {
-    await supabase.auth.signOut()
     setUser(null)
-    setSession(null)
+    localStorage.removeItem('app_session')
   }
 
   const value = useMemo(() => ({ 
     user, 
-    session, 
     login, 
     logout,
     loading 
-  }), [user, session, loading])
+  }), [user, loading])
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>
 }

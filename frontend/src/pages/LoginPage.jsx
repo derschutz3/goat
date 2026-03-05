@@ -15,9 +15,9 @@ export default function LoginPage() {
     setError('')
     const ok = await login(form)
     if (!ok) {
-      setError('Acesso negado. Verifique suas credenciais.')
+      setError('Acesso negado. Usuário ou senha incorretos.')
     } else {
-      navigate('/dashboard', { replace: true })
+      navigate('/escala', { replace: true })
     }
     setLoading(false)
   }
