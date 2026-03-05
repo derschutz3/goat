@@ -36,9 +36,7 @@ export default function StoresPage() {
       setStores(data || [])
     } catch (err) {
       console.error('Error fetching stores:', err)
-      // Fallback to mock data if table doesn't exist yet
-      setStores(mockStores)
-      addToast('Erro ao carregar lojas, usando dados locais', 'error')
+      addToast('Erro ao carregar lojas: ' + err.message, 'error')
     } finally {
       setLoading(false)
     }
