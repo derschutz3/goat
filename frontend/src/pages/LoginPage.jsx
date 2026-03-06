@@ -220,10 +220,6 @@ export default function LoginPage() {
             {loading ? 'Autenticando...' : 'Entrar no Sistema'}
           </button>
         </form>
-        
-        <div style={{ textAlign: 'center', marginTop: 24, fontSize: 13, color: 'var(--text-dim)' }}>
-          © 2026 Enterprise Systems
-        </div>
       </div>
     </div>
   )
