@@ -28,7 +28,9 @@ export default function AppShell({ children }) {
     <div className={`app-shell ${menuOpen ? 'menu-open' : ''}`}>
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-logo" style={{ width: 32, height: 32, background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: 8, flexShrink: 0 }}></div>
+          <div className="brand-logo" style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+            <img src="/primatas-logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.style.background = 'linear-gradient(135deg, var(--primary), var(--accent))'; }} />
+          </div>
           <span className="brand-text" style={{ color: 'var(--text-main)', opacity: 1, visibility: 'visible', transform: 'none' }}>Primatas System</span>
         </div>
         
@@ -68,7 +70,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.4</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.5</div>
         </div>
       </aside>
 
