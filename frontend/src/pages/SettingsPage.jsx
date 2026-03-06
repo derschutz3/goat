@@ -167,41 +167,41 @@ export default function SettingsPage() {
 
       {/* Content SLA */}
       {activeTab === 'sla' && (
-        <div className="card max-w-3xl animate-fade-in overflow-hidden">
+        <div className="card max-w-3xl animate-fade-in">
           <div className="card-header border-b border-light p-6">
             <h3 className="font-semibold text-lg">Definição de Prazos</h3>
             <p className="text-muted text-sm mt-1">Configure o tempo máximo (em horas) para resolução de cada prioridade.</p>
           </div>
           
-          <div className="flex flex-col">
-            {Object.entries(sla).map(([key, val], index, arr) => (
-              <div key={key} className={`flex items-center justify-between p-6 hover:bg-muted-5 transition-colors ${index !== arr.length - 1 ? 'border-b border-light' : ''}`}>
+          <div className="p-6 grid gap-4">
+            {Object.entries(sla).map(([key, val]) => (
+              <div key={key} className="flex items-center justify-between p-4 border border-light rounded-xl hover:bg-muted-5 transition-colors">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-${key === 'critica' ? 'red' : key === 'alta' ? 'orange' : key === 'media' ? 'yellow' : 'blue'}-500/10`}>
-                     <div className={`w-4 h-4 rounded-full bg-${key === 'critica' ? 'red' : key === 'alta' ? 'orange' : key === 'media' ? 'yellow' : 'blue'}-500 shadow-sm`}></div>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${key === 'critica' ? 'red' : key === 'alta' ? 'orange' : key === 'media' ? 'yellow' : 'blue'}-500/10`}>
+                     <div className={`w-3 h-3 rounded-full bg-${key === 'critica' ? 'red' : key === 'alta' ? 'orange' : key === 'media' ? 'yellow' : 'blue'}-500`}></div>
                   </div>
                   <div>
-                    <span className="capitalize font-semibold text-lg block">{key}</span>
-                    <span className="text-xs text-muted uppercase tracking-wider font-medium">Prioridade</span>
+                    <div className="font-medium capitalize text-lg">{key}</div>
+                    <div className="text-xs text-muted font-mono mt-0.5 uppercase tracking-wider">Prioridade</div>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4 bg-muted-5 p-2 pr-4 rounded-xl border border-light focus-within:border-primary transition-all">
+                <div className="flex items-center gap-3">
                   <input 
                     type="number" 
-                    className="bg-transparent border-none text-right w-20 text-white outline-none font-bold text-xl" 
+                    className="input w-24 text-center h-12" 
                     value={val} 
                     onChange={(e) => handleSlaChange(key, e.target.value)}
                   />
-                  <span className="text-muted text-sm font-medium border-l border-light pl-4 py-1">horas</span>
+                  <span className="text-muted text-sm font-medium">horas</span>
                 </div>
               </div>
             ))}
           </div>
           
-          <div className="p-6 bg-muted-5 border-t border-light">
-            <button className="btn btn-primary w-full py-4 text-base shadow-lg shadow-primary/20" onClick={saveSla} disabled={loading}>
-              {loading ? 'Salvando alterações...' : 'Salvar Alterações'}
+          <div className="p-6 border-t border-light flex justify-end bg-muted-5 rounded-b-xl">
+            <button className="btn btn-primary px-8" onClick={saveSla} disabled={loading}>
+              {loading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </div>
         </div>
