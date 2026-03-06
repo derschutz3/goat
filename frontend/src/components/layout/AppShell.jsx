@@ -29,7 +29,15 @@ export default function AppShell({ children }) {
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-logo" style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
-            <img src="/primatas-logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.style.background = 'linear-gradient(135deg, var(--primary), var(--accent))'; }} />
+            <img 
+              src="https://files.trae.ai/images/d37823e5-9e47-4e2a-a2ba-e847dbcf2646.png" 
+              alt="Logo" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              onError={(e) => { 
+                e.target.onerror = null; 
+                e.target.src = '/primatas-logo.png'; // Fallback to local
+              }} 
+            />
           </div>
           <span className="brand-text" style={{ color: 'var(--text-main)', opacity: 1, visibility: 'visible', transform: 'none' }}>Primatas System</span>
         </div>
@@ -70,7 +78,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.5</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.6</div>
         </div>
       </aside>
 
