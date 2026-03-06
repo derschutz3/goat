@@ -9,13 +9,16 @@ export default function SchedulePage() {
   const [schedules, setSchedules] = useState([])
   const [technicians, setTechnicians] = useState([])
   const [stores, setStores] = useState([])
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [editingCell, setEditingCell] = useState(null) // { techId, dateStr }
   const [manualStore, setManualStore] = useState('')
   
-  // Gerar datas da semana atual/próxima
-  const getNextDays = (days = 7) => {
+  // Gerar datas da semana atual/próxima (Segunda a Sexta ou Sábado)
+  const getNextDays = (days = 5) => {
     const dates = []
     const today = new Date()
+    // Find next Monday if today is weekend, otherwise start from today or this week's Monday
+    // For simplicity, let's show next 5 days starting from today for now, or fixed Mon-Fri logic
+    // Implementing fixed logic: Start from today
     for (let i = 0; i < days; i++) {
       const d = new Date(today)
       d.setDate(today.getDate() + i)
@@ -24,7 +27,7 @@ export default function SchedulePage() {
     return dates
   }
   
-  const weekDays = getNextDays(7)
+  const weekDays = getNextDays(5) // Show 5 days (matrix columns)
 
   useEffect(() => {
     fetchData()
@@ -34,11 +37,16 @@ export default function SchedulePage() {
     try {
       setLoading(true)
       
-      // 1. Buscar técnicos (apenas quem pode atuar como técnico)
+      // 1. Buscar técnicos (APENAS quem pode atuar como técnico)
+      // Strict filter: only users with role 'tecnico' should appear in rows? 
+      // User said "Usuarios que nao tem o sub usuario tecnico, nao irao aparecer".
+      // But also said admin/manager can act as techs.
+      // Let's stick to the roles that CAN be techs.
       const { data: techs } = await supabase
         .from('app_users')
         .select('*')
         .in('role', ['tecnico', 'admin', 'manager', 'supervisor'])
+        .order('username')
       
       setTechnicians(techs || [])
 
@@ -47,12 +55,13 @@ export default function SchedulePage() {
         .from('stores')
         .select('id, name')
         .eq('active', true)
+        .order('name')
       
       setStores(storesData || [])
 
       // 3. Buscar escalas existentes
       const startDate = weekDays[0].toISOString().split('T')[0]
-      const endDate = weekDays[6].toISOString().split('T')[0]
+      const endDate = weekDays[weekDays.length - 1].toISOString().split('T')[0]
       
       const { data: scheds, error: schedError } = await supabase
         .from('schedules')
@@ -79,25 +88,24 @@ export default function SchedulePage() {
     }
   }
 
-  const handleAddSchedule = async (userId, date) => {
+  const handleAddSchedule = async (techId, dateStr) => {
     if (!manualStore) {
       addToast('Selecione uma loja primeiro', 'error')
       return
     }
 
     try {
-      const dateStr = date.toISOString().split('T')[0]
-      
       const { data, error } = await supabase
         .from('schedules')
-        .insert([{ user_id: userId, date: dateStr, store_id: manualStore }])
+        .insert([{ user_id: techId, date: dateStr, store_id: manualStore }])
         .select(`*, app_users (username, avatar_url), stores (name)`)
         .single()
 
       if (error) throw error
 
       setSchedules([...schedules, data])
-      addToast('Técnico escalado com sucesso')
+      addToast('Agendado')
+      setEditingCell(null) // Close popover
     } catch (err) {
       addToast('Erro ao adicionar: ' + err.message, 'error')
     }
@@ -113,7 +121,7 @@ export default function SchedulePage() {
       if (error) throw error
 
       setSchedules(schedules.filter(s => s.id !== scheduleId))
-      addToast('Removido da escala')
+      addToast('Removido')
     } catch (err) {
       addToast('Erro ao remover', 'error')
     }
@@ -126,9 +134,8 @@ export default function SchedulePage() {
       const { data: tickets } = await supabase
         .from('tickets')
         .select('store_id')
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // Últimos 30 dias
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) 
 
-      // Contar ocorrências por loja
       const demandMap = {}
       tickets?.forEach(t => {
         if (t.store_id) {
@@ -136,41 +143,38 @@ export default function SchedulePage() {
         }
       })
 
-      // Ordenar lojas por demanda (maior para menor)
       const rankedStores = Object.entries(demandMap)
         .sort(([, a], [, b]) => b - a)
         .map(([id]) => parseInt(id))
 
-      // Se não houver dados, usar todas as lojas aleatoriamente
       const targetStores = rankedStores.length > 0 
         ? rankedStores 
         : stores.map(s => s.id)
 
       const newSchedules = []
       
-      // Distribuição inteligente
-      weekDays.forEach((day, dayIndex) => {
-        // Ignorar domingo (0)
-        if (day.getDay() === 0) return 
+      // Distribuição inteligente: Load Balancing
+      // Objetivo: Preencher a grade (Techs x Days) distribuindo as lojas prioritárias
+      
+      let storeCursor = 0
+      
+      // Iterar sobre dias (Colunas)
+      weekDays.forEach((day) => {
+        // Ignorar fim de semana se quiser, mas vamos assumir dias úteis
+        if (day.getDay() === 0 || day.getDay() === 6) return 
 
-        // Sábado (6) é dia de plantão (menos técnicos)
-        const isSaturday = day.getDay() === 6
-        const availableTechs = isSaturday 
-          ? technicians.slice(0, Math.ceil(technicians.length / 2)) 
-          : technicians
+        const dateStr = day.toISOString().split('T')[0]
 
-        // Atribuir técnicos às lojas mais prioritárias
-        availableTechs.forEach((tech, techIndex) => {
-          // Round-robin nas lojas prioritárias
-          // O técnico 1 vai na loja Top 1, Técnico 2 na Top 2...
-          // No dia seguinte, rotaciona para não ficar repetitivo
-          const storeIndex = (techIndex + dayIndex) % targetStores.length
-          const storeId = targetStores[storeIndex]
+        // Iterar sobre técnicos (Linhas)
+        technicians.forEach((tech) => {
+          // Round-robin nas lojas
+          const storeId = targetStores[storeCursor % targetStores.length]
+          storeCursor++
 
           if (storeId) {
             newSchedules.push({
               user_id: tech.id,
-              date: day.toISOString().split('T')[0],
+              date: dateStr,
               store_id: storeId,
               shift: 'full'
             })
@@ -179,39 +183,43 @@ export default function SchedulePage() {
       })
 
       if (newSchedules.length > 0) {
+        // Opcional: Limpar semana atual antes de inserir?
+        // Por segurança, apenas insere. O usuário remove o que não quer.
+        
         const { error } = await supabase
           .from('schedules')
           .insert(newSchedules)
         
         if (error) throw error
         
-        addToast(`Escala inteligente gerada baseada na demanda!`, 'success')
+        addToast(`Escala gerada e distribuída!`, 'success')
         fetchData()
       } else {
-        addToast('Não foi possível gerar escala (sem técnicos ou lojas)', 'warning')
+        addToast('Não foi possível gerar escala', 'warning')
       }
 
     } catch (err) {
       console.error('Erro na IA:', err)
-      addToast('Erro ao gerar escala: ' + err.message, 'error')
+      addToast('Erro: ' + err.message, 'error')
     } finally {
       setGenerating(false)
     }
+  }
+
+  // Helper para agrupar
+  const getSchedulesForCell = (techId, dateStr) => {
+    return schedules.filter(s => s.user_id === techId && s.date === dateStr)
   }
 
   return (
     <div className="grid">
       <div className="dashboard-header">
         <div>
-          <div className="title">Escala de Técnicos</div>
-          <div className="subtitle">Gerenciamento de visitas baseado em demanda</div>
+          <div className="title">Escala de Visitas</div>
+          <div className="subtitle">Planejamento semanal de técnicos nas lojas</div>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <button 
-            className="btn-secondary" 
-            onClick={fetchData}
-            title="Atualizar"
-          >
+          <button className="btn-secondary" onClick={fetchData} title="Atualizar">
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
@@ -222,118 +230,132 @@ export default function SchedulePage() {
             disabled={generating || technicians.length === 0}
             style={{ background: 'linear-gradient(135deg, #8b5cf6, #d946ef)' }}
           >
-            {generating ? 'Analisando Demanda...' : 'Gerar Escala Inteligente'}
+            {generating ? 'Distribuindo...' : 'Gerar Escala Automática'}
           </button>
         </div>
       </div>
 
-      <div style={{ marginBottom: 20, padding: 16, background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: 16 }}>
-        <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>Configuração Manual:</span>
-        <select 
-          className="select" 
-          style={{ width: 200 }}
-          value={manualStore}
-          onChange={e => setManualStore(e.target.value)}
-        >
-          <option value="">Selecione a Loja...</option>
-          {stores.map(s => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>← Selecione a loja antes de adicionar um técnico no dia</span>
+      <div style={{ marginBottom: 20, padding: 16, background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>1. Selecione a Loja:</span>
+          <select 
+            className="select" 
+            style={{ width: 220 }}
+            value={manualStore}
+            onChange={e => setManualStore(e.target.value)}
+          >
+            <option value="">Selecione...</option>
+            {stores.map(s => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>2. Clique no ícone de lápis na grade para adicionar a visita</span>
       </div>
 
       {loading ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Carregando escala...</div>
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Carregando grade...</div>
       ) : (
-        <div className="grid-7" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
-          {weekDays.map(date => {
-            const dateStr = date.toISOString().split('T')[0]
-            const isToday = new Date().toISOString().split('T')[0] === dateStr
-            const daySchedules = schedules.filter(s => s.date === dateStr)
-            
-            return (
-              <div key={dateStr} className="card" style={{ padding: 16, minHeight: 200, display: 'flex', flexDirection: 'column', borderColor: isToday ? 'var(--primary)' : 'var(--border-light)' }}>
-                <div style={{ marginBottom: 12, borderBottom: '1px solid var(--border-light)', paddingBottom: 8 }}>
-                  <div style={{ textTransform: 'capitalize', fontWeight: 600, color: isToday ? 'var(--primary)' : 'var(--text-main)' }}>
-                    {date.toLocaleDateString('pt-BR', { weekday: 'short' })}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}
-                  </div>
-                </div>
-
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {daySchedules.map(sched => (
-                    <div key={sched.id} style={{ 
-                      display: 'flex', flexDirection: 'column', gap: 4,
-                      padding: 8, borderRadius: 6, background: 'rgba(255,255,255,0.05)',
-                      fontSize: 13, borderLeft: '3px solid var(--accent)'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ 
-                          width: 20, height: 20, borderRadius: '50%', 
-                          background: 'var(--primary)', color: 'white',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 10, fontWeight: 'bold'
-                        }}>
-                          {sched.app_users?.avatar_url ? (
-                            <img src={sched.app_users.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                          ) : (
-                            (sched.app_users?.username?.[0] || '?').toUpperCase()
-                          )}
-                        </div>
-                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
-                          {sched.app_users?.username}
-                        </span>
-                        <button 
-                          onClick={() => handleRemoveSchedule(sched.id)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}
-                          className="hover-danger"
-                        >
-                          ×
-                        </button>
+        <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
+          <table className="table" style={{ width: '100%', minWidth: 800 }}>
+            <thead>
+              <tr>
+                <th style={{ width: 200, paddingLeft: 24, background: 'var(--bg-app)' }}>Técnico</th>
+                {weekDays.map(day => (
+                  <th key={day.toISOString()} style={{ textAlign: 'center', background: 'var(--bg-app)' }}>
+                    <div style={{ textTransform: 'capitalize' }}>{day.toLocaleDateString('pt-BR', { weekday: 'long' })}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>{day.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {technicians.map(tech => (
+                <tr key={tech.id}>
+                  <td style={{ paddingLeft: 24, verticalAlign: 'middle' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ 
+                        width: 36, height: 36, borderRadius: '50%', 
+                        background: 'var(--primary)', color: 'white',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 14, fontWeight: 'bold'
+                      }}>
+                        {tech.avatar_url ? (
+                          <img src={tech.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                        ) : (
+                          (tech.username?.[0] || '?').toUpperCase()
+                        )}
                       </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        {sched.stores?.name || 'Sem local'}
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{tech.username}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{tech.role}</div>
                       </div>
                     </div>
-                  ))}
+                  </td>
                   
-                  {daySchedules.length === 0 && (
-                    <div style={{ fontSize: 12, color: 'var(--text-dim)', fontStyle: 'italic', textAlign: 'center', marginTop: 10 }}>
-                      -
-                    </div>
-                  )}
-                </div>
+                  {weekDays.map(day => {
+                    const dateStr = day.toISOString().split('T')[0]
+                    const cellSchedules = getSchedulesForCell(tech.id, dateStr)
+                    const isEditing = editingCell?.techId === tech.id && editingCell?.dateStr === dateStr
 
-                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border-light)' }}>
-                  <select 
-                    className="input" 
-                    style={{ padding: '4px 8px', fontSize: 12, width: '100%' }}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        handleAddSchedule(e.target.value, date)
-                        e.target.value = ''
-                      }
-                    }}
-                    value=""
-                    disabled={!manualStore}
-                  >
-                    <option value="" disabled>+ Adicionar Técnico</option>
-                    {technicians.map(t => (
-                      <option key={t.id} value={t.id} disabled={daySchedules.some(s => s.user_id === t.id)}>
-                        {t.username}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )
-          })}
+                    return (
+                      <td key={dateStr} style={{ verticalAlign: 'top', height: 100, padding: 8, background: 'rgba(255,255,255,0.01)', borderRight: '1px solid var(--border-light)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, height: '100%' }}>
+                          {cellSchedules.map(s => (
+                            <div key={s.id} style={{ 
+                              background: 'var(--bg-app)', border: '1px solid var(--border-light)', 
+                              borderRadius: 6, padding: '6px 8px', fontSize: 12,
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                            }}>
+                              <span style={{ fontWeight: 500 }}>{s.stores?.name}</span>
+                              <button 
+                                onClick={() => handleRemoveSchedule(s.id)}
+                                style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}
+                                className="hover-danger"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                          
+                          {/* Botão de Adicionar (Lápis/Mais) */}
+                          <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+                            <button
+                              onClick={() => {
+                                if (manualStore) {
+                                  handleAddSchedule(tech.id, dateStr)
+                                } else {
+                                  addToast('Selecione uma loja no topo primeiro', 'info')
+                                }
+                              }}
+                              style={{ 
+                                background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '50%', 
+                                width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', color: 'var(--text-muted)', transition: 'all 0.2s'
+                              }}
+                              title="Adicionar Loja Selecionada"
+                              className="hover-primary"
+                            >
+                              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+              {technicians.length === 0 && (
+                <tr>
+                  <td colSpan={weekDays.length + 1} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
+                    Nenhum técnico disponível para a escala.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
