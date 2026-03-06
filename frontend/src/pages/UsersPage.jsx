@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -12,6 +12,10 @@ export default function UsersPage() {
   const [creating, setCreating] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
+  
+  const [uploading, setUploading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     fetchUsers()
@@ -31,6 +35,74 @@ export default function UsersPage() {
       addToast('Erro ao carregar usuários', 'error')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDrag = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0])
+    }
+  }
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileUpload(e.target.files[0])
+    }
+  }
+
+  const handleFileUpload = async (file) => {
+    try {
+      setUploading(true)
+      
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Por favor, envie apenas imagens.')
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error('A imagem deve ter no máximo 2MB.')
+      }
+
+      const fileExt = file.name.split('.').pop()
+      // Use editingId if editing, otherwise random temp ID (will be orphaned if not saved, but ok for now)
+      const userId = editingId || 'temp-' + Math.random().toString(36).substr(2, 9)
+      const fileName = `${userId}-${Math.random()}.${fileExt}`
+      const filePath = `${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file)
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      if (data) {
+        setFormData(prev => ({ ...prev, avatar_url: data.publicUrl }))
+        addToast('Imagem carregada! Salve para confirmar.')
+      }
+    } catch (error) {
+      console.error('Erro no upload:', error)
+      addToast(error.message || 'Erro ao enviar imagem', 'error')
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -66,7 +138,6 @@ export default function UsersPage() {
         addToast(`Usuário ${formData.username} atualizado com sucesso!`)
       } else {
         // Create new user
-        // Check if username exists
         const { data: existing } = await supabase
           .from('app_users')
           .select('id')
@@ -214,6 +285,69 @@ export default function UsersPage() {
             <div className="title" style={{ fontSize: 18 }}>{editingId ? 'Editar Usuário' : 'Novo Usuário'}</div>
           </div>
           <form onSubmit={handleSaveUser} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, alignItems: 'end' }}>
+            {/* Avatar Upload */}
+            <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, width: '100%', maxWidth: 300 }}>
+                <div style={{ position: 'relative' }}>
+                  {formData.avatar_url ? (
+                    <img 
+                      src={formData.avatar_url} 
+                      alt="Avatar" 
+                      style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', border: '4px solid var(--bg-app)' }} 
+                      onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                    />
+                  ) : null}
+                  <div style={{ 
+                    width: 100, height: 100, borderRadius: '50%', 
+                    background: 'linear-gradient(135deg, var(--secondary), var(--primary))',
+                    display: formData.avatar_url ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'white', fontWeight: 'bold', fontSize: 32, border: '4px solid var(--bg-app)'
+                  }}>
+                    {(formData.username || '?').charAt(0).toUpperCase()}
+                  </div>
+                  
+                  {uploading && (
+                    <div style={{ 
+                      position: 'absolute', inset: 0, borderRadius: '50%', 
+                      background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <div className="spinner"></div>
+                    </div>
+                  )}
+                </div>
+
+                <div 
+                  className={`drop-zone ${dragActive ? 'active' : ''}`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    border: `2px dashed ${dragActive ? 'var(--primary)' : 'var(--border-light)'}`,
+                    borderRadius: 'var(--radius-md)',
+                    padding: '12px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    background: dragActive ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+                    transition: 'all 0.2s',
+                    width: '100%'
+                  }}
+                >
+                  <input 
+                    ref={fileInputRef}
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    {uploading ? 'Enviando...' : 'Arraste uma foto ou clique'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div>
               <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Email</label>
               <input 
@@ -226,13 +360,13 @@ export default function UsersPage() {
               />
             </div>
             <div>
-              <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Senha {editingId && '(deixe em branco para manter)'}</label>
+              <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Senha {editingId && '(opcional)'}</label>
               <input 
                 className="input" 
                 type="text" 
                 value={formData.password}
                 onChange={e => setFormData({...formData, password: e.target.value})}
-                placeholder={editingId ? "Nova senha (opcional)" : "Senha de acesso"}
+                placeholder={editingId ? "Nova senha" : "Senha de acesso"}
                 required={!editingId}
                 minLength={4}
               />
@@ -246,16 +380,6 @@ export default function UsersPage() {
                 onChange={e => setFormData({...formData, username: e.target.value})}
                 placeholder="Ex: joaosilva"
                 required
-              />
-            </div>
-            <div>
-              <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>URL da Foto (opcional)</label>
-              <input 
-                className="input" 
-                type="text" 
-                value={formData.avatar_url}
-                onChange={e => setFormData({...formData, avatar_url: e.target.value})}
-                placeholder="https://..."
               />
             </div>
             <div>

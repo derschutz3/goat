@@ -1,12 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 
 export default function ProfilePage() {
-  const { user, login } = useAuth() // login can be used to update session locally
+  const { user } = useAuth()
   const { addToast } = useToast()
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const fileInputRef = useRef(null)
+  
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -22,10 +26,8 @@ export default function ProfilePage() {
         ...prev,
         username: user.username || '',
         email: user.email || '',
-        avatar_url: user.avatar_url || '' // Assuming we add this to session later
+        avatar_url: user.avatar_url || ''
       }))
-      
-      // Fetch fresh data
       fetchProfile()
     }
   }, [user])
@@ -53,6 +55,76 @@ export default function ProfilePage() {
     }
   }
 
+  const handleDrag = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0])
+    }
+  }
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileUpload(e.target.files[0])
+    }
+  }
+
+  const handleFileUpload = async (file) => {
+    try {
+      setUploading(true)
+      
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Por favor, envie apenas imagens.')
+      }
+
+      // Validar tamanho (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        throw new Error('A imagem deve ter no máximo 2MB.')
+      }
+
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`
+      const filePath = `${fileName}`
+
+      // Upload para o Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file)
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      // Pegar URL pública
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      if (data) {
+        setFormData(prev => ({ ...prev, avatar_url: data.publicUrl }))
+        addToast('Imagem carregada com sucesso! Clique em Salvar para confirmar.')
+      }
+    } catch (error) {
+      console.error('Erro no upload:', error)
+      addToast(error.message || 'Erro ao enviar imagem', 'error')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -62,7 +134,6 @@ export default function ProfilePage() {
         avatar_url: formData.avatar_url
       }
 
-      // Password change logic
       if (formData.newPassword) {
         if (formData.newPassword !== formData.confirmPassword) {
           throw new Error('A nova senha e a confirmação não coincidem')
@@ -71,7 +142,6 @@ export default function ProfilePage() {
           throw new Error('A senha deve ter pelo menos 4 caracteres')
         }
         
-        // Verify current password (simple check)
         const { data: verifyData } = await supabase
           .from('app_users')
           .select('id')
@@ -86,19 +156,14 @@ export default function ProfilePage() {
         updateData.password = formData.newPassword
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('app_users')
         .update(updateData)
         .eq('id', user.id)
-        .select()
-        .single()
 
       if (error) throw error
 
       addToast('Perfil atualizado com sucesso!')
-      
-      // Update local session data if needed (optional, for avatar mainly)
-      // login({ username: data.username, password: data.password }) // Re-login to refresh session? Or just ignore for now.
       
       setFormData(prev => ({
         ...prev,
@@ -129,49 +194,75 @@ export default function ProfilePage() {
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          {/* Avatar Upload Area */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
             <div style={{ position: 'relative' }}>
               {formData.avatar_url ? (
                 <img 
                   src={formData.avatar_url} 
                   alt="Avatar" 
-                  style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', border: '4px solid var(--bg-app)' }} 
+                  style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '4px solid var(--bg-app)' }} 
                   onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
                 />
               ) : null}
               <div style={{ 
-                width: 100, height: 100, borderRadius: '50%', 
+                width: 120, height: 120, borderRadius: '50%', 
                 background: 'linear-gradient(135deg, var(--secondary), var(--primary))',
                 display: formData.avatar_url ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 'bold', fontSize: 32, border: '4px solid var(--bg-app)'
+                color: 'white', fontWeight: 'bold', fontSize: 40, border: '4px solid var(--bg-app)'
               }}>
                 {(formData.username || '?').charAt(0).toUpperCase()}
               </div>
+              
+              {uploading && (
+                <div style={{ 
+                  position: 'absolute', inset: 0, borderRadius: '50%', 
+                  background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <div className="spinner"></div>
+                </div>
+              )}
+            </div>
+
+            <div 
+              className={`drop-zone ${dragActive ? 'active' : ''}`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                border: `2px dashed ${dragActive ? 'var(--primary)' : 'var(--border-light)'}`,
+                borderRadius: 'var(--radius-md)',
+                padding: '20px',
+                textAlign: 'center',
+                cursor: 'pointer',
+                background: dragActive ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+                transition: 'all 0.2s',
+                width: '100%'
+              }}
+            >
+              <input 
+                ref={fileInputRef}
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                {uploading ? 'Enviando...' : 'Arraste uma foto ou clique para selecionar'}
+              </p>
             </div>
           </div>
 
           <div>
-            <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Nome de Usuário (não editável)</label>
+            <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Nome de Usuário</label>
             <input className="input" type="text" value={formData.username} disabled style={{ opacity: 0.7 }} />
           </div>
 
           <div>
-            <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Email (não editável)</label>
+            <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Email</label>
             <input className="input" type="email" value={formData.email} disabled style={{ opacity: 0.7 }} />
-          </div>
-
-          <div>
-            <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>URL da Foto de Perfil</label>
-            <input 
-              className="input" 
-              type="text" 
-              value={formData.avatar_url}
-              onChange={e => setFormData({...formData, avatar_url: e.target.value})}
-              placeholder="https://exemplo.com/minha-foto.jpg"
-            />
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-              Cole o link direto de uma imagem (ex: imgur, ibb, ou bucket público)
-            </div>
           </div>
 
           <div style={{ borderTop: '1px solid var(--border-light)', margin: '10px 0' }}></div>
