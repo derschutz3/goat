@@ -14,19 +14,6 @@ export function AuthProvider({ children }) {
       setUser(JSON.parse(savedUser))
     }
     setLoading(false)
-
-    // Listen for custom event to force user update
-    const handleUserUpdate = (event) => {
-      const updatedUser = event.detail
-      setUser(prev => {
-        const newState = { ...prev, ...updatedUser }
-        localStorage.setItem('app_session', JSON.stringify(newState))
-        return newState
-      })
-    }
-
-    window.addEventListener('auth:update-user', handleUserUpdate)
-    return () => window.removeEventListener('auth:update-user', handleUserUpdate)
   }, [])
 
   const login = async ({ username, password }) => {
@@ -66,9 +53,12 @@ export function AuthProvider({ children }) {
   }
 
   const updateUser = (newData) => {
-    // Dispatch custom event to ensure all listeners update
-    const event = new CustomEvent('auth:update-user', { detail: newData })
-    window.dispatchEvent(event)
+    setUser(prev => {
+      if (!prev) return null
+      const updated = { ...prev, ...newData }
+      localStorage.setItem('app_session', JSON.stringify(updated))
+      return updated
+    })
   }
 
   const value = useMemo(() => ({ 

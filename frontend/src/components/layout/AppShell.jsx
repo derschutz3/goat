@@ -72,7 +72,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v3.7</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v3.8</div>
         </div>
       </aside>
 
@@ -93,7 +93,8 @@ export default function AppShell({ children }) {
             <div className="avatar">
               {user?.avatar_url ? (
                 <img 
-                  src={`${user.avatar_url}?t=${new Date().getTime()}`} 
+                  key={user.avatar_url}
+                  src={user.avatar_url} 
                   alt={user.username} 
                   style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
                   onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
