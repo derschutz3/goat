@@ -177,7 +177,7 @@ export default function LoginPage() {
       <div className="login-blob-2"></div>
 
       <div className="login-card">
-        <div className="login-title">Service Desk</div>
+        <div className="login-title">Primatas System</div>
         <div className="login-subtitle">Acesse sua conta para continuar</div>
 
         <form onSubmit={handleSubmit}>
