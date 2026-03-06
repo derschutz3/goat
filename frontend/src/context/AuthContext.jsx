@@ -14,16 +14,28 @@ export function AuthProvider({ children }) {
       setUser(JSON.parse(savedUser))
     }
     setLoading(false)
+
+    // Listen for custom event to force user update
+    const handleUserUpdate = (event) => {
+      const updatedUser = event.detail
+      setUser(prev => {
+        const newState = { ...prev, ...updatedUser }
+        localStorage.setItem('app_session', JSON.stringify(newState))
+        return newState
+      })
+    }
+
+    window.addEventListener('auth:update-user', handleUserUpdate)
+    return () => window.removeEventListener('auth:update-user', handleUserUpdate)
   }, [])
 
   const login = async ({ username, password }) => {
     try {
-      // 1. Busca usuário na nossa tabela personalizada
       const { data, error } = await supabase
         .from('app_users')
         .select('*')
         .eq('username', username)
-        .eq('password', password) // Comparação direta para simplicidade
+        .eq('password', password)
         .single()
 
       if (error || !data) {
@@ -31,7 +43,6 @@ export function AuthProvider({ children }) {
         return false
       }
 
-      // 2. Salva "sessão" localmente
       const userData = {
         id: data.id,
         username: data.username,
@@ -54,13 +65,10 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('app_session')
   }
 
-  // Helper to update session data without relogin (e.g. after profile edit)
   const updateUser = (newData) => {
-    setUser(prev => {
-      const updated = { ...prev, ...newData }
-      localStorage.setItem('app_session', JSON.stringify(updated))
-      return updated
-    })
+    // Dispatch custom event to ensure all listeners update
+    const event = new CustomEvent('auth:update-user', { detail: newData })
+    window.dispatchEvent(event)
   }
 
   const value = useMemo(() => ({ 
