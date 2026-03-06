@@ -177,15 +177,14 @@ export default function LoginPage() {
       <div className="login-blob-2"></div>
 
       <div className="login-card">
-        <div style={{ width: 80, height: 80, margin: '0 auto 20px', borderRadius: '50%', overflow: 'hidden', border: '4px solid var(--primary)' }}>
+        <div style={{ width: 80, height: 80, margin: '0 auto 20px', borderRadius: '50%', overflow: 'hidden', border: '4px solid var(--primary)', background: 'var(--card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <img 
-            src="/primatas-photo.jpg" 
+            src="/monkey-icon.svg" 
             alt="Logo" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-            onError={(e) => { e.target.src = '/primatas-logo.svg' }}
+            style={{ width: '70%', height: '70%', objectFit: 'contain' }} 
           />
         </div>
-        <div className="login-title">Primatas System</div>
+        <div className="login-title">Primatas de Madagascar</div>
         <div className="login-subtitle">Acesse sua conta para continuar</div>
 
         <form onSubmit={handleSubmit}>

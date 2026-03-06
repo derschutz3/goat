@@ -31,15 +31,14 @@ export default function AppShell({ children }) {
       <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-logo" style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+          <div className="brand-logo" style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--card-bg)' }}>
             <img 
-              src="/primatas-photo.jpg" 
+              src="/monkey-icon.svg" 
               alt="Logo" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-              onError={(e) => { e.target.src = '/primatas-logo.svg' }}
+              style={{ width: '80%', height: '80%', objectFit: 'contain' }} 
             />
           </div>
-          <span className="brand-text" style={{ color: 'var(--text-main)', opacity: 1, visibility: 'visible', transform: 'none' }}>Primatas System</span>
+          <span className="brand-text" style={{ color: 'var(--text-main)', opacity: 1, visibility: 'visible', transform: 'none' }}>Primatas de Madagascar</span>
         </div>
         
         <nav className="menu">
@@ -82,7 +81,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.23</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.24</div>
         </div>
       </aside>
 
