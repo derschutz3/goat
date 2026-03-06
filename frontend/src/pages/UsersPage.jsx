@@ -8,9 +8,10 @@ export default function UsersPage() {
   const { addToast } = useToast()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [newUser, setNewUser] = useState({ email: '', password: '', username: '', role: 'user' })
+  const [formData, setFormData] = useState({ email: '', password: '', username: '', role: 'user', avatar_url: '' })
   const [creating, setCreating] = useState(false)
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)
 
   useEffect(() => {
     fetchUsers()
@@ -18,7 +19,6 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     try {
-      // Fetch from our simple custom table
       const { data, error } = await supabase
         .from('app_users')
         .select('*')
@@ -34,46 +34,92 @@ export default function UsersPage() {
     }
   }
 
-  const handleCreateUser = async (e) => {
+  const handleSaveUser = async (e) => {
     e.preventDefault()
     setCreating(true)
 
     try {
-      // Check if username exists
-      const { data: existing } = await supabase
-        .from('app_users')
-        .select('id')
-        .eq('username', newUser.username)
-        .single()
+      if (editingId) {
+        // Update existing user
+        const updateData = {
+          username: formData.username,
+          email: formData.email,
+          role: formData.role,
+          avatar_url: formData.avatar_url
+        }
+        
+        // Only update password if provided
+        if (formData.password) {
+          updateData.password = formData.password
+        }
 
-      if (existing) {
-        throw new Error('Nome de usuário já existe')
+        const { data, error } = await supabase
+          .from('app_users')
+          .update(updateData)
+          .eq('id', editingId)
+          .select()
+          .single()
+
+        if (error) throw error
+
+        setUsers(users.map(u => u.id === editingId ? data : u))
+        addToast(`Usuário ${formData.username} atualizado com sucesso!`)
+      } else {
+        // Create new user
+        // Check if username exists
+        const { data: existing } = await supabase
+          .from('app_users')
+          .select('id')
+          .eq('username', formData.username)
+          .single()
+
+        if (existing) {
+          throw new Error('Nome de usuário já existe')
+        }
+
+        const { data, error } = await supabase
+          .from('app_users')
+          .insert([{
+            username: formData.username,
+            password: formData.password,
+            email: formData.email,
+            role: formData.role,
+            avatar_url: formData.avatar_url
+          }])
+          .select()
+          .single()
+
+        if (error) throw error
+
+        addToast(`Usuário ${formData.username} criado com sucesso!`)
+        setUsers([data, ...users])
       }
-
-      // Insert directly into our custom table
-      const { data, error } = await supabase
-        .from('app_users')
-        .insert([{
-          username: newUser.username,
-          password: newUser.password, // Storing plain text for MVP as requested (simple auth)
-          email: newUser.email,
-          role: newUser.role
-        }])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      addToast(`Usuário ${newUser.username} criado com sucesso!`)
-      setNewUser({ email: '', password: '', username: '', role: 'user' })
-      setShowForm(false)
-      setUsers([data, ...users])
+      
+      resetForm()
     } catch (err) {
-      console.error('Error creating user:', err)
-      addToast(err.message || 'Erro ao criar usuário', 'error')
+      console.error('Error saving user:', err)
+      addToast(err.message || 'Erro ao salvar usuário', 'error')
     } finally {
       setCreating(false)
     }
+  }
+
+  const handleEditClick = (userToEdit) => {
+    setEditingId(userToEdit.id)
+    setFormData({
+      email: userToEdit.email || '',
+      password: '', // Don't show current password
+      username: userToEdit.username,
+      role: userToEdit.role,
+      avatar_url: userToEdit.avatar_url || ''
+    })
+    setShowForm(true)
+  }
+
+  const resetForm = () => {
+    setFormData({ email: '', password: '', username: '', role: 'user', avatar_url: '' })
+    setEditingId(null)
+    setShowForm(false)
   }
 
   const handleDeleteUser = async (userId) => {
@@ -109,11 +155,14 @@ export default function UsersPage() {
         </div>
         <button 
           className="btn-primary" 
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            if (showForm) resetForm()
+            else setShowForm(true)
+          }}
           style={{ display: 'flex', alignItems: 'center', gap: 8 }}
         >
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={showForm ? "M6 18L18 6M6 6l12 12" : "M12 4v16m8-8H4"} />
           </svg>
           {showForm ? 'Cancelar' : 'Novo Usuário'}
         </button>
@@ -162,29 +211,29 @@ export default function UsersPage() {
       {showForm && (
         <div className="card" style={{ marginBottom: 32, animation: 'fadeIn 0.3s ease' }}>
           <div className="card-header">
-            <div className="title" style={{ fontSize: 18 }}>Novo Usuário</div>
+            <div className="title" style={{ fontSize: 18 }}>{editingId ? 'Editar Usuário' : 'Novo Usuário'}</div>
           </div>
-          <form onSubmit={handleCreateUser} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, alignItems: 'end' }}>
+          <form onSubmit={handleSaveUser} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, alignItems: 'end' }}>
             <div>
               <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Email</label>
               <input 
                 className="input" 
                 type="email" 
-                value={newUser.email}
-                onChange={e => setNewUser({...newUser, email: e.target.value})}
+                value={formData.email}
+                onChange={e => setFormData({...formData, email: e.target.value})}
                 placeholder="colaborador@empresa.com"
                 required
               />
             </div>
             <div>
-              <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Senha</label>
+              <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Senha {editingId && '(deixe em branco para manter)'}</label>
               <input 
                 className="input" 
                 type="text" 
-                value={newUser.password}
-                onChange={e => setNewUser({...newUser, password: e.target.value})}
-                placeholder="Senha de acesso"
-                required
+                value={formData.password}
+                onChange={e => setFormData({...formData, password: e.target.value})}
+                placeholder={editingId ? "Nova senha (opcional)" : "Senha de acesso"}
+                required={!editingId}
                 minLength={4}
               />
             </div>
@@ -193,18 +242,28 @@ export default function UsersPage() {
               <input 
                 className="input" 
                 type="text" 
-                value={newUser.username}
-                onChange={e => setNewUser({...newUser, username: e.target.value})}
+                value={formData.username}
+                onChange={e => setFormData({...formData, username: e.target.value})}
                 placeholder="Ex: joaosilva"
                 required
+              />
+            </div>
+            <div>
+              <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>URL da Foto (opcional)</label>
+              <input 
+                className="input" 
+                type="text" 
+                value={formData.avatar_url}
+                onChange={e => setFormData({...formData, avatar_url: e.target.value})}
+                placeholder="https://..."
               />
             </div>
             <div>
               <label className="subtitle" style={{ marginBottom: 8, display: 'block' }}>Função</label>
               <select 
                 className="input"
-                value={newUser.role}
-                onChange={e => setNewUser({...newUser, role: e.target.value})}
+                value={formData.role}
+                onChange={e => setFormData({...formData, role: e.target.value})}
               >
                 <option value="user">Usuário (Padrão)</option>
                 <option value="tecnico">Técnico</option>
@@ -214,7 +273,7 @@ export default function UsersPage() {
               </select>
             </div>
             <button type="submit" className="btn-primary" disabled={creating} style={{ height: 42 }}>
-              {creating ? 'Criando...' : 'Criar Usuário'}
+              {creating ? 'Salvando...' : (editingId ? 'Salvar Alterações' : 'Criar Usuário')}
             </button>
           </form>
         </div>
@@ -245,10 +304,18 @@ export default function UsersPage() {
                   <tr key={u.id} style={{ transition: 'background 0.2s' }}>
                     <td style={{ paddingLeft: 24 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        {u.avatar_url ? (
+                          <img 
+                            src={u.avatar_url} 
+                            alt={u.username} 
+                            style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} 
+                            onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                          />
+                        ) : null}
                         <div style={{ 
                           width: 32, height: 32, borderRadius: '50%', 
                           background: 'linear-gradient(135deg, var(--secondary), var(--primary))',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          display: u.avatar_url ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center',
                           color: 'white', fontWeight: 'bold', fontSize: 12
                         }}>
                           {(u.username || '?').charAt(0).toUpperCase()}
@@ -276,18 +343,28 @@ export default function UsersPage() {
                     </td>
                     <td style={{ color: 'var(--text-muted)' }}>{new Date(u.created_at).toLocaleDateString()}</td>
                     <td style={{ textAlign: 'right', paddingRight: 24 }}>
-                      {u.id !== user?.id && (
-                          <button 
-                              onClick={() => handleDeleteUser(u.id)}
-                              style={{ color: 'var(--danger)', background: 'rgba(239, 68, 68, 0.1)', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 6, transition: 'all 0.2s' }}
-                              title="Remover acesso"
-                              className="hover-danger"
-                          >
-                              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                          </button>
-                      )}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                        <button 
+                          onClick={() => handleEditClick(u)}
+                          style={{ color: 'var(--primary)', background: 'rgba(99, 102, 241, 0.1)', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 6, transition: 'all 0.2s' }}
+                          title="Editar"
+                        >
+                          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        {u.id !== user?.id && (
+                            <button 
+                                onClick={() => handleDeleteUser(u.id)}
+                                style={{ color: 'var(--danger)', background: 'rgba(239, 68, 68, 0.1)', border: 'none', cursor: 'pointer', padding: 8, borderRadius: 6, transition: 'all 0.2s' }}
+                                title="Remover acesso"
+                            >
+                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

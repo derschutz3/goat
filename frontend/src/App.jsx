@@ -8,6 +8,7 @@ import TicketDetailPage from './pages/TicketDetailPage'
 import SchedulePage from './pages/SchedulePage'
 import UsersPage from './pages/UsersPage'
 import StoresPage from './pages/StoresPage'
+import ProfilePage from './pages/ProfilePage'
 import { useAuth } from './context/AuthContext'
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/escala" element={<SchedulePage />} />
         <Route path="/lojas" element={<StoresPage />} />
         <Route path="/usuarios" element={<UsersPage />} />
+        <Route path="/perfil" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AppShell>
