@@ -89,7 +89,59 @@ export default function SettingsPage() {
   }
 
   // --- Handlers Priorities ---
-  // (Apenas visual por enquanto, já que exige mudanças profundas no backend para adicionar novas)
+  const [newPriority, setNewPriority] = useState({ label: '', color: 'neutral' })
+  const [editingPriority, setEditingPriority] = useState(null)
+
+  const addPriority = () => {
+    if (!newPriority.label.trim()) return
+    const id = newPriority.label.toLowerCase().replace(/\s+/g, '_')
+    const newItem = { id, label: newPriority.label, color: newPriority.color }
+    
+    // Evitar duplicatas de ID
+    if (priorities.some(p => p.id === id)) {
+      addToast('Já existe uma prioridade com esse nome.', 'error')
+      return
+    }
+
+    const updated = [...priorities, newItem]
+    setPriorities(updated)
+    savePriorities(updated)
+    setNewPriority({ label: '', color: 'neutral' })
+    addToast('Prioridade adicionada')
+  }
+
+  const removePriority = (id) => {
+    const updated = priorities.filter(p => p.id !== id)
+    setPriorities(updated)
+    savePriorities(updated)
+    addToast('Prioridade removida')
+  }
+
+  const startEditingPriority = (priority) => {
+    setEditingPriority({ ...priority })
+  }
+
+  const saveEditedPriority = () => {
+    if (!editingPriority || !editingPriority.label.trim()) return
+    
+    const updated = priorities.map(p => p.id === editingPriority.id ? editingPriority : p)
+    setPriorities(updated)
+    savePriorities(updated)
+    setEditingPriority(null)
+    addToast('Prioridade atualizada')
+  }
+
+  const savePriorities = (data) => {
+    localStorage.setItem('primatas_priorities', JSON.stringify(data))
+  }
+
+  // Load Priorities on Mount
+  useEffect(() => {
+    const savedPriorities = localStorage.getItem('primatas_priorities')
+    if (savedPriorities) {
+      setPriorities(JSON.parse(savedPriorities))
+    }
+  }, [])
   
   return (
     <div className="dashboard-container">
@@ -200,26 +252,92 @@ export default function SettingsPage() {
       {activeTab === 'priorities' && (
         <div className="card max-w-3xl animate-fade-in">
           <div className="card-header border-b border-light p-6">
-            <h3 className="font-semibold text-lg">Níveis de Prioridade</h3>
-            <p className="text-muted text-sm mt-1">Visualização das prioridades do sistema e seus indicadores.</p>
+            <h3 className="font-semibold text-lg">Gerenciar Prioridades</h3>
+            <p className="text-muted text-sm mt-1">Defina os níveis de urgência para os chamados.</p>
           </div>
-          <div className="p-6 grid gap-4">
-            {priorities.map(p => (
-              <div key={p.id} className="flex items-center justify-between p-4 border border-light rounded-xl bg-muted-5 hover:bg-muted-10 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${p.color === 'neutral' ? 'gray' : p.color === 'warning' ? 'yellow' : p.color === 'orange' ? 'orange' : 'red'}-500/10`}>
-                     <div className={`w-3 h-3 rounded-full bg-${p.color === 'neutral' ? 'gray' : p.color === 'warning' ? 'yellow' : p.color === 'orange' ? 'orange' : 'red'}-500`}></div>
-                  </div>
-                  <div>
-                    <div className="font-medium capitalize text-lg">{p.label}</div>
-                    <div className="text-xs text-muted font-mono mt-0.5 uppercase tracking-wider">{p.id}</div>
-                  </div>
+          
+          <div className="p-6">
+            {/* Add New Priority */}
+            <div className="flex gap-3 mb-6 items-center bg-muted-5 p-4 rounded-xl border border-light">
+              <input 
+                className="input flex-1 bg-dark-bg border-light focus:border-primary h-12" 
+                placeholder="Nome da prioridade (ex: Urgentíssimo)" 
+                value={newPriority.label}
+                onChange={(e) => setNewPriority({ ...newPriority, label: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && addPriority()}
+              />
+              <select 
+                className="select bg-dark-bg border-light focus:border-primary h-12 w-32"
+                value={newPriority.color}
+                onChange={(e) => setNewPriority({ ...newPriority, color: e.target.value })}
+              >
+                <option value="neutral">Cinza</option>
+                <option value="info">Azul</option>
+                <option value="success">Verde</option>
+                <option value="warning">Amarelo</option>
+                <option value="orange">Laranja</option>
+                <option value="danger">Vermelho</option>
+              </select>
+              <button className="btn-secondary h-12 px-6" onClick={addPriority}>Adicionar</button>
+            </div>
+
+            <div className="grid gap-3">
+              {priorities.map(p => (
+                <div key={p.id} className="flex items-center justify-between p-4 border border-light rounded-xl hover:bg-muted-5 transition-colors group">
+                  {editingPriority && editingPriority.id === p.id ? (
+                    <div className="flex flex-1 gap-3 items-center">
+                      <input 
+                        className="input flex-1 bg-dark-bg h-10" 
+                        value={editingPriority.label}
+                        onChange={(e) => setEditingPriority({ ...editingPriority, label: e.target.value })}
+                      />
+                      <select 
+                        className="select bg-dark-bg h-10 w-32"
+                        value={editingPriority.color}
+                        onChange={(e) => setEditingPriority({ ...editingPriority, color: e.target.value })}
+                      >
+                        <option value="neutral">Cinza</option>
+                        <option value="info">Azul</option>
+                        <option value="success">Verde</option>
+                        <option value="warning">Amarelo</option>
+                        <option value="orange">Laranja</option>
+                        <option value="danger">Vermelho</option>
+                      </select>
+                      <button className="btn-primary h-10 px-4 text-xs" onClick={saveEditedPriority}>Salvar</button>
+                      <button className="btn-secondary h-10 px-4 text-xs" onClick={() => setEditingPriority(null)}>Cancelar</button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${p.color === 'neutral' ? 'gray' : p.color === 'warning' ? 'yellow' : p.color === 'orange' ? 'orange' : p.color === 'success' ? 'green' : p.color === 'info' ? 'blue' : 'red'}-500/10`}>
+                          <div className={`w-3 h-3 rounded-full bg-${p.color === 'neutral' ? 'gray' : p.color === 'warning' ? 'yellow' : p.color === 'orange' ? 'orange' : p.color === 'success' ? 'green' : p.color === 'info' ? 'blue' : 'red'}-500`}></div>
+                        </div>
+                        <div>
+                          <div className="font-medium capitalize text-lg">{p.label}</div>
+                          <div className="text-xs text-muted font-mono mt-0.5 uppercase tracking-wider opacity-60">{p.id}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          className="p-2 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                          onClick={() => startEditingPriority(p)}
+                          title="Editar"
+                        >
+                          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button 
+                          className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all"
+                          onClick={() => removePriority(p.id)}
+                          title="Remover"
+                        >
+                          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <div className="px-3 py-1 rounded-full bg-muted-10 text-xs text-muted border border-light">
-                  Sistema Padrão
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
