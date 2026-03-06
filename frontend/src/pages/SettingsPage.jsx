@@ -179,10 +179,10 @@ export default function SettingsPage() {
                   <div className={`w-2 h-2 rounded-full bg-${key === 'critica' ? 'danger' : key === 'alta' ? 'orange' : key === 'media' ? 'warning' : 'info'}`}></div>
                   <span className="capitalize font-medium text-base">{key}</span>
                 </div>
-                <div className="flex items-center gap-3 bg-dark-bg p-2 rounded-full border border-light focus-within:border-primary transition-colors px-4">
+                <div className="flex items-center gap-3 bg-muted-5 p-2 rounded-xl border border-light transition-colors px-4">
                   <input 
                     type="number" 
-                    className="bg-transparent border-none text-right w-16 text-white font-mono outline-none" 
+                    className="bg-transparent border-none text-right w-16 text-white outline-none font-medium text-lg" 
                     style={{ background: 'transparent', boxShadow: 'none' }}
                     value={val} 
                     onChange={(e) => handleSlaChange(key, e.target.value)}
