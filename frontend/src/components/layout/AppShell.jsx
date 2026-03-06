@@ -27,6 +27,7 @@ export default function AppShell({ children }) {
 
   return (
     <div className={`app-shell ${menuOpen ? 'menu-open' : ''}`}>
+      <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-logo" style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
@@ -41,31 +42,31 @@ export default function AppShell({ children }) {
         </div>
         
         <nav className="menu">
-          <NavLink to="/dashboard" className="menu-item">
+          <NavLink to="/dashboard" className="menu-item" onClick={() => setMenuOpen(false)}>
             <span className="menu-icon"><Icons.Dashboard /></span>
             <span className="menu-text">Dashboard</span>
           </NavLink>
-          <NavLink to="/chamados" className="menu-item" end>
+          <NavLink to="/chamados" className="menu-item" end onClick={() => setMenuOpen(false)}>
             <span className="menu-icon"><Icons.Ticket /></span>
             <span className="menu-text">Chamados</span>
           </NavLink>
-          <NavLink to="/chamados/novo" className="menu-item">
+          <NavLink to="/chamados/novo" className="menu-item" onClick={() => setMenuOpen(false)}>
             <span className="menu-icon"><Icons.Plus /></span>
             <span className="menu-text">Novo Chamado</span>
           </NavLink>
-          <NavLink to="/lojas" className="menu-item">
+          <NavLink to="/lojas" className="menu-item" onClick={() => setMenuOpen(false)}>
             <span className="menu-icon"><Icons.Store /></span>
             <span className="menu-text">Lojas</span>
           </NavLink>
-          <NavLink to="/usuarios" className="menu-item">
+          <NavLink to="/usuarios" className="menu-item" onClick={() => setMenuOpen(false)}>
             <span className="menu-icon"><Icons.Users /></span>
             <span className="menu-text">Usuários</span>
           </NavLink>
-          <NavLink to="/configuracoes" className="menu-item">
+          <NavLink to="/configuracoes" className="menu-item" onClick={() => setMenuOpen(false)}>
             <span className="menu-icon"><Icons.Settings /></span>
             <span className="menu-text">Configurações</span>
           </NavLink>
-          <NavLink to="/perfil" className="menu-item">
+          <NavLink to="/perfil" className="menu-item" onClick={() => setMenuOpen(false)}>
             <span className="menu-icon"><Icons.Profile /></span>
             <span className="menu-text">Meu Perfil</span>
           </NavLink>
@@ -80,7 +81,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.19</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.20</div>
         </div>
       </aside>
 

@@ -139,12 +139,12 @@ export default function DashboardPage() {
                 <tbody>
                   {data.recent_tickets.map(t => (
                     <tr key={t.id} className="border-b border-light hover:bg-muted/5">
-                      <td className="p-3 font-mono">#{t.id}</td>
-                      <td className="p-3 font-medium">{t.store || 'N/A'}</td>
-                      <td className="p-3"><PriorityPill priority={t.priority} /></td>
-                      <td className="p-3"><StatusPill status={t.status} /></td>
-                      <td className="p-3 text-muted">{t.technician || '-'}</td>
-                      <td className="p-3 text-right text-muted">
+                      <td className="p-3 font-mono" data-label="ID">#{t.id}</td>
+                      <td className="p-3 font-medium" data-label="Loja">{t.store || 'N/A'}</td>
+                      <td className="p-3" data-label="Prioridade"><PriorityPill priority={t.priority} /></td>
+                      <td className="p-3" data-label="Status"><StatusPill status={t.status} /></td>
+                      <td className="p-3 text-muted" data-label="Técnico">{t.technician || '-'}</td>
+                      <td className="p-3 text-right text-muted" data-label="Aberto há">
                         {Math.floor((new Date() - new Date(t.created_at)) / (1000 * 60 * 60))}h
                       </td>
                     </tr>
@@ -261,7 +261,20 @@ export default function DashboardPage() {
         @media (max-width: 1024px) {
           .dashboard-grid { grid-template-columns: 1fr !important; }
         }
-      `}</style>
+
+        @media (max-width: 768px) {
+          .grid-cols-4 { grid-template-columns: 1fr 1fr; }
+          
+          /* Responsive Table (Card View) */
+          table, thead, tbody, th, td, tr { display: block; }
+          thead tr { position: absolute; top: -9999px; left: -9999px; }
+          tr { border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: 12px; background: rgba(255,255,255,0.02); }
+          td { border: none; border-bottom: 1px solid rgba(255,255,255,0.02); position: relative; padding-left: 50%; text-align: right; }
+          td:before { position: absolute; top: 16px; left: 16px; width: 45%; white-space: nowrap; text-align: left; font-weight: 600; color: var(--text-muted); content: attr(data-label); }
+          td:last-child { border-bottom: none; }
+          
+          .kpi-value { font-size: 24px; }
+        }
     </div>
   )
 }
