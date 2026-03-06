@@ -114,7 +114,7 @@ export default function DashboardPage() {
         <KpiCard title="Risco SLA" value={data.sla_risk.length} subtext="Atenção necessária" color="danger" />
       </div>
 
-      <div className="dashboard-grid mb-6" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+      <div className="dashboard-grid mb-6">
         
         {/* Coluna Principal */}
         <div className="flex flex-col gap-6">
