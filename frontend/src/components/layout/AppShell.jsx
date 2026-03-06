@@ -30,9 +30,10 @@ export default function AppShell({ children }) {
         <div className="brand">
           <div className="brand-logo" style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
             <img 
-              src="/primatas-logo.svg" 
+              src="/primatas-photo.jpg" 
               alt="Logo" 
               style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              onError={(e) => { e.target.src = '/primatas-logo.svg' }}
             />
           </div>
           <span className="brand-text" style={{ color: 'var(--text-main)', opacity: 1, visibility: 'visible', transform: 'none' }}>Primatas System</span>
@@ -74,7 +75,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.13</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.14</div>
         </div>
       </aside>
 
