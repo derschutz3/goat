@@ -174,26 +174,27 @@ export default function SettingsPage() {
           </div>
           <div className="p-6 grid gap-4">
             {Object.entries(sla).map(([key, val]) => (
-              <div key={key} className="flex items-center justify-between p-4 border border-light rounded-xl bg-muted-5 hover:bg-muted-10 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full bg-${key === 'critica' ? 'danger' : key === 'alta' ? 'orange' : key === 'media' ? 'warning' : 'info'}`}></div>
-                  <span className="capitalize font-medium text-base">{key}</span>
+              <div key={key} className="flex items-center justify-between p-4 border border-light rounded-xl hover:bg-muted-5 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${key === 'critica' ? 'red' : key === 'alta' ? 'orange' : key === 'media' ? 'yellow' : 'blue'}-500/10`}>
+                     <div className={`w-3 h-3 rounded-full bg-${key === 'critica' ? 'red' : key === 'alta' ? 'orange' : key === 'media' ? 'yellow' : 'blue'}-500`}></div>
+                  </div>
+                  <span className="capitalize font-medium text-lg">{key}</span>
                 </div>
-                <div className="flex items-center gap-3 bg-muted-5 p-2 rounded-xl border border-light transition-colors px-4">
+                <div className="flex items-center gap-3">
                   <input 
                     type="number" 
-                    className="bg-transparent border-none text-right w-16 text-white outline-none font-medium text-lg" 
-                    style={{ background: 'transparent', boxShadow: 'none' }}
+                    className="input w-24 text-center h-12" 
                     value={val} 
                     onChange={(e) => handleSlaChange(key, e.target.value)}
                   />
-                  <span className="text-muted text-sm font-medium pr-2">horas</span>
+                  <span className="text-muted text-sm font-medium">horas</span>
                 </div>
               </div>
             ))}
           </div>
           <div className="p-6 border-t border-light flex justify-end bg-muted-5 rounded-b-xl">
-            <button className="btn-primary w-full md:w-auto px-8 py-3" onClick={saveSla} disabled={loading}>
+            <button className="btn btn-primary px-8" onClick={saveSla} disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </div>
