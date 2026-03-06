@@ -114,8 +114,15 @@ export default function ProfilePage() {
         .getPublicUrl(filePath)
 
       if (data) {
-        setFormData(prev => ({ ...prev, avatar_url: data.publicUrl }))
-        addToast('Imagem carregada com sucesso! Clique em Salvar para confirmar.')
+        const newAvatarUrl = data.publicUrl
+        setFormData(prev => ({ ...prev, avatar_url: newAvatarUrl }))
+        
+        // Force immediate session update with new avatar
+        if (typeof updateUser === 'function') {
+          updateUser({ avatar_url: newAvatarUrl })
+        }
+        
+        addToast('Imagem carregada! Clique em Salvar para confirmar.')
       }
     } catch (error) {
       console.error('Erro no upload:', error)
