@@ -69,7 +69,7 @@ export default function TicketCreatePage() {
         </div>
         <div className="col-12">
           <label className="subtitle">Descrição</label>
-          <textarea className="textarea" rows="4" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+          <textarea className="textarea" rows="4" style={{ resize: 'none' }} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
         </div>
         <div className="col-6">
           <label className="subtitle">Prioridade</label>
