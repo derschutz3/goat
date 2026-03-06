@@ -624,6 +624,42 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateX(4px);
 }
 
+.btn-icon-primary {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px; /* Quadrado arredondado */
+  background: rgba(99, 102, 241, 0.1); /* Fundo roxo sutil */
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-icon-primary:hover {
+  background: rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn-icon-danger {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px; /* Quadrado arredondado */
+  background: rgba(239, 68, 68, 0.1); /* Fundo vermelho sutil */
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-icon-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(-2px);
+}
+
 @media (max-width: 768px) {
   .ticket-card-item {
     flex-direction: column;

@@ -230,7 +230,7 @@ export default function SettingsPage() {
                     <span className="font-medium">{cat.name}</span>
                   </div>
                   <button 
-                    className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="btn-icon-danger"
                     onClick={() => removeCategory(cat.id)}
                     title="Remover"
                   >
@@ -317,16 +317,16 @@ export default function SettingsPage() {
                           <div className="text-xs text-muted font-mono mt-0.5 uppercase tracking-wider opacity-60">{p.id}</div>
                         </div>
                       </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex gap-2">
                         <button 
-                          className="p-2 text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                          className="btn-icon-primary"
                           onClick={() => startEditingPriority(p)}
                           title="Editar"
                         >
                           <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                         </button>
                         <button 
-                          className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all"
+                          className="btn-icon-danger"
                           onClick={() => removePriority(p.id)}
                           title="Remover"
                         >
