@@ -252,6 +252,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Dashboard & Lists */
+.dashboard-container {
+  background-color: transparent; /* Garante que pegue o gradiente do body/app-shell */
+}
+
 .dashboard-header {
   display: flex;
   align-items: center;

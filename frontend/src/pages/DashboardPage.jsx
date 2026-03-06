@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getDashboard } from '../services/ticketService'
 import EmptyState from '../components/common/EmptyState'
+import './dashboard.css'
 
 // Componentes internos para o Dashboard
 const KpiCard = ({ title, value, subtext, color = 'primary' }) => (
@@ -119,7 +120,7 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-6">
           
           {/* Fila de Chamados Recentes */}
-          <div className="card">
+          <div className="card dashboard-table-container">
             <div className="card-header flex justify-between items-center p-4 border-b border-light">
               <h3 className="font-semibold">Chamados Recentes</h3>
               <Link to="/chamados" className="text-sm text-primary hover:underline">Ver todos</Link>
@@ -224,58 +225,6 @@ export default function DashboardPage() {
 
         </div>
       </div>
-
-      <style>{`
-        .kpi-card { padding: 20px; display: flex; flex-direction: column; gap: 4px; }
-        .kpi-title { font-size: 14px; color: var(--text-muted); font-weight: 500; }
-        .kpi-value { font-size: 28px; font-weight: 700; color: var(--text-main); }
-        .kpi-subtext { font-size: 12px; opacity: 0.7; }
-        
-        .grid-cols-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-        .flex-col { flex-direction: column; }
-        .gap-6 { gap: 24px; }
-        .gap-4 { gap: 16px; }
-        .gap-3 { gap: 12px; }
-        .mb-6 { margin-bottom: 24px; }
-        .mb-4 { margin-bottom: 16px; }
-        .p-4 { padding: 16px; }
-        .p-3 { padding: 12px; }
-        .p-2 { padding: 8px; }
-        .w-full { width: 100%; }
-        .text-sm { font-size: 14px; }
-        .text-xs { font-size: 12px; }
-        .font-bold { font-weight: 700; }
-        .font-semibold { font-weight: 600; }
-        .font-medium { font-weight: 500; }
-        .font-mono { font-family: monospace; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .text-muted { color: var(--text-muted); }
-        .text-danger { color: var(--danger); }
-        .text-success { color: var(--success); }
-        .bg-muted\\/10 { background: rgba(255,255,255,0.05); }
-        .bg-danger\\/5 { background: rgba(239, 68, 68, 0.05); }
-        .border-b { border-bottom-width: 1px; }
-        .border-light { border-color: var(--border-light); }
-        
-        @media (max-width: 1024px) {
-          .dashboard-grid { grid-template-columns: 1fr !important; }
-        }
-
-        @media (max-width: 768px) {
-          .grid-cols-4 { grid-template-columns: 1fr 1fr; }
-          
-          /* Responsive Table (Card View) */
-          table, thead, tbody, th, td, tr { display: block; }
-          thead tr { position: absolute; top: -9999px; left: -9999px; }
-          tr { border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: 12px; background: rgba(255,255,255,0.02); }
-          td { border: none; border-bottom: 1px solid rgba(255,255,255,0.02); position: relative; padding-left: 50%; text-align: right; }
-          td:before { position: absolute; top: 16px; left: 16px; width: 45%; white-space: nowrap; text-align: left; font-weight: 600; color: var(--text-muted); content: attr(data-label); }
-          td:last-child { border-bottom: none; }
-          
-          .kpi-value { font-size: 24px; }
-        }
-      `}</style>
     </div>
   )
 }
