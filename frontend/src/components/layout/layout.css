@@ -25,14 +25,14 @@
 }
 
 .sidebar:hover {
-  width: 280px;
+  width: 320px; /* Aumentado para caber nomes longos */
   box-shadow: 10px 0 40px rgba(0, 0, 0, 0.4);
   background: rgba(10, 10, 18, 0.9);
 }
 
 .brand {
   font-family: 'Outfit', sans-serif;
-  font-size: 24px;
+  font-size: 20px; /* Reduzido levemente para caber melhor */
   font-weight: 700;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
@@ -218,12 +218,10 @@
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-100%);
-    width: 280px; /* Mobile sempre full width quando aberto */
+    width: 320px; /* Mobile sempre full width ou largo o suficiente */
     box-shadow: none; /* Sombra controlada pelo estado open */
-  }
-  
-  .app-shell.menu-open .sidebar {
-    transform: translateX(0);
+    z-index: 40; /* Sidebar acima do overlay */
+  } transform: translateX(0);
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5);
   }
 
