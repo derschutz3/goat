@@ -36,7 +36,8 @@ export function AuthProvider({ children }) {
         id: data.id,
         username: data.username,
         role: data.role,
-        email: data.email
+        email: data.email,
+        avatar_url: data.avatar_url
       }
       
       setUser(userData)
@@ -53,10 +54,20 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('app_session')
   }
 
+  // Helper to update session data without relogin (e.g. after profile edit)
+  const updateUser = (newData) => {
+    setUser(prev => {
+      const updated = { ...prev, ...newData }
+      localStorage.setItem('app_session', JSON.stringify(updated))
+      return updated
+    })
+  }
+
   const value = useMemo(() => ({ 
     user, 
     login, 
     logout,
+    updateUser,
     loading 
   }), [user, loading])
 

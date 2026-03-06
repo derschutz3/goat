@@ -165,6 +165,15 @@ export default function ProfilePage() {
 
       addToast('Perfil atualizado com sucesso!')
       
+      // Update local session data to reflect changes immediately in UI
+      if (typeof updateUser === 'function') {
+        updateUser({
+          username: formData.username,
+          email: formData.email,
+          avatar_url: formData.avatar_url
+        })
+      }
+      
       setFormData(prev => ({
         ...prev,
         currentPassword: '',

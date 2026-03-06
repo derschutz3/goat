@@ -72,7 +72,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v3.3</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v3.4</div>
         </div>
       </aside>
 
@@ -91,7 +91,22 @@ export default function AppShell({ children }) {
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{user?.role || 'Admin'}</div>
             </div>
             <div className="avatar">
-              {user?.username?.[0]?.toUpperCase() || 'U'}
+              {user?.avatar_url ? (
+                <img 
+                  src={user.avatar_url} 
+                  alt={user.username} 
+                  style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                  onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                />
+              ) : null}
+              <div style={{ 
+                width: '100%', height: '100%', borderRadius: '50%', 
+                background: 'linear-gradient(135deg, var(--secondary), var(--primary))',
+                display: user?.avatar_url ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontWeight: 'bold'
+              }}>
+                {user?.username?.[0]?.toUpperCase() || 'U'}
+              </div>
             </div>
           </div>
         </header>
