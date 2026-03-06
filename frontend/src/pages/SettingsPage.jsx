@@ -138,6 +138,7 @@ export default function SettingsPage() {
                   <input 
                     type="number" 
                     className="bg-transparent border-none text-right w-16 text-white font-mono outline-none" 
+                    style={{ background: 'transparent', boxShadow: 'none' }}
                     value={val} 
                     onChange={(e) => handleSlaChange(key, e.target.value)}
                   />
@@ -147,7 +148,7 @@ export default function SettingsPage() {
             ))}
           </div>
           <div className="p-6 border-t border-light flex justify-end bg-muted-5 rounded-b-xl">
-            <button className="btn-primary" onClick={saveSla} disabled={loading}>
+            <button className="btn-primary w-full md:w-auto px-8 py-3" onClick={saveSla} disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </div>
