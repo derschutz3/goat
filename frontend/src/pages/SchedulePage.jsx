@@ -12,22 +12,28 @@ export default function SchedulePage() {
   const [editingCell, setEditingCell] = useState(null) // { techId, dateStr }
   const [manualStore, setManualStore] = useState('')
   
-  // Gerar datas da semana atual/próxima (Segunda a Sexta ou Sábado)
-  const getNextDays = (days = 5) => {
+  // Gerar datas da semana atual (Segunda a Sábado)
+  const getNextDays = (days = 6) => {
     const dates = []
     const today = new Date()
-    // Find next Monday if today is weekend, otherwise start from today or this week's Monday
-    // For simplicity, let's show next 5 days starting from today for now, or fixed Mon-Fri logic
-    // Implementing fixed logic: Start from today
+    const currentDay = today.getDay() // 0 = Domingo, 1 = Segunda
+    
+    // Calcular a segunda-feira desta semana
+    // Se for domingo (0), volta 6 dias. Se for outro dia, volta (day - 1)
+    const diff = currentDay === 0 ? -6 : 1 - currentDay
+    
+    const monday = new Date(today)
+    monday.setDate(today.getDate() + diff)
+    
     for (let i = 0; i < days; i++) {
-      const d = new Date(today)
-      d.setDate(today.getDate() + i)
+      const d = new Date(monday)
+      d.setDate(monday.getDate() + i)
       dates.push(d)
     }
     return dates
   }
   
-  const weekDays = getNextDays(5) // Show 5 days (matrix columns)
+  const weekDays = getNextDays(6) // Mostrar 6 dias (Segunda a Sábado)
 
   useEffect(() => {
     fetchData()
