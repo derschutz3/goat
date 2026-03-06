@@ -100,16 +100,12 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Tabs - Estilo Pill (Botões Soltos Padronizados) */}
+      {/* Tabs - Botões Padrão do Sistema */}
       <div className="flex flex-wrap gap-3 mb-8">
         {['sla', 'categories', 'priorities'].map((tab) => (
           <button 
             key={tab}
-            className={`px-6 py-2.5 rounded-2xl font-semibold text-sm transition-all ${
-              activeTab === tab 
-                ? 'bg-[#5856D6] text-white shadow-[0_4px_12px_rgba(88,86,214,0.25)] hover:bg-[#4F46E5]' 
-                : 'bg-muted-5 text-muted hover:text-white hover:bg-muted-10 border border-transparent hover:border-light'
-            }`}
+            className={activeTab === tab ? 'btn btn-primary' : 'btn btn-secondary'}
             onClick={() => setActiveTab(tab)}
           >
             {tab === 'sla' ? 'Políticas de SLA' : tab === 'categories' ? 'Categorias' : 'Prioridades'}
