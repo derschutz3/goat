@@ -155,31 +155,50 @@ export default function SchedulePage() {
 
       const newSchedules = []
       
-      // Distribuição inteligente: Load Balancing
-      // Objetivo: Preencher a grade (Techs x Days) distribuindo as lojas prioritárias
+      // Distribuição inteligente: Load Balancing (Justo)
+      // Objetivo: Distribuir lojas prioritárias igualmente entre técnicos ao longo da semana
       
-      let storeCursor = 0
+      let storeCursor = 0 // Manter cursor global para rodar todas as lojas
       
       // Iterar sobre dias (Colunas)
       weekDays.forEach((day) => {
-        // Ignorar fim de semana se quiser, mas vamos assumir dias úteis
-        if (day.getDay() === 0 || day.getDay() === 6) return 
+        if (day.getDay() === 0) return // Pular domingo
 
         const dateStr = day.toISOString().split('T')[0]
-
-        // Iterar sobre técnicos (Linhas)
+        const isSaturday = day.getDay() === 6
+        
+        // Sábado: equipe reduzida (ex: metade da equipe, rotacionando)
+        // Lógica simples: Se for sábado, pula técnicos pares/ímpares baseado no dia do mês?
+        // Ou assume todos disponíveis por enquanto.
+        // Vamos manter todos disponíveis para simplificar a distribuição justa
+        
+        // Quantas lojas visitar por dia? 
+        // Vamos tentar agendar TODAS as lojas prioritárias distribuídas na semana
+        // Ou agendar N visitas por técnico.
+        
+        // Nova Lógica: Para cada técnico disponível, atribuir 1 ou 2 lojas prioritárias neste dia
         technicians.forEach((tech) => {
-          // Round-robin nas lojas
-          const storeId = targetStores[storeCursor % targetStores.length]
-          storeCursor++
-
-          if (storeId) {
-            newSchedules.push({
-              user_id: tech.id,
-              date: dateStr,
-              store_id: storeId,
-              shift: 'full'
-            })
+          // Pegar a próxima loja da lista de prioridade (circular)
+          // Mas garantir que lojas diferentes sejam visitadas
+          
+          // Vamos atribuir 1 visita por técnico por dia para começar (carga leve)
+          // Se quiser carga pesada, aumentar loop
+          const visitsPerDay = 1 
+          
+          for(let i=0; i < visitsPerDay; i++) {
+             // Round-robin global de lojas para garantir que todas sejam atendidas
+             const storeIndex = (storeCursor) % targetStores.length
+             const storeId = targetStores[storeIndex]
+             storeCursor++
+             
+             if (storeId) {
+                newSchedules.push({
+                  user_id: tech.id,
+                  date: dateStr,
+                  store_id: storeId,
+                  shift: 'full'
+                })
+             }
           }
         })
       })
