@@ -8,25 +8,31 @@ export async function getDashboard() {
     return new Promise(resolve => setTimeout(() => resolve(mockDashboard()), 400))
   }
   
-  // 1. Fetch all active tickets for stats
+  // 1. Fetch tickets (raw)
   const { data: tickets, error } = await supabase
     .from('tickets')
-    .select(`
-      id, status, priority, created_at, technician_id,
-      technician:app_users!technician_id(username),
-      store:stores(name)
-    `)
-    // .gte('created_at', ...) // In a real app, limit date range for performance
-  
+    .select('id, status, priority, created_at, technician_id, store_id')
+    
   if (error) throw error
 
-  // 2. Calculate KPIs
-  const today = new Date().toDateString()
-  const now = new Date()
-  
-  const open = tickets.filter(t => t.status === 'novo').length
-  const pending = tickets.filter(t => ['em_analise', 'aguardando_peca'].includes(t.status)).length
-  const resolved_today = tickets.filter(t => 
+  // 1.1 Fetch auxiliary data for mapping (avoid complex joins that might fail)
+  const { data: users } = await supabase.from('app_users').select('id, username')
+  const { data: stores } = await supabase.from('stores').select('id, name')
+
+  const userMap = (users || []).reduce((acc, u) => ({ ...acc, [u.id]: u.username }), {})
+  const storeMap = (stores || []).reduce((acc, s) => ({ ...acc, [s.id]: s.name }), {})
+
+  // 1.2 Enrich tickets
+  const enrichedTickets = tickets.map(t => ({
+    ...t,
+    technician: t.technician_id ? { username: userMap[t.technician_id] || 'Desconhecido' } : null,
+    store: t.store_id ? { name: storeMap[t.store_id] || 'Loja removida' } : null
+  }))
+
+  // Use enrichedTickets for calculations
+  const open = enrichedTickets.filter(t => t.status === 'novo').length
+  const pending = enrichedTickets.filter(t => ['em_analise', 'aguardando_peca'].includes(t.status)).length
+  const resolved_today = enrichedTickets.filter(t => 
     t.status === 'resolvido' && 
     new Date(t.created_at).toDateString() === today
   ).length
@@ -35,7 +41,7 @@ export async function getDashboard() {
   // Critica: 4h, Alta: 8h, Media: 24h, Baixa: 48h
   const slaHours = { critica: 4, alta: 8, media: 24, baixa: 48 }
   
-  const ticketsWithSLA = tickets.map(t => {
+  const ticketsWithSLA = enrichedTickets.map(t => {
     if (['resolvido', 'fechado'].includes(t.status)) return { ...t, sla_status: 'ok' }
     
     const created = new Date(t.created_at)
@@ -57,9 +63,9 @@ export async function getDashboard() {
 
   // 4. Productivity (Technicians)
   const techStats = {}
-  tickets.forEach(t => {
-    if (t.technician_id && t.technician) {
-      const name = t.technician.username
+  enrichedTickets.forEach(t => {
+    if (t.technician_id && userMap[t.technician_id]) {
+      const name = userMap[t.technician_id]
       if (!techStats[name]) techStats[name] = { name, total: 0, resolved_today: 0 }
       
       techStats[name].total++
@@ -72,7 +78,7 @@ export async function getDashboard() {
 
   // 5. Volume by Hour (Today)
   const volumeByHour = Array(24).fill(0).map((_, i) => ({ hour: i, count: 0 }))
-  tickets.forEach(t => {
+  enrichedTickets.forEach(t => {
     const d = new Date(t.created_at)
     if (d.toDateString() === today) {
       volumeByHour[d.getHours()].count++
@@ -80,7 +86,7 @@ export async function getDashboard() {
   })
 
   // 6. Recent Tickets (Rich data)
-  const recent_tickets = tickets
+  const recent_tickets = enrichedTickets
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 7)
     .map(t => ({
@@ -98,10 +104,10 @@ export async function getDashboard() {
     productivity,
     volume_by_hour: volumeByHour, // Only show hours with data or full day? Full day is better for chart.
     priority_counts: {
-      baixa: tickets.filter(t => t.priority === 'baixa').length,
-      media: tickets.filter(t => t.priority === 'media').length,
-      alta: tickets.filter(t => t.priority === 'alta').length,
-      critica: tickets.filter(t => t.priority === 'critica').length
+      baixa: enrichedTickets.filter(t => t.priority === 'baixa').length,
+      media: enrichedTickets.filter(t => t.priority === 'media').length,
+      alta: enrichedTickets.filter(t => t.priority === 'alta').length,
+      critica: enrichedTickets.filter(t => t.priority === 'critica').length
     }
   }
 }
