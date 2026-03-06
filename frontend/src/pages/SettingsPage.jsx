@@ -147,7 +147,7 @@ export default function SettingsPage() {
             ))}
           </div>
           <div className="p-6 border-t border-light flex justify-end bg-muted-5 rounded-b-xl">
-            <button className="btn-primary px-8" onClick={saveSla} disabled={loading}>
+            <button className="btn-primary" onClick={saveSla} disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </div>
@@ -171,7 +171,7 @@ export default function SettingsPage() {
                 onChange={(e) => setNewCategory(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addCategory()}
               />
-              <button className="btn-secondary px-6 h-12" onClick={addCategory}>Adicionar</button>
+              <button className="btn-secondary h-12 px-6" onClick={addCategory}>Adicionar</button>
             </div>
 
             <div className="grid gap-2">
