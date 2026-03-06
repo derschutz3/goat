@@ -34,7 +34,7 @@ export default function SchedulePage() {
     try {
       setLoading(true)
       
-      // 1. Buscar técnicos
+      // 1. Buscar técnicos (apenas quem pode atuar como técnico)
       const { data: techs } = await supabase
         .from('app_users')
         .select('*')
