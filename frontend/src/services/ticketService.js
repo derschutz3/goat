@@ -8,39 +8,95 @@ export async function getDashboard() {
     return new Promise(resolve => setTimeout(() => resolve(mockDashboard()), 400))
   }
   
-  // Real implementation: Count tickets by status
-  // This is a simplified dashboard query. 
-  // In a real app, you might want to use RPC (stored procedures) for complex stats.
-  
+  // 1. Fetch all active tickets for stats
   const { data: tickets, error } = await supabase
     .from('tickets')
-    .select('status, priority, created_at')
+    .select(`
+      id, status, priority, created_at, technician_id,
+      technician:app_users!technician_id(username),
+      store:stores(name)
+    `)
+    // .gte('created_at', ...) // In a real app, limit date range for performance
   
   if (error) throw error
 
+  // 2. Calculate KPIs
+  const today = new Date().toDateString()
+  const now = new Date()
+  
   const open = tickets.filter(t => t.status === 'novo').length
   const pending = tickets.filter(t => ['em_analise', 'aguardando_peca'].includes(t.status)).length
   const resolved_today = tickets.filter(t => 
     t.status === 'resolvido' && 
-    new Date(t.created_at).toDateString() === new Date().toDateString()
+    new Date(t.created_at).toDateString() === today
   ).length
+
+  // 3. SLA Risk Logic
+  // Critica: 4h, Alta: 8h, Media: 24h, Baixa: 48h
+  const slaHours = { critica: 4, alta: 8, media: 24, baixa: 48 }
   
-  // Basic overdue logic (e.g., older than 3 days and not resolved)
-  const threeDaysAgo = new Date()
-  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
-  
-  const overdue = tickets.filter(t => 
-    !['resolvido', 'fechado'].includes(t.status) && 
-    new Date(t.created_at) < threeDaysAgo
-  ).length
+  const ticketsWithSLA = tickets.map(t => {
+    if (['resolvido', 'fechado'].includes(t.status)) return { ...t, sla_status: 'ok' }
+    
+    const created = new Date(t.created_at)
+    const deadline = new Date(created.getTime() + (slaHours[t.priority] || 48) * 60 * 60 * 1000)
+    const timeLeft = deadline - now
+    const hoursLeft = timeLeft / (1000 * 60 * 60)
+    
+    let sla_status = 'ok'
+    if (timeLeft < 0) sla_status = 'overdue'
+    else if (hoursLeft < 2) sla_status = 'risk' // Less than 2h warning
+    
+    return { ...t, deadline, hoursLeft, sla_status }
+  })
+
+  const sla_risk = ticketsWithSLA
+    .filter(t => ['risk', 'overdue'].includes(t.sla_status) && !['resolvido', 'fechado'].includes(t.status))
+    .sort((a, b) => a.hoursLeft - b.hoursLeft)
+    .slice(0, 5)
+
+  // 4. Productivity (Technicians)
+  const techStats = {}
+  tickets.forEach(t => {
+    if (t.technician_id && t.technician) {
+      const name = t.technician.username
+      if (!techStats[name]) techStats[name] = { name, total: 0, resolved_today: 0 }
+      
+      techStats[name].total++
+      if (t.status === 'resolvido' && new Date(t.created_at).toDateString() === today) {
+        techStats[name].resolved_today++
+      }
+    }
+  })
+  const productivity = Object.values(techStats).sort((a, b) => b.resolved_today - a.resolved_today)
+
+  // 5. Volume by Hour (Today)
+  const volumeByHour = Array(24).fill(0).map((_, i) => ({ hour: i, count: 0 }))
+  tickets.forEach(t => {
+    const d = new Date(t.created_at)
+    if (d.toDateString() === today) {
+      volumeByHour[d.getHours()].count++
+    }
+  })
+
+  // 6. Recent Tickets (Rich data)
+  const recent_tickets = tickets
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 7)
+    .map(t => ({
+      ...t,
+      store: t.store?.name,
+      technician: t.technician?.username
+    }))
 
   return {
     open,
     pending,
     resolved_today,
-    overdue,
-    recent_tickets: tickets.slice(0, 5), // Simplified
-    productivity: [], // Would need separate query
+    sla_risk, // Replaces simple 'overdue'
+    recent_tickets,
+    productivity,
+    volume_by_hour: volumeByHour, // Only show hours with data or full day? Full day is better for chart.
     priority_counts: {
       baixa: tickets.filter(t => t.priority === 'baixa').length,
       media: tickets.filter(t => t.priority === 'media').length,

@@ -7,6 +7,7 @@ import TicketCreatePage from './pages/TicketCreatePage'
 import TicketDetailPage from './pages/TicketDetailPage'
 import UsersPage from './pages/UsersPage'
 import StoresPage from './pages/StoresPage'
+import SettingsPage from './pages/SettingsPage'
 import ProfilePage from './pages/ProfilePage'
 import { useAuth } from './context/AuthContext'
 
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/chamados/:id" element={<TicketDetailPage />} />
         <Route path="/lojas" element={<StoresPage />} />
         <Route path="/usuarios" element={<UsersPage />} />
+        <Route path="/configuracoes" element={<SettingsPage />} />
         <Route path="/perfil" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
