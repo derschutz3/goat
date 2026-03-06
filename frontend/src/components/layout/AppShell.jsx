@@ -29,7 +29,7 @@ export default function AppShell({ children }) {
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-logo" style={{ width: 32, height: 32, background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: 8, flexShrink: 0 }}></div>
-          <span className="brand-text">Primatas System</span>
+          <span className="brand-text" style={{ color: 'var(--text-main)', opacity: 1, visibility: 'visible', transform: 'none' }}>Primatas System</span>
         </div>
         
         <nav className="menu">
@@ -72,7 +72,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v3.8</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v3.9</div>
         </div>
       </aside>
 
