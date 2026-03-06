@@ -30,26 +30,16 @@ export default function AppShell({ children }) {
     <div className={`app-shell ${menuOpen ? 'menu-open' : ''}`}>
       <div className="sidebar-overlay" onClick={() => setMenuOpen(false)}></div>
       <aside className="sidebar">
-        <div className="brand flex justify-between items-center pr-4">
-          <div className="flex items-center gap-3">
-            <div className="brand-logo" style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
-              <img 
-                src="/primatas-photo.jpg" 
-                alt="Logo" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                onError={(e) => { e.target.src = '/primatas-logo.svg' }}
-              />
-            </div>
-            <span className="brand-text" style={{ color: 'var(--text-main)', opacity: 1, visibility: 'visible', transform: 'none' }}>Primatas System</span>
+        <div className="brand">
+          <div className="brand-logo" style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+            <img 
+              src="/primatas-photo.jpg" 
+              alt="Logo" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              onError={(e) => { e.target.src = '/primatas-logo.svg' }}
+            />
           </div>
-          {/* Mobile Close Button */}
-          <button 
-            className="lg:hidden text-muted hover:text-white p-2"
-            onClick={() => setMenuOpen(false)}
-            style={{ display: window.innerWidth <= 1024 ? 'block' : 'none' }}
-          >
-            <Icons.Close />
-          </button>
+          <span className="brand-text" style={{ color: 'var(--text-main)', opacity: 1, visibility: 'visible', transform: 'none' }}>Primatas System</span>
         </div>
         
         <nav className="menu">
@@ -92,7 +82,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.22</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.23</div>
         </div>
       </aside>
 
