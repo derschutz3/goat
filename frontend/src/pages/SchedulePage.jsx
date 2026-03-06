@@ -36,7 +36,7 @@ export default function SchedulePage() {
       const { data: techs, error: techError } = await supabase
         .from('app_users')
         .select('*')
-        .in('role', ['tecnico', 'admin', 'manager']) // Permitir admins na escala também
+        .in('role', ['tecnico', 'admin', 'manager', 'supervisor']) // Permitir todos os técnicos
       
       if (techError) throw techError
       setTechnicians(techs || [])

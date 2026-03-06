@@ -164,11 +164,11 @@ export async function getCategories() {
 }
 
 export async function getTechnicians() {
-  // In Supabase, technicians are profiles with specific roles
+  // Now using app_users instead of profiles
   const { data, error } = await supabase
-    .from('profiles')
+    .from('app_users')
     .select('id, username')
-    .in('role', ['tecnico', 'admin', 'supervisor'])
+    .in('role', ['tecnico', 'admin', 'supervisor', 'manager']) // Added manager
     
   if (error) throw error
   return data
