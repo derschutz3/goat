@@ -74,12 +74,21 @@ export default function DashboardPage() {
   useEffect(() => {
     getDashboard()
       .then(setData)
-      .catch(() => setError('Não foi possível carregar o dashboard'))
+      .catch((err) => {
+        console.error('Dashboard error:', err)
+        setError(err.message || 'Erro desconhecido ao carregar dashboard')
+      })
       .finally(() => setLoading(false))
   }, [])
 
   if (loading) return <div className="card p-8 text-center">Carregando dashboard...</div>
-  if (error) return <div className="card p-8 text-center text-danger">{error}</div>
+  if (error) return (
+    <div className="card p-8 text-center text-danger">
+      <h3 className="font-bold text-lg mb-2">Erro ao carregar dashboard</h3>
+      <p className="font-mono bg-muted/10 p-4 rounded text-sm text-left overflow-auto">{error}</p>
+      <button onClick={() => window.location.reload()} className="btn-primary mt-4">Tentar Novamente</button>
+    </div>
+  )
   if (!data) return <EmptyState title="Sem dados" />
 
   return (
