@@ -179,9 +179,13 @@ export default function LoginPage() {
       <div className="login-card">
         <div style={{ width: 80, height: 80, margin: '0 auto 20px', borderRadius: '50%', overflow: 'hidden', border: '4px solid var(--primary)' }}>
           <img 
-            src="/primatas-logo.svg" 
+            src="/primatas-icon.png" 
             alt="Logo" 
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            onError={(e) => { 
+              e.target.onerror = null; 
+              e.target.src = '/primatas-logo.svg'; 
+            }}
           />
         </div>
         <div className="login-title">Primatas System</div>
