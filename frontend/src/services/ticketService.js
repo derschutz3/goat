@@ -63,6 +63,11 @@ export async function getDashboard() {
     .filter(t => ['risk', 'overdue'].includes(t.sla_status) && !['resolvido', 'fechado'].includes(t.status))
     .sort((a, b) => a.hoursLeft - b.hoursLeft)
     .slice(0, 5)
+    .map(t => ({
+      ...t,
+      store: t.store?.name || t.store, // Flatten object to string
+      technician: t.technician?.username || t.technician // Flatten object to string
+    }))
 
   // 4. Productivity (Technicians)
   const techStats = {}
