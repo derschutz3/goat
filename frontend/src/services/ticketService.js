@@ -15,6 +15,9 @@ export async function getDashboard() {
     
   if (error) throw error
 
+  const today = new Date().toDateString()
+  const now = new Date()
+
   // 1.1 Fetch auxiliary data for mapping (avoid complex joins that might fail)
   const { data: users } = await supabase.from('app_users').select('id, username')
   const { data: stores } = await supabase.from('stores').select('id, name')
