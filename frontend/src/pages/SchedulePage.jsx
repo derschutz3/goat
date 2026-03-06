@@ -37,15 +37,11 @@ export default function SchedulePage() {
     try {
       setLoading(true)
       
-      // 1. Buscar técnicos (APENAS quem pode atuar como técnico)
-      // Strict filter: only users with role 'tecnico' should appear in rows? 
-      // User said "Usuarios que nao tem o sub usuario tecnico, nao irao aparecer".
-      // But also said admin/manager can act as techs.
-      // Let's stick to the roles that CAN be techs.
+      // 1. Buscar técnicos (quem tem a flag is_tech = true)
       const { data: techs } = await supabase
         .from('app_users')
         .select('*')
-        .in('role', ['tecnico', 'admin', 'manager', 'supervisor'])
+        .eq('is_tech', true)
         .order('username')
       
       setTechnicians(techs || [])

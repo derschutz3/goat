@@ -8,7 +8,7 @@ export default function UsersPage() {
   const { addToast } = useToast()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [formData, setFormData] = useState({ email: '', password: '', username: '', role: 'user', avatar_url: '' })
+  const [formData, setFormData] = useState({ email: '', password: '', username: '', role: 'user', avatar_url: '', is_tech: false })
   const [creating, setCreating] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -117,7 +117,8 @@ export default function UsersPage() {
           username: formData.username,
           email: formData.email,
           role: formData.role,
-          avatar_url: formData.avatar_url
+          avatar_url: formData.avatar_url,
+          is_tech: formData.is_tech
         }
         
         // Only update password if provided
@@ -155,7 +156,8 @@ export default function UsersPage() {
             password: formData.password,
             email: formData.email,
             role: formData.role,
-            avatar_url: formData.avatar_url
+            avatar_url: formData.avatar_url,
+            is_tech: formData.is_tech
           }])
           .select()
           .single()
@@ -182,13 +184,14 @@ export default function UsersPage() {
       password: '', // Don't show current password
       username: userToEdit.username,
       role: userToEdit.role,
-      avatar_url: userToEdit.avatar_url || ''
+      avatar_url: userToEdit.avatar_url || '',
+      is_tech: userToEdit.is_tech || false
     })
     setShowForm(true)
   }
 
   const resetForm = () => {
-    setFormData({ email: '', password: '', username: '', role: 'user', avatar_url: '' })
+    setFormData({ email: '', password: '', username: '', role: 'user', avatar_url: '', is_tech: false })
     setEditingId(null)
     setShowForm(false)
   }
@@ -396,6 +399,18 @@ export default function UsersPage() {
                 <option value="admin">Administrador</option>
               </select>
             </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <input 
+                type="checkbox" 
+                id="is_tech"
+                checked={formData.is_tech}
+                onChange={e => setFormData({...formData, is_tech: e.target.checked})}
+                style={{ width: 16, height: 16, cursor: 'pointer' }}
+              />
+              <label htmlFor="is_tech" style={{ cursor: 'pointer', fontSize: 14 }}>Exercer função de técnico?</label>
+            </div>
+
             <button type="submit" className="btn-primary" disabled={creating} style={{ height: 42 }}>
               {creating ? 'Salvando...' : (editingId ? 'Salvar Alterações' : 'Criar Usuário')}
             </button>
@@ -446,7 +461,17 @@ export default function UsersPage() {
                         </div>
                         <div>
                           <div style={{ fontWeight: 500 }}>{u.username || 'Sem nome'}</div>
-                          {u.email && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{u.email}</div>}
+                          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            {u.email && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{u.email}</div>}
+                            {u.is_tech && (
+                              <span style={{ 
+                                fontSize: 10, background: 'var(--primary)', color: 'white', 
+                                padding: '2px 6px', borderRadius: 4, fontWeight: 'bold' 
+                              }}>
+                                TÉCNICO
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
