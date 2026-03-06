@@ -41,8 +41,9 @@ export async function getDashboard() {
   ).length
 
   // 3. SLA Risk Logic
-  // Critica: 4h, Alta: 8h, Media: 24h, Baixa: 48h
-  const slaHours = { critica: 4, alta: 8, media: 24, baixa: 48 }
+  // Tenta ler do localStorage (configurado na página de Settings), senão usa padrão
+  const savedSla = localStorage.getItem('primatas_sla')
+  const slaHours = savedSla ? JSON.parse(savedSla) : { critica: 4, alta: 8, media: 24, baixa: 48 }
   
   const ticketsWithSLA = enrichedTickets.map(t => {
     if (['resolvido', 'fechado'].includes(t.status)) return { ...t, sla_status: 'ok' }
