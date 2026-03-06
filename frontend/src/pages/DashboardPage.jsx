@@ -275,6 +275,7 @@ export default function DashboardPage() {
           
           .kpi-value { font-size: 24px; }
         }
+      `}</style>
     </div>
   )
 }
