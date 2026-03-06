@@ -100,19 +100,23 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Tabs - Padrão Segmented Control */}
-      <div className="flex p-1 mb-8 bg-muted-10 rounded-xl w-fit border border-light">
+      {/* Tabs - Estilo Clean (Border Bottom) */}
+      <div className="flex border-b border-light mb-8">
         {['sla', 'categories', 'priorities'].map((tab) => (
           <button 
             key={tab}
-            className={`px-6 py-2 rounded-lg font-medium text-sm transition-all ${
+            className={`px-6 py-4 font-medium text-sm transition-all relative ${
               activeTab === tab 
-                ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                : 'text-muted hover:text-white hover:bg-white/5'
+                ? 'text-primary' 
+                : 'text-muted hover:text-white'
             }`}
             onClick={() => setActiveTab(tab)}
           >
             {tab === 'sla' ? 'Políticas de SLA' : tab === 'categories' ? 'Categorias' : 'Prioridades'}
+            {/* Active Indicator Line */}
+            {activeTab === tab && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_-2px_6px_rgba(var(--primary-rgb),0.5)] rounded-t-full"></div>
+            )}
           </button>
         ))}
       </div>
