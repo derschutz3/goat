@@ -208,7 +208,7 @@ export default function ProfilePage() {
             <div style={{ position: 'relative' }}>
               {formData.avatar_url ? (
                 <img 
-                  src={formData.avatar_url} 
+                  src={`${formData.avatar_url}?t=${new Date().getTime()}`} 
                   alt="Avatar" 
                   style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '4px solid var(--bg-app)' }} 
                   onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
