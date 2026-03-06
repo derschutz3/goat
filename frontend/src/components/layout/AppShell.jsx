@@ -45,10 +45,6 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Plus /></span>
             <span className="menu-text">Novo Chamado</span>
           </NavLink>
-          <NavLink to="/escala" className="menu-item">
-            <span className="menu-icon"><Icons.Calendar /></span>
-            <span className="menu-text">Escala</span>
-          </NavLink>
           <NavLink to="/lojas" className="menu-item">
             <span className="menu-icon"><Icons.Store /></span>
             <span className="menu-text">Lojas</span>
@@ -72,7 +68,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.3</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.4</div>
         </div>
       </aside>
 
