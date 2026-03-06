@@ -72,7 +72,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v3.9</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v4.0</div>
         </div>
       </aside>
 
