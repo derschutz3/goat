@@ -100,52 +100,54 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b border-light pb-1">
-        <button 
-          className={`px-4 py-2 font-medium transition-colors ${activeTab === 'sla' ? 'text-primary border-b-2 border-primary' : 'text-muted hover:text-white'}`}
-          onClick={() => setActiveTab('sla')}
-        >
-          Políticas de SLA
-        </button>
-        <button 
-          className={`px-4 py-2 font-medium transition-colors ${activeTab === 'categories' ? 'text-primary border-b-2 border-primary' : 'text-muted hover:text-white'}`}
-          onClick={() => setActiveTab('categories')}
-        >
-          Categorias
-        </button>
-        <button 
-          className={`px-4 py-2 font-medium transition-colors ${activeTab === 'priorities' ? 'text-primary border-b-2 border-primary' : 'text-muted hover:text-white'}`}
-          onClick={() => setActiveTab('priorities')}
-        >
-          Prioridades
-        </button>
+      {/* Tabs - Melhorado */}
+      <div className="flex gap-2 mb-6 border-b border-light overflow-x-auto">
+        {['sla', 'categories', 'priorities'].map((tab) => (
+          <button 
+            key={tab}
+            className={`px-6 py-3 font-medium text-sm transition-all relative outline-none ${
+              activeTab === tab 
+                ? 'text-primary' 
+                : 'text-muted hover:text-white'
+            }`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab === 'sla' ? 'Políticas de SLA' : tab === 'categories' ? 'Categorias' : 'Prioridades'}
+            {activeTab === tab && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"></div>
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Content SLA */}
       {activeTab === 'sla' && (
-        <div className="card max-w-2xl animate-fade-in">
-          <div className="card-header border-b">
-            <h3 className="font-semibold">Definição de Prazos (Horas)</h3>
+        <div className="card max-w-3xl animate-fade-in">
+          <div className="card-header border-b border-light p-6">
+            <h3 className="font-semibold text-lg">Definição de Prazos</h3>
+            <p className="text-muted text-sm mt-1">Configure o tempo máximo (em horas) para resolução de cada prioridade.</p>
           </div>
-          <div className="grid gap-4">
+          <div className="p-6 grid gap-4">
             {Object.entries(sla).map(([key, val]) => (
-              <div key={key} className="flex items-center justify-between p-3 bg-muted-10 rounded-lg">
-                <span className="capitalize font-medium">{key}</span>
-                <div className="flex items-center gap-2">
+              <div key={key} className="flex items-center justify-between p-4 border border-light rounded-xl bg-muted-5 hover:bg-muted-10 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full bg-${key === 'critica' ? 'danger' : key === 'alta' ? 'orange' : key === 'media' ? 'warning' : 'info'}`}></div>
+                  <span className="capitalize font-medium text-base">{key}</span>
+                </div>
+                <div className="flex items-center gap-3 bg-dark-bg p-2 rounded-lg border border-light focus-within:border-primary transition-colors">
                   <input 
                     type="number" 
-                    className="input w-24 text-center" 
+                    className="bg-transparent border-none text-right w-16 text-white font-mono outline-none" 
                     value={val} 
                     onChange={(e) => handleSlaChange(key, e.target.value)}
                   />
-                  <span className="text-muted text-sm">horas</span>
+                  <span className="text-muted text-sm font-medium pr-2">horas</span>
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-6 flex justify-end">
-            <button className="btn-primary" onClick={saveSla} disabled={loading}>
+          <div className="p-6 border-t border-light flex justify-end bg-muted-5 rounded-b-xl">
+            <button className="btn-primary px-8" onClick={saveSla} disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </div>
@@ -154,58 +156,74 @@ export default function SettingsPage() {
 
       {/* Content Categories */}
       {activeTab === 'categories' && (
-        <div className="card max-w-2xl animate-fade-in">
-          <div className="card-header border-b">
-            <h3 className="font-semibold">Gerenciar Categorias</h3>
+        <div className="card max-w-3xl animate-fade-in">
+          <div className="card-header border-b border-light p-6">
+            <h3 className="font-semibold text-lg">Gerenciar Categorias</h3>
+            <p className="text-muted text-sm mt-1">Adicione ou remova categorias para classificação dos chamados.</p>
           </div>
           
-          <div className="flex gap-2 mb-6">
-            <input 
-              className="input" 
-              placeholder="Nova categoria..." 
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addCategory()}
-            />
-            <button className="btn-secondary" onClick={addCategory}>Adicionar</button>
-          </div>
+          <div className="p-6">
+            <div className="flex gap-3 mb-6">
+              <input 
+                className="input flex-1 bg-dark-bg border-light focus:border-primary h-12" 
+                placeholder="Nome da nova categoria..." 
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+              />
+              <button className="btn-secondary px-6 h-12" onClick={addCategory}>Adicionar</button>
+            </div>
 
-          <div className="list">
-            {categories.map(cat => (
-              <div key={cat.id} className="list-item">
-                <span>{cat.name}</span>
-                <button 
-                  className="text-danger hover:text-white transition-colors"
-                  onClick={() => removeCategory(cat.id)}
-                  title="Remover"
-                >
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                </button>
-              </div>
-            ))}
-            {categories.length === 0 && <div className="text-center text-muted p-4">Nenhuma categoria encontrada.</div>}
+            <div className="grid gap-2">
+              {categories.map(cat => (
+                <div key={cat.id} className="flex items-center justify-between p-4 border border-light rounded-xl hover:bg-muted-5 transition-colors group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                    </div>
+                    <span className="font-medium">{cat.name}</span>
+                  </div>
+                  <button 
+                    className="p-2 text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    onClick={() => removeCategory(cat.id)}
+                    title="Remover"
+                  >
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+              ))}
+              {categories.length === 0 && (
+                <div className="text-center text-muted p-8 border-2 border-dashed border-light rounded-xl">
+                  Nenhuma categoria cadastrada.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
       {/* Content Priorities */}
       {activeTab === 'priorities' && (
-        <div className="card max-w-2xl animate-fade-in">
-          <div className="card-header border-b">
-            <h3 className="font-semibold">Níveis de Prioridade</h3>
+        <div className="card max-w-3xl animate-fade-in">
+          <div className="card-header border-b border-light p-6">
+            <h3 className="font-semibold text-lg">Níveis de Prioridade</h3>
+            <p className="text-muted text-sm mt-1">Visualização das prioridades do sistema e seus indicadores.</p>
           </div>
-          <p className="text-muted mb-4 text-sm">
-            As prioridades definem a ordem de atendimento e o SLA aplicado.
-            (Edição avançada desabilitada nesta versão)
-          </p>
-          <div className="list">
+          <div className="p-6 grid gap-3">
             {priorities.map(p => (
-              <div key={p.id} className="list-item">
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full bg-${p.color === 'neutral' ? 'gray-500' : p.color === 'warning' ? 'yellow-500' : p.color === 'orange' ? 'orange-500' : 'red-500'}`}></div>
-                  <span className="font-medium capitalize">{p.label}</span>
+              <div key={p.id} className="flex items-center justify-between p-4 border border-light rounded-xl hover:bg-muted-5 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${p.color === 'neutral' ? 'gray' : p.color === 'warning' ? 'yellow' : p.color === 'orange' ? 'orange' : 'red'}-500/10`}>
+                     <div className={`w-3 h-3 rounded-full bg-${p.color === 'neutral' ? 'gray' : p.color === 'warning' ? 'yellow' : p.color === 'orange' ? 'orange' : 'red'}-500`}></div>
+                  </div>
+                  <div>
+                    <div className="font-medium capitalize text-lg">{p.label}</div>
+                    <div className="text-xs text-muted font-mono mt-0.5 uppercase tracking-wider">{p.id}</div>
+                  </div>
                 </div>
-                <span className="text-sm text-muted font-mono">{p.id}</span>
+                <div className="px-3 py-1 rounded-full bg-muted-10 text-xs text-muted border border-light">
+                  Sistema Padrão
+                </div>
               </div>
             ))}
           </div>
