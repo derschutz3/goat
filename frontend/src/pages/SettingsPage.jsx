@@ -179,7 +179,7 @@ export default function SettingsPage() {
                   <div className={`w-2 h-2 rounded-full bg-${key === 'critica' ? 'danger' : key === 'alta' ? 'orange' : key === 'media' ? 'warning' : 'info'}`}></div>
                   <span className="capitalize font-medium text-base">{key}</span>
                 </div>
-                <div className="flex items-center gap-3 bg-dark-bg p-2 rounded-lg border border-light focus-within:border-primary transition-colors">
+                <div className="flex items-center gap-3 bg-dark-bg p-2 rounded-full border border-light focus-within:border-primary transition-colors px-4">
                   <input 
                     type="number" 
                     className="bg-transparent border-none text-right w-16 text-white font-mono outline-none" 
