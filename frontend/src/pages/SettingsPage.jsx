@@ -211,13 +211,13 @@ export default function SettingsPage() {
           <div className="p-6">
             <div className="flex gap-3 mb-6">
               <input 
-                className="input flex-1 bg-dark-bg border-light focus:border-primary h-12" 
+                className="input flex-1 h-12" 
                 placeholder="Nome da nova categoria..." 
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addCategory()}
               />
-              <button className="btn-secondary h-12 px-6" onClick={addCategory}>Adicionar</button>
+              <button className="btn btn-secondary h-12 px-6" onClick={addCategory}>Adicionar</button>
             </div>
 
             <div className="grid gap-4">
@@ -260,14 +260,14 @@ export default function SettingsPage() {
             {/* Add New Priority */}
             <div className="flex gap-3 mb-6 items-center bg-muted-5 p-4 rounded-xl border border-light">
               <input 
-                className="input flex-1 bg-dark-bg border-light focus:border-primary h-12" 
+                className="input flex-1 h-12" 
                 placeholder="Nome da prioridade (ex: Urgentíssimo)" 
                 value={newPriority.label}
                 onChange={(e) => setNewPriority({ ...newPriority, label: e.target.value })}
                 onKeyDown={(e) => e.key === 'Enter' && addPriority()}
               />
               <select 
-                className="select bg-dark-bg border-light focus:border-primary h-12 w-32"
+                className="select h-12 w-32"
                 value={newPriority.color}
                 onChange={(e) => setNewPriority({ ...newPriority, color: e.target.value })}
               >
@@ -278,7 +278,7 @@ export default function SettingsPage() {
                 <option value="orange">Laranja</option>
                 <option value="danger">Vermelho</option>
               </select>
-              <button className="btn-secondary h-12 px-6" onClick={addPriority}>Adicionar</button>
+              <button className="btn btn-secondary h-12 px-6" onClick={addPriority}>Adicionar</button>
             </div>
 
             <div className="grid gap-3">
@@ -287,12 +287,12 @@ export default function SettingsPage() {
                   {editingPriority && editingPriority.id === p.id ? (
                     <div className="flex flex-1 gap-3 items-center">
                       <input 
-                        className="input flex-1 bg-dark-bg h-10" 
+                        className="input flex-1 h-10" 
                         value={editingPriority.label}
                         onChange={(e) => setEditingPriority({ ...editingPriority, label: e.target.value })}
                       />
                       <select 
-                        className="select bg-dark-bg h-10 w-32"
+                        className="select h-10 w-32"
                         value={editingPriority.color}
                         onChange={(e) => setEditingPriority({ ...editingPriority, color: e.target.value })}
                       >
@@ -303,8 +303,8 @@ export default function SettingsPage() {
                         <option value="orange">Laranja</option>
                         <option value="danger">Vermelho</option>
                       </select>
-                      <button className="btn-primary h-10 px-4 text-xs" onClick={saveEditedPriority}>Salvar</button>
-                      <button className="btn-secondary h-10 px-4 text-xs" onClick={() => setEditingPriority(null)}>Cancelar</button>
+                      <button className="btn btn-primary h-10 px-4 text-xs" onClick={saveEditedPriority}>Salvar</button>
+                      <button className="btn btn-secondary h-10 px-4 text-xs" onClick={() => setEditingPriority(null)}>Cancelar</button>
                     </div>
                   ) : (
                     <>
