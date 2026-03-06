@@ -121,37 +121,37 @@ export default function DashboardPage() {
           
           {/* Fila de Chamados Recentes */}
           <div className="card dashboard-table-container">
-            <div className="card-header flex justify-between items-center p-4 border-b border-light">
+            <div className="card-header border-b">
               <h3 className="font-semibold">Chamados Recentes</h3>
               <Link to="/chamados" className="text-sm text-primary hover:underline">Ver todos</Link>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-muted/10 text-muted">
+            <div className="table-container">
+              <table className="table">
+                <thead className="bg-muted-10 text-muted">
                   <tr>
-                    <th className="p-3">ID</th>
-                    <th className="p-3">Loja / Cliente</th>
-                    <th className="p-3">Prioridade</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Técnico</th>
-                    <th className="p-3 text-right">Aberto há</th>
+                    <th>ID</th>
+                    <th>Loja / Cliente</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th>Técnico</th>
+                    <th className="text-right">Aberto há</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.recent_tickets.map(t => (
-                    <tr key={t.id} className="border-b border-light hover:bg-muted/5">
-                      <td className="p-3 font-mono" data-label="ID">#{t.id}</td>
-                      <td className="p-3 font-medium" data-label="Loja">{t.store || 'N/A'}</td>
-                      <td className="p-3" data-label="Prioridade"><PriorityPill priority={t.priority} /></td>
-                      <td className="p-3" data-label="Status"><StatusPill status={t.status} /></td>
-                      <td className="p-3 text-muted" data-label="Técnico">{t.technician || '-'}</td>
-                      <td className="p-3 text-right text-muted" data-label="Aberto há">
+                    <tr key={t.id} className="hover-bg-muted-5">
+                      <td className="font-mono" data-label="ID">#{t.id}</td>
+                      <td className="font-medium" data-label="Loja">{t.store || 'N/A'}</td>
+                      <td data-label="Prioridade"><PriorityPill priority={t.priority} /></td>
+                      <td data-label="Status"><StatusPill status={t.status} /></td>
+                      <td className="text-muted" data-label="Técnico">{t.technician || '-'}</td>
+                      <td className="text-right text-muted" data-label="Aberto há">
                         {Math.floor((new Date() - new Date(t.created_at)) / (1000 * 60 * 60))}h
                       </td>
                     </tr>
                   ))}
                   {data.recent_tickets.length === 0 && (
-                    <tr><td colSpan="6" className="p-6 text-center text-muted">Nenhum chamado recente.</td></tr>
+                    <tr><td colSpan="6" className="text-center text-muted p-4">Nenhum chamado recente.</td></tr>
                   )}
                 </tbody>
               </table>
