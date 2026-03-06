@@ -100,23 +100,19 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Tabs - Estilo Clean (Border Bottom) */}
-      <div className="flex border-b border-light mb-8">
+      {/* Tabs - Estilo Pill (Botões Soltos Padronizados) */}
+      <div className="flex flex-wrap gap-3 mb-8">
         {['sla', 'categories', 'priorities'].map((tab) => (
           <button 
             key={tab}
-            className={`px-6 py-4 font-medium text-sm transition-all relative ${
+            className={`px-6 py-2.5 rounded-2xl font-semibold text-sm transition-all ${
               activeTab === tab 
-                ? 'text-primary' 
-                : 'text-muted hover:text-white'
+                ? 'bg-[#5856D6] text-white shadow-[0_4px_12px_rgba(88,86,214,0.25)] hover:bg-[#4F46E5]' 
+                : 'bg-muted-5 text-muted hover:text-white hover:bg-muted-10 border border-transparent hover:border-light'
             }`}
             onClick={() => setActiveTab(tab)}
           >
             {tab === 'sla' ? 'Políticas de SLA' : tab === 'categories' ? 'Categorias' : 'Prioridades'}
-            {/* Active Indicator Line */}
-            {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_-2px_6px_rgba(var(--primary-rgb),0.5)] rounded-t-full"></div>
-            )}
           </button>
         ))}
       </div>
