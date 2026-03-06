@@ -218,10 +218,13 @@
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-100%);
-    width: 320px; /* Mobile sempre full width ou largo o suficiente */
-    box-shadow: none; /* Sombra controlada pelo estado open */
-    z-index: 40; /* Sidebar acima do overlay */
-  } transform: translateX(0);
+    width: 320px;
+    box-shadow: none;
+    z-index: 40;
+  }
+  
+  .app-shell.menu-open .sidebar {
+    transform: translateX(0);
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5);
   }
 
