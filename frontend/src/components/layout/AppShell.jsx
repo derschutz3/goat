@@ -157,12 +157,15 @@ export default function AppShell({ children }) {
 
       <style>{`
         @media (max-width: 1024px) {
-          .topbar button { display: none !important; } /* Hide hamburger menu */
-          .sidebar { display: none !important; } /* Hide sidebar on mobile */
+          .topbar button { display: none !important; }
+          .sidebar { display: none !important; }
           .mobile-bottom-nav { display: flex !important; }
-          .main { padding-bottom: 80px; } /* Space for bottom nav */
-          .topbar { left: 0 !important; width: 100% !important; }
+          .main { padding-bottom: 80px; margin-left: 0 !important; }
+          .topbar { left: 0 !important; width: 100% !important; padding: 0 16px !important; }
           .content { padding: 16px; }
+        }
+        @media (min-width: 1025px) {
+          .mobile-bottom-nav { display: none !important; }
         }
       `}</style>
     </div>

@@ -277,7 +277,7 @@
 
   /* Mobile Bottom Navigation Styles */
   .mobile-bottom-nav {
-    display: none; /* Hidden by default, shown via inline style in AppShell for mobile */
+    display: none;
     position: fixed;
     bottom: 0;
     left: 0;
