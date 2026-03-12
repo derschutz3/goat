@@ -81,7 +81,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.51</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.53</div>
         </div>
       </aside>
 
@@ -126,9 +126,43 @@ export default function AppShell({ children }) {
         </div>
       </main>
 
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <NavLink to="/dashboard" className="mobile-nav-item">
+          <Icons.Dashboard />
+          <span>Início</span>
+        </NavLink>
+        <NavLink to="/chamados" className="mobile-nav-item" end>
+          <Icons.Ticket />
+          <span>Chamados</span>
+        </NavLink>
+        <NavLink to="/chamados/novo" className="mobile-nav-item highlight">
+          <div className="plus-circle">
+            <Icons.Plus />
+          </div>
+        </NavLink>
+        <NavLink to="/configuracoes" className="mobile-nav-item">
+          <Icons.Settings />
+          <span>Ajustes</span>
+        </NavLink>
+        <NavLink to="/perfil" className="mobile-nav-item">
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt="Perfil" className="nav-avatar" />
+          ) : (
+            <Icons.Profile />
+          )}
+          <span>Perfil</span>
+        </NavLink>
+      </nav>
+
       <style>{`
         @media (max-width: 1024px) {
-          .topbar button { display: block !important; }
+          .topbar button { display: none !important; } /* Hide hamburger menu */
+          .sidebar { display: none !important; } /* Hide sidebar on mobile */
+          .mobile-bottom-nav { display: flex !important; }
+          .main { padding-bottom: 80px; } /* Space for bottom nav */
+          .topbar { left: 0 !important; width: 100% !important; }
+          .content { padding: 16px; }
         }
       `}</style>
     </div>

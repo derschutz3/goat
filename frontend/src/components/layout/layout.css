@@ -274,4 +274,86 @@
     padding: 0 16px;
     height: 64px;
   }
+
+  /* Mobile Bottom Navigation Styles */
+  .mobile-bottom-nav {
+    display: none; /* Hidden by default, shown via inline style in AppShell for mobile */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(10, 10, 18, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 100;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 16px;
+  }
+
+  body.light-mode .mobile-bottom-nav {
+    background: rgba(255, 255, 255, 0.9);
+    border-top: 1px solid var(--border-light);
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 500;
+    width: 60px;
+    height: 100%;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-nav-item svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--primary);
+  }
+
+  .mobile-nav-item.active svg {
+    stroke-width: 2.5px;
+  }
+
+  .nav-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid transparent;
+  }
+
+  .mobile-nav-item.active .nav-avatar {
+    border-color: var(--primary);
+  }
+
+  /* Highlight Button (New Ticket) */
+  .mobile-nav-item.highlight .plus-circle {
+    width: 48px;
+    height: 32px;
+    background: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-nav-item.highlight.active .plus-circle {
+    background: var(--text-main);
+    color: var(--bg-app);
+  }
 }
