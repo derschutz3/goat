@@ -176,14 +176,9 @@ export default function SettingsPage() {
           <div className="p-6 grid gap-4">
             {Object.entries(sla).map(([key, val]) => (
               <div key={key} className="flex items-center justify-between p-4 border border-light rounded-xl hover:bg-muted-5 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center bg-${key === 'critica' ? 'red' : key === 'alta' ? 'orange' : key === 'media' ? 'yellow' : 'blue'}-500/10`}>
-                     <div className={`w-3 h-3 rounded-full bg-${key === 'critica' ? 'red' : key === 'alta' ? 'orange' : key === 'media' ? 'yellow' : 'blue'}-500`}></div>
-                  </div>
-                  <div>
-                    <div className="font-medium capitalize text-lg">{key}</div>
-                    <div className="text-xs text-muted font-mono mt-0.5 uppercase tracking-wider">Prioridade</div>
-                  </div>
+                <div className="flex flex-col gap-1">
+                  <div className="font-medium capitalize text-lg">{key}</div>
+                  <div className="text-xs text-muted font-mono uppercase tracking-wider">Prioridade</div>
                 </div>
                 
                 <div className="flex items-center gap-3">
