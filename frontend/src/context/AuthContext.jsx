@@ -17,6 +17,20 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = async ({ username, password }) => {
+    // Fallback/Dev Login
+    if (username === 'admin' && password === 'admin') {
+      const devUser = {
+        id: 'dev-admin',
+        username: 'admin',
+        role: 'admin',
+        email: 'admin@sistema.com',
+        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
+      }
+      setUser(devUser)
+      localStorage.setItem('app_session', JSON.stringify(devUser))
+      return true
+    }
+
     try {
       const { data, error } = await supabase
         .from('app_users')
