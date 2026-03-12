@@ -289,9 +289,8 @@
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     z-index: 100;
     align-items: center;
-    justify-content: space-between; /* Melhor distribuição */
-    padding: 0 8px; /* Padding reduzido para caber mais itens */
-    overflow-x: auto; /* Permitir scroll se necessário em telas muito pequenas */
+    justify-content: space-between;
+    padding: 0; /* Remove padding lateral */
   }
 
   body.light-mode .mobile-bottom-nav {
@@ -307,12 +306,12 @@
     gap: 4px;
     color: var(--text-muted);
     text-decoration: none;
-    font-size: 9px; /* Fonte levemente menor */
+    font-size: 9px;
     font-weight: 500;
-    min-width: 56px; /* Largura mínima para toque */
-    flex: 1; /* Distribuir espaço igualmente */
+    flex: 1; /* Força divisão igual do espaço */
     height: 100%;
     transition: all 0.2s ease;
+    padding: 0 4px; /* Pequeno respiro interno */
   }
 
   .mobile-nav-item svg {
