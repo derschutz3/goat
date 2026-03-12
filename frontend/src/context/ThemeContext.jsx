@@ -1,20 +1,35 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
-const ThemeContext = createContext(null)
+const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark')
+  // Ler do localStorage ou usar preferência do sistema, padrão 'dark'
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('primatas_theme')
+    if (saved) return saved
+    return 'dark' // Default dark
+  })
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
+    localStorage.setItem('primatas_theme', theme)
+    
+    // Aplicar classe no body
+    if (theme === 'light') {
+      document.body.classList.add('light-mode')
+    } else {
+      document.body.classList.remove('light-mode')
+    }
   }, [theme])
 
-  const toggle = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'))
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+  }
 
-  const value = useMemo(() => ({ theme, toggle }), [theme])
-
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  )
 }
 
 export function useTheme() {

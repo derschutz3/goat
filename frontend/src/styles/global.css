@@ -36,6 +36,57 @@
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* Light Mode Overrides */
+body.light-mode {
+  --bg-app: #f1f5f9;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+  
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  
+  --border-light: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(99, 102, 241, 0.2);
+  
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 4px 20px rgba(99, 102, 241, 0.1);
+}
+
+body.light-mode .input, 
+body.light-mode .select, 
+body.light-mode .textarea {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+body.light-mode .input:focus, 
+body.light-mode .select:focus, 
+body.light-mode .textarea:focus {
+  border-color: var(--primary);
+  background: #ffffff;
+}
+
+body.light-mode .list-item,
+body.light-mode .bg-muted-5 {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-mode .list-item:hover,
+body.light-mode .hover-bg-muted-5:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .bg-dark-bg {
+  background: #f8fafc;
+}
+
+body.light-mode .sidebar {
+  background: #ffffff;
+  border-right: 1px solid var(--border-light);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

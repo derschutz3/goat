@@ -1,0 +1,63 @@
+/* Hide known login popup containers */
+.login-box,
+#login-box,
+.J_LoginBox,
+.J_Popup,
+.baxter-content,
+.mui-dialog,
+.login-dialog,
+.login-mask,
+.sufei-dialog-mask,
+.sufei-dialog-content,
+.login-tip,
+.tb-login-dialog,
+.tm-login-dialog,
+#login,
+.login-new,
+.mini-login,
+[class*="login-modal"],
+[class*="login-wrap"],
+[id*="login-layer"],
+.ks-overlay,
+.ks-overlay-mask,
+.ks-overlay-content,
+.ui-dialog-mask,
+.ui-mask,
+.next-overlay-backdrop,
+.next-dialog,
+[class*="overlay-mask"],
+[class*="dialog-mask"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    z-index: -9999 !important;
+}
+
+/* Ensure the body is scrollable */
+body, html {
+    overflow: auto !important;
+    position: static !important;
+    height: auto !important;
+    width: auto !important;
+}
+
+/* Hide iframes that might be login prompts */
+iframe[src*="login.taobao.com"],
+iframe[src*="login.tmall.com"] {
+    display: none !important;
+}
+
+/* Styles for emergency button */
+#taobao-blocker-btn {
+    transition: all 0.2s ease;
+}
+#taobao-blocker-btn:hover {
+    transform: scale(1.05);
+    background-color: #ff1f1f !important;
+}
+#taobao-blocker-btn:active {
+    transform: scale(0.95);
+}

@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Taobao Login Blocker",
+  "version": "1.0",
+  "description": "Removes the mandatory login popup on Taobao and Tmall.",
+  "permissions": ["activeTab", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.taobao.com/*", "*://*.tmall.com/*"],
+      "js": ["content.js"],
+      "css": ["style.css"],
+      "run_at": "document_start"
+    }
+  ]
+}
