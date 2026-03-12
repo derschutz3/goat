@@ -191,8 +191,8 @@ export default function SettingsPage() {
             ))}
           </div>
           
-          <div className="p-6 border-t border-light bg-muted-5 rounded-b-xl">
-            <button className="btn btn-primary w-full" onClick={saveSla} disabled={loading}>
+          <div className="p-6 border-t border-light flex justify-end bg-muted-5 rounded-b-xl">
+            <button className="btn btn-primary px-8" onClick={saveSla} disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </div>

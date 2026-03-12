@@ -81,7 +81,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.64</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.65</div>
         </div>
       </aside>
 
@@ -153,6 +153,10 @@ export default function AppShell({ children }) {
           )}
           <span>Perfil</span>
         </NavLink>
+        <button className="mobile-nav-item" onClick={toggleTheme} style={{ background: 'transparent', border: 'none' }}>
+          {theme === 'dark' ? <Icons.Moon /> : <Icons.Sun />}
+          <span>Tema</span>
+        </button>
       </nav>
 
       <style>{`
