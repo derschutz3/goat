@@ -81,7 +81,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.60</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.61</div>
         </div>
       </aside>
 
@@ -141,22 +141,10 @@ export default function AppShell({ children }) {
             <Icons.Plus />
           </div>
         </NavLink>
-        <NavLink to="/lojas" className="mobile-nav-item">
-          <Icons.Store />
-          <span>Lojas</span>
-        </NavLink>
-        <NavLink to="/usuarios" className="mobile-nav-item">
-          <Icons.Users />
-          <span>Usuários</span>
-        </NavLink>
         <NavLink to="/configuracoes" className="mobile-nav-item">
           <Icons.Settings />
           <span>Ajustes</span>
         </NavLink>
-        <button className="mobile-nav-item" onClick={toggleTheme} style={{ background: 'transparent', border: 'none' }}>
-          {theme === 'dark' ? <Icons.Moon /> : <Icons.Sun />}
-          <span>Tema</span>
-        </button>
         <NavLink to="/perfil" className="mobile-nav-item">
           {user?.avatar_url ? (
             <img src={user.avatar_url} alt="Perfil" className="nav-avatar" />
