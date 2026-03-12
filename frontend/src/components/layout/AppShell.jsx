@@ -81,7 +81,7 @@ export default function AppShell({ children }) {
             <span className="menu-icon"><Icons.Logout /></span>
             <span className="menu-text">Sair</span>
           </button>
-          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.53</div>
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', marginTop: 4, opacity: 0.5 }}>v5.55</div>
         </div>
       </aside>
 
@@ -140,6 +140,14 @@ export default function AppShell({ children }) {
           <div className="plus-circle">
             <Icons.Plus />
           </div>
+        </NavLink>
+        <NavLink to="/lojas" className="mobile-nav-item">
+          <Icons.Store />
+          <span>Lojas</span>
+        </NavLink>
+        <NavLink to="/usuarios" className="mobile-nav-item">
+          <Icons.Users />
+          <span>Usuários</span>
         </NavLink>
         <NavLink to="/configuracoes" className="mobile-nav-item">
           <Icons.Settings />
