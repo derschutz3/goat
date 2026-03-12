@@ -23,7 +23,7 @@ const Icons = {
 
 export default function AppShell({ children }) {
   const { logout, user } = useAuth()
-  const { theme, toggle } = useTheme()
+  const { theme, toggleTheme } = useTheme()
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -73,7 +73,7 @@ export default function AppShell({ children }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="menu-item" onClick={toggle} style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+          <button className="menu-item" onClick={toggleTheme} style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer' }}>
             <span className="menu-icon">{theme === 'dark' ? <Icons.Moon /> : <Icons.Sun />}</span>
             <span className="menu-text">Tema: {theme === 'dark' ? 'Escuro' : 'Claro'}</span>
           </button>
