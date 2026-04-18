@@ -1,161 +1,153 @@
 {% extends "base.html" %}
 
-{% block title %}Lojas{% endblock %}
+{% block title %}Lojas & Setores{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <h4 class="mb-0 text-secondary"><i class="fas fa-store me-2"></i>Lojas</h4>
-    <button class="btn btn-primary" onclick="openModal()"><i class="fas fa-plus me-1"></i> Nova Loja</button>
+    <div>
+        <h4 class="mb-1"><i class="fas fa-store me-2 text-primary"></i>Gestão de Unidades</h4>
+        <p class="text-muted small mb-0">Cadastre e gerencie lojas, setores e departamentos</p>
+    </div>
+    <button class="btn btn-primary shadow-sm" onclick="openModal()">
+        <i class="fas fa-plus me-2"></i>Nova Unidade
+    </button>
 </div>
 
 <div class="row g-4">
-    <!-- Lojas -->
     <div class="col-12">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 text-muted">Todas as Lojas</h6>
-                <span class="badge bg-light text-dark">{{ stats|length }} Lojas</span>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-muted">Unidades Registradas</h6>
+                <span class="badge bg-primary rounded-pill">{{ stats|length }} Total</span>
             </div>
-            <div class="list-group list-group-flush">
-                {% for store in stats %}
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center flex-grow-1" onclick="editStore('{{ store.name }}')" style="cursor: pointer;">
-                        <div class="ms-2">
-                            <div class="fw-bold">{{ store.name }}</div>
-                            <small class="text-muted">{{ store.count }} chamados</small>
-                        </div>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-outline-primary" onclick="editStore('{{ store.name }}')" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStore('{{ store.name }}')" title="Excluir">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">Nome da Unidade</th>
+                                <th class="py-3 small fw-bold text-muted text-uppercase">Chamados</th>
+                                <th class="py-3 small fw-bold text-muted text-uppercase">Status</th>
+                                <th class="pe-4 py-3 text-end small fw-bold text-muted text-uppercase">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for store in stats %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-light text-primary rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ store.name }}</div>
+                                            <div class="text-muted extra-small">ID Unidade: {{ store.id if store.id else '---' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border fw-medium">
+                                        {{ store.count }} <i class="fas fa-ticket-alt ms-1 text-muted"></i>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success-soft text-success"><i class="fas fa-check-circle me-1"></i>Ativo</span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-white border shadow-sm" onclick="editStore('{{ store.name }}')" title="Editar">
+                                            <i class="fas fa-edit text-primary"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-white border shadow-sm ms-1" onclick="deleteStore('{{ store.name }}')" title="Excluir">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    <i class="fas fa-store-slash fa-3x mb-3 text-muted opacity-25"></i>
+                                    <p class="text-muted">Nenhuma loja ou setor encontrado.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                {% else %}
-                <div class="list-group-item text-center text-muted py-3">
-                    Nenhuma loja encontrada.
-                </div>
-                {% endfor %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Add/Edit Modal -->
 <div class="modal fade" id="storeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Nova Loja</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="fw-bold" id="modalTitle">Nova Unidade</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <form id="storeForm">
+            <form id="storeForm" method="POST">
+                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label for="name" class="form-label">Nome da Loja</label>
-                        <input type="text" class="form-control" id="name" required>
+                        <label class="form-label small fw-bold text-muted text-uppercase">Nome da Loja ou Setor</label>
+                        <input type="text" class="form-control border-0 bg-light py-2" name="name" id="storeName" required placeholder="Ex: Loja Matriz, TI, Financeiro...">
                     </div>
-                    <div class="mb-3">
-                        <label for="cnpj" class="form-label">CNPJ</label>
-                        <input type="text" class="form-control" id="cnpj">
-                    </div>
-                    <div class="mb-3">
-                        <label for="address" class="form-label">Endereço</label>
-                        <input type="text" class="form-control" id="address">
-                    </div>
-                    <div class="mb-3">
-                        <label for="manager" class="form-label">Gerente</label>
-                        <input type="text" class="form-control" id="manager">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="saveStore()">Salvar</button>
-            </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Confirmar</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
-let storeModal;
-
-document.addEventListener('DOMContentLoaded', function() {
-    storeModal = new bootstrap.Modal(document.getElementById('storeModal'));
-});
+const modal = new bootstrap.Modal(document.getElementById('storeModal'));
+const form = document.getElementById('storeForm');
+const title = document.getElementById('modalTitle');
+const input = document.getElementById('storeName');
 
 function openModal() {
-    document.getElementById('modalTitle').innerText = 'Nova Loja';
-    document.getElementById('storeForm').reset();
-    document.getElementById('name').readOnly = false;
-    storeModal.show();
+    title.innerText = 'Nova Unidade';
+    form.action = "{{ url_for('chamados.gerenciar_lojas') }}";
+    input.value = '';
+    modal.show();
 }
 
-function editStore(name) {
-    document.getElementById('modalTitle').innerText = 'Editar Loja';
-    
-    fetch(`/lojas/details/${encodeURIComponent(name)}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('name').value = data.name;
-            document.getElementById('cnpj').value = data.cnpj || '';
-            document.getElementById('address').value = data.address || '';
-            document.getElementById('manager').value = data.manager || '';
-            document.getElementById('name').readOnly = true; // Prevent renaming for now as it is the key
-            storeModal.show();
-        })
-        .catch(error => console.error('Error:', error));
-}
-
-function saveStore() {
-    const data = {
-        name: document.getElementById('name').value,
-        cnpj: document.getElementById('cnpj').value,
-        address: document.getElementById('address').value,
-        manager: document.getElementById('manager').value
-    };
-
-    fetch('/lojas/save', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Erro ao salvar: ' + (data.message || 'Erro desconhecido'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Erro ao salvar loja');
-    });
+function editStore(oldName) {
+✨ UI: Modernize Lojas & Setores management with better table and modals    // Flask route for edit might need the name as a param or handled via POST
+    form.action = "{{ url_for('chamados.gerenciar_lojas') }}"; 
+    input.value = oldName;
+    // We can add a hidden input for the old name if the backend uses it to identify
+    let hiddenInput = document.getElementById('oldNameInput');
+    if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'old_name';
+        hiddenInput.id = 'oldNameInput';
+        form.appendChild(hiddenInput);
+    }
+    hiddenInput.value = oldName;
+    modal.show();
 }
 
 function deleteStore(name) {
-    if (confirm(`Tem certeza que deseja excluir a loja "${name}"?`)) {
-        fetch(`/lojas/delete/${encodeURIComponent(name)}`, {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Erro ao excluir: ' + (data.message || 'Erro desconhecido'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Erro ao excluir loja');
-        });
+    if (confirm(`Deseja realmente excluir a unidade "${name}"? Esta ação não poderá ser desfeita.`)) {
+        const deleteForm = document.createElement('form');
+        deleteForm.method = 'POST';
+        deleteForm.action = "{{ url_for('chamados.excluir_loja') }}";
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'name';
+        input.value = name;
+        
+        deleteForm.appendChild(input);
+        document.body.appendChild(deleteForm);
+        deleteForm.submit();
     }
 }
 </script>
