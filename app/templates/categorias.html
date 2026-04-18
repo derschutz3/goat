@@ -3,26 +3,32 @@
 {% block title %}Gerenciar Categorias{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0 text-secondary"><i class="fas fa-tags me-2"></i>Gerenciar Categorias</h4>
-    <a href="{{ url_for('chamados.index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Voltar</a>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="mb-1"><i class="fas fa-tags me-2 text-primary"></i>Categorias de Chamado</h4>
+        <p class="text-muted small mb-0">Organize os tipos de problemas do help desk</p>
+    </div>
+    <a href="{{ url_for('chamados.index') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i> Voltar
+    </a>
 </div>
 
-<div class="row">
+<div class="row g-4">
     <!-- Add New Category -->
-    <div class="col-md-4 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header py-3">
-                <h6 class="mb-0 fw-bold">Adicionar Nova Categoria</h6>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+            <div class="card-header bg-transparent border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="fas fa-plus-circle me-2 text-success"></i>Nova Categoria</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form action="{{ url_for('chamados.gerenciar_categorias') }}" method="POST">
                     <div class="mb-3">
-                        <label for="name" class="form-label">Nome da Categoria</label>
-                        <input type="text" class="form-control" id="name" name="name" required placeholder="Ex: Telefonia">
+                        <label for="name" class="form-label small fw-bold text-muted text-uppercase">Nome da Categoria</label>
+                        <input type="text" class="form-control" id="name" name="name" required 
+                               placeholder="Ex: Telefonia, Rede, ERP..." autofocus>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-plus me-1"></i> Adicionar
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                        <i class="fas fa-save me-2"></i>Cadastrar Categoria
                     </button>
                 </form>
             </div>
@@ -30,36 +36,45 @@
     </div>
 
     <!-- List Categories -->
-    <div class="col-md-8">
+    <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
-            <div class="card-header py-3">
-                <h6 class="mb-0 fw-bold">Categorias Existentes</h6>
+            <div class="card-header bg-transparent border-bottom py-3">
+                <h6 class="mb-0 fw-bold"><i class="fas fa-list me-2 text-primary"></i>Categorias Ativas</h6>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr>
-                                <th class="ps-4">Nome</th>
-                                <th class="text-end pe-4">Ações</th>
+                                <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">Nome da Categoria</th>
+                                <th class="py-3 text-end pe-4 small fw-bold text-muted text-uppercase">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for category in categories %}
                             <tr>
-                                <td class="ps-4 fw-medium">{{ category.name }}</td>
+✨ UI: Redesign categories page with side-by-side layout and improved table                                    <div class="d-flex align-items-center">
+                                        <div class="category-icon-sm bg-primary-soft text-primary me-3">
+                                            <i class="fas fa-folder"></i>
+                                        </div>
+                                        <span class="fw-medium">{{ category.name }}</span>
+                                    </div>
+                                </td>
                                 <td class="text-end pe-4">
-                                    <a href="{{ url_for('chamados.excluir_categoria', id=category.id) }}" 
-                                       class="btn btn-sm btn-outline-danger"
-                                       onclick="return confirm('Tem certeza que deseja excluir esta categoria?')">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
+                                    <form action="{{ url_for('chamados.excluir_categoria', id=category.id) }}" 
+                                          method="POST" class="d-inline"
+                                          onsubmit="return confirm('Tem certeza que deseja excluir esta categoria? Isso pode afetar a filtragem de chamados existentes.');">
+                                        <button type="submit" class="btn btn-sm btn-white border shadow-sm" title="Excluir Categoria">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="2" class="text-center py-4 text-muted">
-                                    Nenhuma categoria cadastrada.
+                                <td colspan="2" class="text-center py-5 text-muted">
+                                    <i class="fas fa-tags fa-3x mb-3 opacity-25"></i>
+                                    <p>Nenhuma categoria cadastrada ainda.</p>
                                 </td>
                             </tr>
                             {% endfor %}
