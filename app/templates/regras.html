@@ -3,74 +3,69 @@
 {% block title %}Regras de Automação{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-6">
-        <h4><i class="fas fa-cogs me-2"></i>Regras de Automação</h4>
-        <p class="text-muted">Gerencie regras automáticas para classificação e atribuição de chamados.</p>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="mb-1"><i class="fas fa-robot me-2 text-primary"></i>Regras de Automação</h4>
+        <p class="text-muted small mb-0">Configure gatilhos e ações para automatizar o fluxo dos chamados</p>
     </div>
-    <div class="col-md-6 text-md-end">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newRuleModal">
-            <i class="fas fa-plus me-2"></i>Nova Regra
-        </button>
-    </div>
+    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#newRuleModal">
+        <i class="fas fa-plus me-2"></i>Nova Regra
+    </button>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm overflow-hidden">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">Nome</th>
-                        <th>Gatilho</th>
-                        <th>Status</th>
-                        <th class="text-end pe-4">Ações</th>
+                        <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">Nome da Regra</th>
+                        <th class="py-3 small fw-bold text-muted text-uppercase">Gatilho</th>
+                        <th class="py-3 small fw-bold text-muted text-uppercase">Status</th>
+                        <th class="pe-4 py-3 text-end small fw-bold text-muted text-uppercase">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for rule in rules %}
                     <tr>
-                        <td class="ps-4 fw-bold">{{ rule.name }}</td>
-                        <td>{{ rule.trigger_event }}</td>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ rule.name }}</div>
+                            <div class="text-muted extra-small">Lógica automatizada</div>
+                        </td>
                         <td>
+                            <span class="badge bg-light text-primary border border-primary border-opacity-25 px-2 py-1">
+                                <i class="fas fa-bolt me-1"></i>{{ rule.trigger_event|replace('_', ' ')|capitalize }}
+                            </span>
+✨ UI: Redesign Automation Rules page with cleaner table and badges                        <td>
                             {% if rule.active %}
-                            <span class="badge bg-success">Ativo</span>
+                            <span class="badge bg-success-soft text-success px-3"><i class="fas fa-check-circle me-1"></i>Ativa</span>
                             {% else %}
-                            <span class="badge bg-secondary">Inativo</span>
+                            <span class="badge bg-secondary-soft text-secondary px-3"><i class="fas fa-pause-circle me-1"></i>Inativa</span>
                             {% endif %}
                         </td>
-                        <td class="text-end pe-4">
-                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                        <td class="pe-4 text-end">
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-white border shadow-sm" title="Editar">
+                                    <i class="fas fa-cog text-primary"></i>
+                                </button>
+                                <button class="btn btn-sm btn-white border shadow-sm ms-1 text-danger" title="Excluir">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">
-                            <i class="fas fa-robot fa-3x mb-3 opacity-25"></i>
-                            <p class="mb-0">Nenhuma regra de automação cadastrada.</p>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="mb-3 text-muted opacity-25">
+                                <i class="fas fa-project-diagram fa-4x"></i>
+                            </div>
+                            <h6 class="text-muted">Nenhuma regra configurada. Comece criando uma!</h6>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Placeholder -->
-<div class="modal fade" id="newRuleModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nova Regra</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>A criação de regras complexas será implementada em breve.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            </div>
         </div>
     </div>
 </div>
