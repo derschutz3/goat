@@ -4,6 +4,150 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Central de Chamados{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    </script>
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<nav class="topbar">
+    <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-link text-muted d-lg-none" id="sidebarToggle">
+            <i class="fas fa-bars fa-lg"></i>
+        </button>
+        <div class="brand d-flex align-items-center gap-2">
+            <div class="bg-primary text-white p-2 rounded-3">
+                <i class="fas fa-headset"></i>
+            </div>
+            <span class="fw-bold fs-5">Goat HelpDesk</span>
+        </div>
+    </div>
+
+    <div class="user-menu">
+        <button class="btn btn-link text-muted" id="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </button>
+        
+        <div class="dropdown">
+            <button class="btn btn-link text-decoration-none d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+                <img src="{{ current_user.profile_image or url_for('static', filename='img/default-avatar.png') }}" class="rounded-circle border" width="32" height="32" style="object-fit: cover;">
+                <div class="text-start d-none d-md-block">
+                    <p class="small fw-bold mb-0 lh-1">{{ current_user.username }}</p>
+                    <p class="text-xs text-muted mb-0">{{ current_user.role|capitalize }}</p>
+                </div>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                <li><a class="dropdown-item py-2" href="#"><i class="fas fa-user-circle me-2"></i> Perfil</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Sair</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<aside class="sidebar">
+    <div class="nav flex-column">
+        <div class="nav-item">
+            <a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'active' if request.endpoint == 'dashboard.index' }}">
+                <i class="fas fa-chart-pie"></i> Dashboard
+            </a>
+        </div>
+        
+        <div class="text-xs text-muted fw-bold px-3 py-2 text-uppercase mt-3">Chamados</div>
+        <div class="nav-item">
+            <a href="{{ url_for('chamados.listar_chamados') }}" class="nav-link {{ 'active' if 'listar' in request.endpoint }}">
+                <i class="fas fa-ticket-alt"></i> Meus Chamados
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ url_for('chamados.novo_chamado') }}" class="nav-link {{ 'active' if 'novo' in request.endpoint }}">
+                <i class="fas fa-plus-circle"></i> Abrir Chamado
+            </a>
+        </div>
+
+        {% if current_user.role != 'user' %}
+        <div class="text-xs text-muted fw-bold px-3 py-2 text-uppercase mt-3">Gestão</div>
+        <div class="nav-item">
+            <a href="{{ url_for('lojas.index') }}" class="nav-link">
+                <i class="fas fa-store"></i> Unidades
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="{{ url_for('escala.index') }}" class="nav-link">
+                <i class="fas fa-calendar-alt"></i> Escalas
+            </a>
+        </div>
+        {% endif %}
+
+        {% if current_user.role in ['admin', 'manager'] %}
+        <div class="text-xs text-muted fw-bold px-3 py-2 text-uppercase mt-3">Configurações</div>
+        <a href="{{ url_for('auth.listar_usuarios') }}" class="nav-link"><i class="fas fa-users"></i> Usuários</a>
+        <a href="{{ url_for('sla.index') }}" class="nav-link"><i class="fas fa-shield-alt"></i> Políticas SLA</a>
+        {% endif %}
+    </div>
+</aside>
+{% endif %}
+
+<main class="main-content">
+    <div class="container-fluid">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('theme-toggle');
+        const icon = toggleBtn.querySelector('i');
+        const html = document.documentElement;
+
+        // Theme Toggle
+        toggleBtn.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // Sidebar Mobile
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                document.querySelector('.sidebar').classList.toggle('active');
+            });
+        }
+    });
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Central de Chamados{% endblock %}</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
