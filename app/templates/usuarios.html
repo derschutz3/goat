@@ -5,10 +5,10 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-        <h4 class="mb-0 text-secondary"><i class="fas fa-users-cog me-2"></i>Gerenciar Usuários</h4>
-        <p class="text-muted small mb-0">Administre o acesso e permissões da equipe.</p>
+        <h4 class="mb-1 fw-bold text-dark"><i class="fas fa-users-cog me-2 text-primary"></i>Gerenciar Usuários</h4>
+        <p class="text-muted small mb-0">Administre o acesso, permissões e perfis da equipe.</p>
     </div>
-    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#novoUsuarioModal">
+    <button class="btn btn-primary shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#novoUsuarioModal">
         <i class="fas fa-user-plus me-2"></i>Novo Usuário
     </button>
 </div>
@@ -17,242 +17,163 @@
 <div class="row g-3 mb-4">
     <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center">
-                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3 text-primary">
-                    <i class="fas fa-users fa-2x"></i>
+            <div class="card-body d-flex align-items-center p-3">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3 text-primary d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                    <i class="fas fa-users fa-lg"></i>
                 </div>
                 <div>
-                    <h6 class="text-muted mb-0">Total de Usuários</h6>
-                    <h3 class="mb-0">{{ users|length }}</h3>
+                    <h6 class="text-muted small mb-1">Total de Usuários</h6>
+                    <h3 class="mb-0 fw-bold">{{ users|length }}</h3>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center">
-                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success">
-                    <i class="fas fa-user-check fa-2x"></i>
+            <div class="card-body d-flex align-items-center p-3">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                    <i class="fas fa-user-check fa-lg"></i>
                 </div>
                 <div>
-                    <h6 class="text-muted mb-0">Usuários Ativos</h6>
-                    <h3 class="mb-0">{{ users|selectattr("is_active")|list|length }}</h3>
+                    <h6 class="text-muted small mb-1">Usuários Ativos</h6>
+                    <h3 class="mb-0 fw-bold">{{ users|selectattr("is_active")|list|length }}</h3>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center">
-                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3 text-info">
-                    <i class="fas fa-tools fa-2x"></i>
+            <div class="card-body d-flex align-items-center p-3">
+                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3 text-info d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                    <i class="fas fa-tools fa-lg"></i>
                 </div>
                 <div>
-                    <h6 class="text-muted mb-0">Técnicos</h6>
-                    <h3 class="mb-0">{{ users|selectattr("is_technician")|list|length }}</h3>
+                    <h6 class="text-muted small mb-1">Técnicos</h6>
+                    <h3 class="mb-0 fw-bold">{{ users|selectattr("is_technician")|list|length }}</h3>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <ul class="nav nav-pills card-header-pills">
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_tab == 'all' %}active{% endif %}" href="{{ url_for('auth.listar_usuarios') }}">Todos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_tab == 'tecnicos' %}active{% endif %}" href="{{ url_for('auth.listar_tecnicos') }}">Técnicos</a>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <form action="{{ url_for(request.endpoint) }}" method="GET" class="d-flex">
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input class="form-control border-start-0 ps-0 bg-light" type="search" name="search" placeholder="Buscar usuário..." value="{{ search }}">
-                        <button class="btn btn-primary" type="submit">Buscar</button>
-                    </div>
-                    {% if search %}
-                    <a href="{{ url_for(request.endpoint) }}" class="btn btn-outline-danger ms-2" title="Limpar"><i class="fas fa-times"></i></a>
-                    {% endif %}
-                </form>
+<div class="card border-0 shadow-sm overflow-hidden">
+    <div class="card-header bg-white border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold">Lista de Usuários</h6>
+            <div class="input-group input-group-sm w-auto">
+                <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" id="userSearch" class="form-control bg-light border-start-0 ps-0" placeholder="Buscar usuário...">
             </div>
         </div>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light text-muted small text-uppercase">
-                    <tr>
-                        <th class="ps-4">Usuário</th>
-                        <th>Função</th>
-                        <th>Departamento</th>
-                        <th>Status</th>
-                        <th class="text-end pe-4">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center">
-                                <div class="position-relative">
-                                    {% if user.profile_image %}
-                                    {% if user.profile_image.startswith('http') %}
-                                    <img src="{{ user.profile_image }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;">
-                                    {% else %}
-                                    <img src="{{ url_for('auth.profile_image', filename=user.profile_image) }}" class="rounded-circle" width="45" height="45" style="object-fit: cover;">
-                                    {% endif %}
-                                    {% else %}
-                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 45px; height: 45px;">
-                                        {{ user.username[:2].upper() }}
-                                    </div>
-                                    {% endif %}
-                                    <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
-                                </div>
-                                <div class="ms-3">
-                                    <h6 class="mb-0 fw-bold text-dark">{{ user.username }}</h6>
-                                    <small class="text-muted">{{ user.email }}</small>
-                                </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="userTable">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">Usuário</th>
+                    <th class="py-3 small fw-bold text-muted text-uppercase">Email</th>
+                    <th class="py-3 small fw-bold text-muted text-uppercase">Permissões</th>
+                    <th class="py-3 small fw-bold text-muted text-uppercase text-center">Status</th>
+                    <th class="pe-4 py-3 text-end small fw-bold text-muted text-uppercase">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm rounded-circle bg-soft-primary text-primary d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm" style="width: 38px; height: 38px; background-color: rgba(13, 110, 253, 0.1);">
+                                {{ user.username[:1].upper() }}
                             </div>
-                        </td>
-                        <td>
-                            {% if user.role == 'admin' %}
-                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3">Admin</span>
-                            {% elif user.role == 'manager' %}
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">Gestor</span>
-                            {% elif user.role == 'tecnico' %}
-                            <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">Técnico</span>
-                            {% else %}
-                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3">Usuário</span>
-                            {% endif %}
-                            
-                            {% if user.is_technician and user.role != 'tecnico' %}
-                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 ms-1" title="Atua como Técnico">
-                                <i class="fas fa-tools small"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ user.username }}</h6>
+                                <small class="text-muted">ID: #{{ user.id }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <div class="d-flex gap-1 flex-wrap">
+                            {% if user.is_admin %}
+                            <span class="badge bg-soft-danger text-danger border border-danger border-opacity-10 px-2 py-1">
+                                <i class="fas fa-user-shield me-1 small"></i>Admin
                             </span>
                             {% endif %}
-                        </td>
-                        <td>{{ user.department or '-' }}</td>
-                        <td>
-                            <span class="badge bg-success-subtle text-success rounded-pill">Ativo</span>
-                        </td>
-                        <td class="text-end pe-4">
-                            <div class="btn-group">
-                                {% if current_user.id == user.id or current_user.role == 'admin' or get_role_level(current_user.role) > get_role_level(user.role) %}
-                                <button class="btn btn-sm btn-light text-primary" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#editarUsuarioModal"
-                                        data-id="{{ user.id }}"
-                                        data-username="{{ user.username }}"
-                                        data-email="{{ user.email }}"
-                                        data-role="{{ user.role }}"
-                                        data-department="{{ user.department or '' }}"
-                                        data-is-technician="{{ 'true' if user.is_technician else 'false' }}"
-                                        onclick="preencherModalEdicao(this)"
-                                        title="Editar">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-light text-warning" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#alterarSenhaModal"
-                                        data-id="{{ user.id }}"
-                                        data-username="{{ user.username }}"
-                                        onclick="preencherModalSenha(this)"
-                                        title="Gerenciar Senha">
-                                    <i class="fas fa-key"></i>
-                                </button>
-                                {% endif %}
-                                {% if user.id != current_user.id and (current_user.role == 'admin' or get_role_level(current_user.role) > get_role_level(user.role)) %}
-                                <form action="{{ url_for('auth.excluir_usuario', id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza?');">
-                                    <button type="submit" class="btn btn-sm btn-light text-danger" title="Excluir"><i class="fas fa-trash"></i></button>
-                                </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center py-5">
-                            <div class="text-muted">
-                                <i class="fas fa-users-slash fa-3x mb-3 opacity-25"></i>
-                                <p>Nenhum usuário encontrado.</p>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="card-footer bg-white text-muted small py-3">
-        Exibindo {{ users|length }} usuários.
+                            {% if user.is_technician %}
+                            <span class="badge bg-soft-info text-info border border-info border-opacity-10 px-2 py-1">
+                                <i class="fas fa-tools me-1 small"></i>Técnico
+                            </span>
+                            {% else %}
+                            <span class="badge bg-soft-secondary text-secondary border border-secondary border-opacity-10 px-2 py-1">
+                                <i class="fas fa-user me-1 small"></i>Usuário
+                            </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        {% if user.is_active %}
+                        <span class="badge rounded-pill bg-success px-3 py-1">Ativo</span>
+                        {% else %}
+                        <span class="badge rounded-pill bg-danger px-3 py-1">Inativo</span>
+                        {% endif %}
+                    </td>
+                    <td class="pe-4 text-end">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-white border shadow-sm" title="Editar" 
+                                    onclick="editUser({{ user.id }}, '{{ user.username }}', '{{ user.email }}', {{ 'true' if user.is_admin else 'false' }}, {{ 'true' if user.is_technician else 'false' }}, {{ 'true' if user.is_active else 'false' }})">
+                                <i class="fas fa-edit text-primary"></i>
+                            </button>
+                            <button class="btn btn-sm btn-white border shadow-sm ms-1 text-danger" title="Excluir" onclick="deleteUser({{ user.id }})">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
 <!-- Modal Novo Usuário -->
 <div class="modal fade" id="novoUsuarioModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title"><i class="fas fa-user-plus me-2 text-primary"></i>Novo Usuário</h5>
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-user-plus me-2 text-primary"></i>Novo Usuário</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ url_for('auth.criar_usuario') }}" method="POST" enctype="multipart/form-data">
-                <div class="modal-body p-4">
-                    <div class="row g-3">
-                        <div class="col-12 text-center mb-3">
-                            <div class="position-relative d-inline-block">
-                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto border border-2 border-dashed" style="width: 100px; height: 100px;">
-                                    <i class="fas fa-camera text-secondary fa-2x"></i>
-                                </div>
-                                <input type="file" class="form-control position-absolute top-0 start-0 w-100 h-100 opacity-0" name="profile_image" accept="image/*" style="cursor: pointer;">
-                            </div>
-                            <small class="d-block text-muted mt-2">Clique para adicionar foto</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Usuário</label>
-                            <input type="text" class="form-control" name="username" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Email</label>
-                            <input type="email" class="form-control" name="email" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Função</label>
-                            <select class="form-select" name="role">
-                                <option value="user">Usuário</option>
-                                <option value="tecnico">Técnico</option>
-                                <option value="manager">Gestor</option>
-                                <option value="supervisor">Supervisor</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="is_technician" id="newIsTechnician">
-                                <label class="form-check-label small" for="newIsTechnician">
-                                    Atua como Técnico?
-                                </label>
+            <form action="{{ url_for('main.usuarios') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nome de Usuário</label>
+                        <input type="text" name="username" class="form-control" required placeholder="Ex: joao.silva">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">E-mail</label>
+                        <input type="email" name="email" class="form-control" required placeholder="email@empresa.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Senha</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_admin" id="isAdminCheck">
+                                <label class="form-check-label small fw-bold" for="isAdminCheck">Administrador</label>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Departamento</label>
-                            <input type="text" class="form-control" name="department">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Senha Inicial</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" name="password" id="newPassInput" required>
-                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('newPassInput')"><i class="fas fa-eye"></i></button>
+                        <div class="col-6 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_technician" id="isTechCheck">
+                                <label class="form-check-label small fw-bold" for="isTechCheck">Técnico</label>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-primary px-4">Criar Usuário</button>
                 </div>
             </form>
@@ -261,97 +182,51 @@
 </div>
 
 <!-- Modal Editar Usuário -->
-<div class="modal fade" id="editarUsuarioModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade" id="editUsuarioModal" tabindex="-1">
+    <div class="modal-dialog">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title"><i class="fas fa-user-edit me-2 text-primary"></i>Editar: <span id="editUsernameDisplay" class="fw-bold"></span></h5>
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-user-edit me-2 text-primary"></i>Editar Usuário</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formEditarUsuario" method="POST" enctype="multipart/form-data">
-                <div class="modal-body p-4">
-                    <div class="row g-3">
-                        {% if is_master or current_user.role == 'admin' %}
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Usuário</label>
-                            <input type="text" class="form-control" name="username" id="editUsername">
-                        </div>
-                        {% endif %}
-                        {% if is_master %}
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Email</label>
-                            <input type="email" class="form-control" name="email" id="editEmail">
-                        </div>
-                        {% endif %}
-                        <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Função</label>
-                            <select class="form-select" name="role" id="editRole">
-                                <option value="user">Usuário</option>
-                                <option value="tecnico">Técnico</option>
-                                <option value="manager">Gestor</option>
-                                <option value="supervisor">Supervisor</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="is_technician" id="editIsTechnician">
-                                <label class="form-check-label small" for="editIsTechnician">
-                                    Atua como Técnico?
-                                </label>
+            <form id="editUserForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nome de Usuário</label>
+                        <input type="text" name="username" id="editUsername" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">E-mail</label>
+                        <input type="email" name="email" id="editEmail" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nova Senha (deixe em branco para manter)</label>
+                        <input type="password" name="password" class="form-control">
+                    </div>
+                    <div class="row">
+                        <div class="col-4 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_admin" id="editIsAdmin">
+                                <label class="form-check-label small fw-bold" for="editIsAdmin">Admin</label>
                             </div>
                         </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Departamento</label>
-                            <input type="text" class="form-control" name="department" id="editDepartment">
+                        <div class="col-4 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_technician" id="editIsTech">
+                                <label class="form-check-label small fw-bold" for="editIsTech">Técnico</label>
+                            </div>
                         </div>
-                        {% if is_master or current_user.role == 'admin' %}
-                        <div class="col-12">
-                            <label class="form-label small fw-bold text-muted">Foto de Perfil</label>
-                            <input type="file" class="form-control" name="profile_image" accept="image/*">
+                        <div class="col-4 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="editIsActive">
+                                <label class="form-check-label small fw-bold" for="editIsActive">Ativo</label>
+                            </div>
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Alterar Senha (Moderno com Visualização) -->
-<div class="modal fade" id="alterarSenhaModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-warning bg-opacity-10 border-bottom-0">
-                <h5 class="modal-title text-dark"><i class="fas fa-key me-2 text-warning"></i>Gerenciar Senha: <span id="senhaUsernameDisplay" class="fw-bold"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="formAlterarSenha" method="POST">
-                <div class="modal-body p-4">
-                    <div class="alert alert-light border mb-4 small">
-                        <i class="fas fa-shield-alt text-primary me-2"></i>
-                        Por segurança, as senhas são criptografadas e não podem ser visualizadas. Você pode definir uma nova senha abaixo e visualizá-la antes de salvar.
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Nova Senha</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control form-control-lg" name="password" id="resetPassInput" required placeholder="Digite a nova senha...">
-                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('resetPassInput')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary" type="button" onclick="generatePassword('resetPassInput')" title="Gerar senha aleatória">
-                                <i class="fas fa-dice"></i>
-                            </button>
-                        </div>
-                        <div class="form-text mt-2" id="passwordStrength"></div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-top-0">
-                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning px-4 text-dark fw-bold">Definir Nova Senha</button>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4">Salvar Alterações</button>
                 </div>
             </form>
         </div>
@@ -359,70 +234,42 @@
 </div>
 
 <script>
-    function preencherModalEdicao(button) {
-        const id = button.getAttribute('data-id');
-        const username = button.getAttribute('data-username');
-        const email = button.getAttribute('data-email');
-        const role = button.getAttribute('data-role');
-        const department = button.getAttribute('data-department');
-        const isTechnician = button.getAttribute('data-is-technician') === 'true';
-        
-        document.getElementById('editUsernameDisplay').textContent = username;
-        const editUsername = document.getElementById('editUsername');
-        if (editUsername) {
-            editUsername.value = username || '';
-        }
-        const editEmail = document.getElementById('editEmail');
-        if (editEmail) {
-            editEmail.value = email || '';
-        }
-        document.getElementById('editRole').value = role;
-        document.getElementById('editDepartment').value = department;
-        document.getElementById('editIsTechnician').checked = isTechnician;
-        
-        const form = document.getElementById('formEditarUsuario');
-        form.action = "{{ url_for('auth.editar_usuario', id=0) }}".replace('0', id);
-    }
+function editUser(id, username, email, isAdmin, isTech, isActive) {
+    document.getElementById('editUserForm').action = '/usuarios/editar/' + id;
+    document.getElementById('editUsername').value = username;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editIsAdmin').checked = isAdmin;
+    document.getElementById('editIsTech').checked = isTech;
+    document.getElementById('editIsActive').checked = isActive;
+    
+    var modal = new bootstrap.Modal(document.getElementById('editUsuarioModal'));
+    modal.show();
+}
 
-    function preencherModalSenha(button) {
-        const id = button.getAttribute('data-id');
-        const username = button.getAttribute('data-username');
-        
-        document.getElementById('senhaUsernameDisplay').textContent = username;
-        
-        const form = document.getElementById('formAlterarSenha');
-        form.action = "{{ url_for('auth.editar_usuario', id=0) }}".replace('0', id);
-        
-        // Reset input
-        document.getElementById('resetPassInput').value = '';
-        document.getElementById('resetPassInput').type = 'password';
+function deleteUser(id) {
+    if (confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
+        window.location.href = '/usuarios/excluir/' + id;
     }
+}
 
-    function togglePassword(inputId) {
-        const input = document.getElementById(inputId);
-        const icon = input.nextElementSibling.querySelector('i');
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.replace('fa-eye', 'fa-eye-slash');
-        } else {
-            input.type = "password";
-            icon.classList.replace('fa-eye-slash', 'fa-eye');
-        }
-    }
-
-    function generatePassword(inputId) {
-        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-        let password = "";
-        for (let i = 0; i < 12; i++) {
-            password += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        const input = document.getElementById(inputId);
-        input.type = "text"; // Show generated password
-        input.value = password;
-        
-        // Update icon to slash since it's visible
-        const icon = input.nextElementSibling.querySelector('i');
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
-    }
+// Search Functionality
+document.getElementById('userSearch').addEventListener('keyup', function() {
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#userTable tbody tr');
+    
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value) ? '' : 'none';
+    });
+});
 </script>
+
+<style>
+.bg-soft-primary { background-color: rgba(13, 110, 253, 0.1); }
+.bg-soft-danger { background-color: rgba(220, 53, 69, 0.1); }
+.bg-soft-info { background-color: rgba(13, 202, 240, 0.1); }
+.bg-soft-secondary { background-color: rgba(108, 117, 125, 0.1); }
+.btn-white { background-color: #fff; color: #333; }
+.btn-white:hover { background-color: #f8f9fa; }
+</style>
 {% endblock %}
