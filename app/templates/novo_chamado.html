@@ -4,98 +4,119 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <h4 class="mb-0 text-secondary"><i class="fas fa-plus-circle me-2"></i>Abrir Novo Chamado</h4>
-    <a href="{{ url_for('chamados.listar_chamados') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Voltar</a>
+    <h4 class="mb-0"><i class="fas fa-plus-circle me-2 text-primary"></i>Abrir Novo Chamado</h4>
+    <a href="{{ url_for('chamados.listar_chamados') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i> Voltar
+    </a>
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-4">
-        <form action="{{ url_for('chamados.novo_chamado') }}" method="POST" enctype="multipart/form-data">
-            <div class="row g-4">
-                <!-- Left Column: Details -->
-                <div class="col-md-4 border-end">
-                    <h5 class="card-title mb-3 text-muted">Informações Básicas</h5>
-                    
-                    <div class="mb-3">
-                        <label for="loja" class="form-label">Loja ou Setor <span class="text-danger">*</span></label>
-                        <select class="form-select" id="loja" name="store_id" required>
-                            <option value="" selected disabled>Selecione...</option>
-                            {% for store in stores %}
-                            <option value="{{ store.id }}">{{ store.name }}</option>
-                            {% endfor %}
-                        </select>
+<div class="row g-4">
+    <!-- Left Column: Form -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom py-3">
+                <h5 class="mb-0 fw-semibold"><i class="fas fa-file-alt me-2 text-primary"></i>Informações do Chamado</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('chamados.novo_chamado') }}" method="POST" enctype="multipart/form-data">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="loja" class="form-label fw-medium">Loja ou Setor <span class="text-danger">*</span></label>
+                            <select class="form-select" id="loja" name="store_id" required>
+                                <option value="" selected disabled>Selecione...</option>
+                                {% for store in stores %}
+                                <option value="{{ store.id }}">{{ store.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="categoria" class="form-label fw-medium">Categoria <span class="text-danger">*</span></label>
+                            <select class="form-select" id="categoria" name="category" required>
+                                <option value="" selected disabled>Selecione...</option>
+                                {% for category in categories %}
+                                <option value="{{ category.name }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="prioridade" class="form-label fw-medium">Prioridade <span class="text-danger">*</span></label>
+                            <select class="form-select" id="prioridade" name="priority" required>
+                                <option value="" selected disabled>Selecione...</option>
+                                <option value="Baixa">&#x1F7E2; Baixa</option>
+                                <option value="Media">&#x1F535; Media</option>
+                                <option value="Alta">&#x1F7E0; Alta</option>
+                                <option value="Critica">&#x1F534; Critica</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="titulo" class="form-label fw-medium">Titulo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="titulo" name="title" placeholder="Resumo do problema..." required>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="categoria" class="form-label">Categoria</label>
-                        <select class="form-select" id="categoria" name="category" required>
-                            <option value="" selected disabled>Selecione...</option>
-                            {% for category in categories %}
-                            <option value="{{ category.name }}">{{ category.name }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="mb-4">
+                        <label for="descricao" class="form-label fw-medium">Descricao Detalhada <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="descricao" name="description" rows="6" placeholder="Descreva o problema com o maximo de detalhes possivel. Inclua etapas para reproduzir o erro, mensagens de erro, etc." required></textarea>
+                        <div class="form-text">Quanto mais detalhes, mais rapido resolveremos!</div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="prioridade" class="form-label">Prioridade</label>
-                        <select class="form-select" id="prioridade" name="priority">
-                            <option value="baixa">Baixa</option>
-                            <option value="normal" selected>Normal</option>
-                            <option value="alta">Alta</option>
-                            <option value="critica">Crítica (Loja parada)</option>
-                        </select>
+                    <div class="mb-4">
+                        <label for="anexo" class="form-label fw-medium">Anexos <span class="text-muted">(opcional)</span></label>
+                        <input type="file" class="form-control" id="anexo" name="attachment" accept="image/*,.pdf,.doc,.docx,.txt">
+                        <div class="form-text">Imagens, PDFs ou documentos que ajudem a entender o problema.</div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="tecnico" class="form-label">Técnico Responsável</label>
-                        <select class="form-select" id="tecnico" name="technician_id">
-                            <option value="" selected>Automático / Nenhum</option>
-                            {% for tech in technicians %}
-                            <option value="{{ tech.id }}">{{ tech.username }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Status Inicial</label>
-                        <select class="form-select" id="status" name="status">
-                            <option value="novo" selected>Novo (Padrão)</option>
-                            <option value="em_analise">Em Análise</option>
-                            <option value="aguardando_peca">Esperando Peça</option>
-                            <option value="resolvido">Concluído</option>
-                            <option value="nao_resolvido">Não Concluído</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="anexo" class="form-label">Anexo (Print/Foto)</label>
-                        <input class="form-control" type="file" id="anexo" name="attachment">
-                        <div class="form-text">Máximo: 5MB. Formatos: JPG, PNG, PDF.</div>
-                    </div>
-                </div>
-
-                <!-- Right Column: Description -->
-                <div class="col-md-8">
-                    <h5 class="card-title mb-3 text-muted">Detalhes da Solicitação</h5>
-
-                    <div class="mb-3">
-                        <label for="titulo" class="form-label">Título do Chamado <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="titulo" name="title" placeholder="Ex: Impressora do caixa não imprime" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="descricao" class="form-label">Descrição Detalhada <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="descricao" name="description" rows="8" placeholder="Descreva o problema com o máximo de detalhes possível..." required></textarea>
-                    </div>
-
-                    <div class="d-flex justify-content-end pt-3">
-                        <button type="submit" class="btn btn-primary btn-lg px-5">
-                            <i class="fas fa-paper-plane me-2"></i> Abrir Chamado
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{{ url_for('chamados.listar_chamados') }}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-paper-plane me-2"></i>Abrir Chamado
                         </button>
                     </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Tips & SLA -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm bg-primary bg-opacity-10 mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold text-primary mb-3"><i class="fas fa-lightbulb me-2"></i>Dicas para um bom chamado</h6>
+                <ul class="list-unstyled text-sm mb-0 small">
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Escolha a categoria correta</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Descreva o erro com detalhes</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Inclua prints quando possivel</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Informe a prioridade real</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3"><i class="fas fa-clock me-2 text-warning"></i>SLA por Prioridade</h6>
+                <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded-2" style="background:rgba(239,68,68,0.1)">
+                    <span class="fw-medium text-danger small"><i class="fas fa-exclamation-circle me-2"></i>Critica</span>
+                    <span class="badge bg-danger rounded-pill">2h</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded-2" style="background:rgba(245,158,11,0.1)">
+                    <span class="fw-medium text-warning small"><i class="fas fa-exclamation-triangle me-2"></i>Alta</span>
+                    <span class="badge bg-warning text-dark rounded-pill">8h</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between mb-2 p-2 rounded-2" style="background:rgba(37,99,235,0.1)">
+                    <span class="fw-medium text-primary small"><i class="fas fa-info-circle me-2"></i>Media</span>
+                    <span class="badge bg-primary rounded-pill">24h</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between p-2 rounded-2" style="background:rgba(16,185,129,0.1)">
+                    <span class="fw-medium text-success small"><i class="fas fa-arrow-down-circle me-2"></i>Baixa</span>
+                    <span class="badge bg-success rounded-pill">72h</span>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}
