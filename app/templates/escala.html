@@ -3,93 +3,67 @@
 {% block title %}Escala de Técnicos{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-        <h4 class="mb-1 fw-bold text-body-emphasis" style="letter-spacing: -0.5px;">Escala Semanal</h4>
-        <p class="text-muted mb-0 small">Gerenciamento e distribuição de visitas técnicas</p>
+        <h4 class="mb-1 fw-bold text-dark"><i class="fas fa-calendar-alt me-2 text-primary"></i>Escala Semanal</h4>
+        <p class="text-muted small mb-0">Distribuição automática de visitas técnicas por loja</p>
     </div>
-    
-    <div>
-        {% if current_user.role in ['admin', 'manager', 'supervisor'] %}
-        <div class="btn-group shadow-sm" role="group">
-            <button type="button" class="btn btn-outline-secondary fw-medium" onclick="if(confirm('Gerar escala aleatória? A atual será substituída.')) document.getElementById('form-random').submit();">
-                <i class="fas fa-random me-2"></i>Aleatório
+
+    {% if current_user.role in ['admin', 'manager', 'supervisor'] %}
+    <div class="d-flex gap-2">
+        <div class="btn-group shadow-sm">
+            <button type="button" class="btn btn-outline-primary fw-medium" onclick="if(confirm('Gerar escala aleatória? A atual será substituída.')) document.getElementById('form-random').submit()">
+                <i class="fas fa-random me-2"></i>Aleatória
             </button>
-            <button type="button" class="btn btn-dark fw-medium" onclick="if(confirm('Gerar escala inteligente baseada em demanda? A atual será substituída.')) document.getElementById('form-smart').submit();">
+            <button type="button" class="btn btn-primary fw-medium" onclick="if(confirm('Gerar escala inteligente baseada em demanda? A atual será substituída.')) document.getElementById('form-smart').submit()">
                 <i class="fas fa-brain me-2"></i>Inteligente
             </button>
         </div>
         
-        <!-- Hidden Forms -->
         <form id="form-random" action="{{ url_for('escala.gerar_escala') }}" method="POST" style="display: none;"></form>
         <form id="form-smart" action="{{ url_for('escala.gerar_escala_inteligente') }}" method="POST" style="display: none;"></form>
-        {% endif %}
     </div>
+    {% endif %}
 </div>
 
-<div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+<div class="card border-0 shadow-sm overflow-hidden">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle" style="border-collapse: collapse;">
-                <thead class="bg-body-tertiary border-bottom">
-                    <tr>
-                        <th class="py-3 ps-4 text-uppercase text-muted small fw-bold" style="width: 200px; letter-spacing: 1px;">Técnico</th>
-                        {% for day in days %}
-                        <th class="py-3 text-center text-uppercase text-muted small fw-bold" style="letter-spacing: 1px;">{{ day }}</th>
+            <table class="table table-bordered border-light mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr class="text-center">
+                        <th class="py-3 bg-white text-muted small fw-bold text-uppercase border-end" style="width: 200px;">Loja / Setor</th>
+                        {% for day in ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'] %}
+                        <th class="py-3 small fw-bold text-muted text-uppercase">{{ day }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for tech in technicians %}
-                    <tr class="border-bottom-0">
-                        <td class="ps-4 py-4 bg-body border-end border-light">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar-circle bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; font-weight: 600;">
-                                    {{ tech.username[:2].upper() }}
-                                </div>
-                                <div class="ms-3">
-                                    <div class="fw-bold text-body-emphasis">{{ tech.username }}</div>
-                                    <div class="small text-muted">Técnico</div>
-                                </div>
-                            </div>
+                    {% for row in schedule_data %}
+                    <tr>
+                        <td class="ps-4 py-3 fw-bold text-dark border-end bg-light bg-opacity-10">
+                            <i class="fas fa-store me-2 text-muted"></i>{{ row.store_name }}
                         </td>
-                        {% for day in days %}
-                        <td class="py-3 px-2 align-top bg-body-secondary border-start border-light position-relative group-hover-container" style="min-width: 180px;">
-                            <div class="d-flex flex-column gap-2 h-100 pb-4">
-                                {% if schedule_map[day][tech.id] %}
-                                    {% for store in schedule_map[day][tech.id] %}
-                                    <div class="p-2 rounded-2 bg-body border shadow-sm d-flex align-items-center transition-hover">
-                                        <span class="d-inline-block rounded-circle bg-secondary me-2" style="width: 6px; height: 6px;"></span>
-                                        <span class="text-body small fw-medium text-truncate" style="max-width: 150px;">{{ store.name }}</span>
+                        {% for day_key in ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'] %}
+                        <td class="p-2 text-center" style="min-width: 120px;">
+                            {% if row[day_key] %}
+                                <div class="p-2 rounded bg-primary bg-opacity-10 border border-primary border-opacity-25">
+                                    <div class="small fw-bold text-primary mb-1">
+                                        <i class="fas fa-user-cog me-1"></i>{{ row[day_key].username }}
                                     </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="d-flex align-items-center justify-content-center h-100 opacity-25">
-                                        <i class="fas fa-minus text-muted small"></i>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            
-                            {% if current_user.role in ['admin', 'manager', 'supervisor'] %}
-                            <button class="btn btn-sm btn-light border position-absolute bottom-0 end-0 m-2 shadow-sm opacity-50 hover-opacity-100 rounded-circle d-flex align-items-center justify-content-center" 
-                                    style="width: 28px; height: 28px;"
-                                    data-user-id="{{ tech.id }}"
-                                    data-user-name="{{ tech.username }}"
-                                    data-day="{{ day }}"
-                                    data-store-ids='{{ schedule_map[day][tech.id]|map(attribute="id")|list|tojson }}'
-                                    onclick="openEditModal(this)"
-                                    title="Editar lojas">
-                                <i class="fas fa-pencil-alt text-secondary" style="font-size: 0.8rem;"></i>
-                            </button>
+                                    <span class="badge bg-primary rounded-pill extra-small" style="font-size: 0.6rem;">VISITA TÉCNICA</span>
+                                </div>
+                            {% else %}
+                                <span class="text-muted extra-small opacity-50">---</span>
                             {% endif %}
                         </td>
                         {% endfor %}
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="py-5 text-center text-muted">
-                            <i class="fas fa-users-slash mb-2 fa-2x opacity-50"></i>
-                            <p class="mb-0">Nenhum técnico disponível.</p>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fas fa-calendar-times fa-3x mb-3 opacity-25"></i>
+                            <p>Nenhuma escala gerada para esta semana.</p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -99,102 +73,12 @@
     </div>
 </div>
 
-<!-- Modal de Edição -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-body-emphasis">Gerenciar Escala</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted small mb-4">
-                    Editando: <span id="modalTechName" class="fw-bold text-dark"></span> - <span id="modalDay" class="fw-bold text-capitalize text-dark"></span>
-                </p>
-                
-                <form action="{{ url_for('escala.atualizar_celula') }}" method="POST">
-                    <input type="hidden" name="user_id" id="modalUserId">
-                    <input type="hidden" name="day" id="modalDayInput">
-                    
-                    <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold text-uppercase">Lojas Atribuídas</label>
-                        <div class="card bg-body-tertiary border-0 p-2" style="max-height: 250px; overflow-y: auto;">
-                            {% for store in all_stores %}
-                            <div class="form-check p-2 rounded hover-bg-light position-relative">
-                                <input class="form-check-input" type="checkbox" name="store_ids" value="{{ store.id }}" id="store_{{ store.id }}">
-                                <label class="form-check-label w-100 stretched-link cursor-pointer d-flex justify-content-between align-items-center" for="store_{{ store.id }}">
-                                    <span class="text-body">{{ store.name }}</span>
-                                </label>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="form-text small mt-2">
-                            <i class="fas fa-info-circle me-1"></i> Selecione as lojas para este horário. Desmarque para remover.
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-dark" onclick="submitForm(this)">Salvar Alterações</button>
-                    </div>
-                </form>
-            </div>
+<div class="mt-4">
+    <div class="card border-0 bg-light shadow-sm border-start border-primary border-4">
+        <div class="card-body p-3 small text-muted">
+            <i class="fas fa-info-circle me-2 text-primary"></i>
+            A <strong>Escala Inteligente</strong> prioriza lojas com chamados em aberto (especialmente Críticos e Altos) e tenta otimizar o tempo de resposta.
         </div>
     </div>
 </div>
-
-<script>
-    function openEditModal(btn) {
-        const userId = btn.getAttribute('data-user-id');
-        const userName = btn.getAttribute('data-user-name');
-        const day = btn.getAttribute('data-day');
-        const currentStoreIds = JSON.parse(btn.getAttribute('data-store-ids'));
-
-        document.getElementById('modalUserId').value = userId;
-        document.getElementById('modalDayInput').value = day;
-        document.getElementById('modalTechName').textContent = userName;
-        document.getElementById('modalDay').textContent = day;
-        
-        // Reset all checkboxes
-        const checkboxes = document.querySelectorAll('input[name="store_ids"]');
-        checkboxes.forEach(cb => {
-            cb.checked = false;
-        });
-        
-        // Check current stores
-        currentStoreIds.forEach(storeId => {
-            const cb = document.getElementById('store_' + storeId);
-            if (cb) cb.checked = true;
-        });
-        
-        const modal = new bootstrap.Modal(document.getElementById('editModal'));
-        modal.show();
-    }
-
-    function submitForm(btn) {
-        // Prevent double submission
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Salvando...';
-        btn.closest('form').submit();
-    }
-</script>
-
-<style>
-    .hover-opacity-100:hover {
-        opacity: 1 !important;
-    }
-    .hover-bg-light:hover {
-        background-color: rgba(var(--bs-body-color-rgb), 0.05);
-    }
-    .cursor-pointer {
-        cursor: pointer;
-    }
-    .transition-hover {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .transition-hover:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
-    }
-</style>
 {% endblock %}
