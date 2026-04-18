@@ -3,51 +3,59 @@
 {% block title %}Avaliações de Atendimento{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-6">
-        <h4><i class="fas fa-star me-2"></i>Avaliações de Atendimento</h4>
-        <p class="text-muted">Feedback recebido dos usuários sobre os chamados resolvidos.</p>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="mb-1"><i class="fas fa-star me-2 text-warning"></i>Avaliações de Atendimento</h4>
+        <p class="text-muted small mb-0">Feedback recebido dos usuários sobre os chamados resolvidos</p>
     </div>
 </div>
 
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm overflow-hidden">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">Chamado</th>
-                        <th>Avaliação</th>
-                        <th>Comentário</th>
-                        <th>Data</th>
+                        <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">Chamado</th>
+                        <th class="py-3 small fw-bold text-muted text-uppercase">Avaliação</th>
+                        <th class="py-3 small fw-bold text-muted text-uppercase">Comentário</th>
+                        <th class="pe-4 py-3 text-end small fw-bold text-muted text-uppercase">Data</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in feedbacks %}
                     <tr>
                         <td class="ps-4">
-                            <a href="{{ url_for('chamados.detalhes_chamado', id=item.ticket_id) }}" class="text-decoration-none fw-bold">
+                            <a href="{{ url_for('chamados.ver_chamado', id=item.ticket_id) }}" class="fw-bold text-primary text-decoration-none">
                                 #{{ item.ticket_id }}
                             </a>
                         </td>
                         <td>
-                            <div class="text-warning">
+                            <div class="text-warning small">
                                 {% for i in range(item.rating) %}
                                 <i class="fas fa-star"></i>
                                 {% endfor %}
                                 {% for i in range(5 - item.rating) %}
-                                <i class="far fa-star"></i>
+                                <i class="far fa-star text-muted opacity-50"></i>
                                 {% endfor %}
                             </div>
                         </td>
-                        <td>{{ item.comment or '-' }}</td>
-                        <td>{{ item.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <div class="text-dark small text-wrap" style="max-width: 400px;">
+                                {{ item.comment if item.comment else '<span class="text-muted fst-italic">Sem comentário</span>'|safe }}
+                            </div>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <small class="text-muted">{{ item.created_at.strftime('%d/%m/%Y') if item.created_at else '---' }}</small>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">
-                            <i class="fas fa-star-half-alt fa-3x mb-3 opacity-25"></i>
-                            <p class="mb-0">Nenhuma avaliação recebida ainda.</p>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="mb-3 text-muted opacity-25">
+                                <i class="fas fa-comment-slash fa-4x"></i>
+                            </div>
+                            <h6 class="text-muted">Nenhuma avaliação recebida até o momento.</h6>
                         </td>
                     </tr>
                     {% endfor %}
